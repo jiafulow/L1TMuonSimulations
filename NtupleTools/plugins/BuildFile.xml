@@ -1,0 +1,5 @@
+<export>
+</export>
+<library   name="L1TMuonSimulationsNtupleTools_plugins" file="*.cc">
+  <use   name="L1TMuonSimulations/NtupleTools"/>
+</library>
