@@ -4,6 +4,12 @@
 //#include "DataFormats/MuonDetId/interface/DTChamberId.h"
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 //#include "DataFormats/MuonDetId/interface/RPCDetId.h"
+#include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
+
+#include "L1Trigger/L1TMuonEndCap/interface/PrimitiveConverter.h"
+//#include "L1Trigger/L1TMuonEndCap/interface/BXAnalyzer.h"
+//#include "L1Trigger/L1TMuonEndCap/interface/ZoneCreation.h"
+//#include "L1Trigger/L1TMuonEndCap/interface/PatternRecognition.h"
 
 
 NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& iConfig) :
@@ -15,56 +21,103 @@ NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& 
 
     token_ = consumes<CSCCorrelatedLCTDigiCollection>(inputTag_);
 
-    produces<std::vector<uint32_t> > (prefix_ + "geoId"         + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "subsystem"     + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "iendcap"       + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "istation"      + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "iring"         + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "ichamber"      + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "ilayer"        + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "triggerSector" + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "triggerCscId"  + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "trknmb"        + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "valid"         + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "quality"       + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "keywire"       + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "strip"         + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "pattern"       + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "bend"          + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "bx"            + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "mpclink"       + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "bx0"           + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "syncErr"       + suffix_);
-    produces<std::vector<uint16_t> > (prefix_ + "cscID"         + suffix_);
-    produces<unsigned>               (prefix_ + "size"          + suffix_);
+    produces<std::vector<uint32_t> >          (prefix_ + "geoId"         + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "subsystem"     + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "iendcap"       + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "istation"      + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "iring"         + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "ichamber"      + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "ilayer"        + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "isector"       + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "isubsector"    + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "triggerSector" + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "triggerCscId"  + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "trknmb"        + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "valid"         + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "quality"       + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "keywire"       + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "strip"         + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "pattern"       + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "bend"          + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "bx"            + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "mpclink"       + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "bx0"           + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "syncErr"       + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "cscID"         + suffix_);
+    produces<std::vector<int> >               (prefix_ + "convPhi"       + suffix_);
+    produces<std::vector<int> >               (prefix_ + "convTheta"     + suffix_);
+    produces<std::vector<int> >               (prefix_ + "convPhit"      + suffix_);
+    produces<std::vector<int> >               (prefix_ + "convPhzvl"     + suffix_);
+    produces<std::vector<int> >               (prefix_ + "convZhit"      + suffix_);
+    produces<std::vector<std::vector<int> > > (prefix_ + "convZoneCont"  + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalPhi"     + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalTheta"   + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalEta"     + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalRho"     + suffix_);
+    produces<unsigned>                        (prefix_ + "size"          + suffix_);
 }
 
 NtupleCSCTriggerPrimitives::~NtupleCSCTriggerPrimitives() {}
 
+namespace {
+float getGlobalPhi(unsigned int isector, int iphi) {
+    if (iphi == -999)  return -999.;
+    float fphi = (iphi*0.0166666) + (isector%6)*60.0 + 13.0;
+    fphi *= M_PI / 180.0;
+    return fphi;
+}
+float getGlobalTheta(unsigned int isector, int itheta) {
+    if (itheta == -999)  return -999.;
+    float ftheta = (itheta*0.2851562) + 8.5;
+    ftheta *= M_PI / 180.0;
+    return ftheta;
+}
+float getGlobalEta(unsigned int isector, int itheta) {
+    if (itheta == -999)  return -999.;
+    float ftheta = getGlobalTheta(isector, itheta);
+    float feta = - std::log(std::tan(ftheta/2.0));
+    if (isector/6 == 1) feta = -feta;
+    return feta;
+}
+//float getGlobalRho()
+}
+
 void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
-    std::auto_ptr<std::vector<uint32_t> > v_geoId         (new std::vector<uint32_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_subsystem     (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_iendcap       (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_istation      (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_iring         (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_ichamber      (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_ilayer        (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_triggerSector (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_triggerCscId  (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_trknmb        (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_valid         (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_quality       (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_keywire       (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_strip         (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_pattern       (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_bend          (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_bx            (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_mpclink       (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_bx0           (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_syncErr       (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> > v_cscID         (new std::vector<uint16_t>());
-    std::auto_ptr<unsigned>               v_size          (new unsigned(0));
+    std::auto_ptr<std::vector<uint32_t> >          v_geoId         (new std::vector<uint32_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_subsystem     (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_iendcap       (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_istation      (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_iring         (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_ichamber      (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_ilayer        (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_isector       (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_isubsector    (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_triggerSector (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_triggerCscId  (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_trknmb        (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_valid         (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_quality       (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_keywire       (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_strip         (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_pattern       (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_bend          (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_bx            (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_mpclink       (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_bx0           (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_syncErr       (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_cscID         (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<int> >               v_convPhi       (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >               v_convTheta     (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >               v_convPhit      (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >               v_convPhzvl     (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >               v_convZhit      (new std::vector<int>());
+    std::auto_ptr<std::vector<std::vector<int> > > v_convZoneCont  (new std::vector<std::vector<int> >());
+    std::auto_ptr<std::vector<float> >             v_globalPhi     (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_globalTheta   (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_globalEta     (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_globalRho     (new std::vector<float>());
+    std::auto_ptr<unsigned>                        v_size          (new unsigned(0));
 
 
     //__________________________________________________________________________
@@ -78,11 +131,10 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
         //edm::LogInfo("NtupleCSCTriggerPrimitives") << "Size: " << muonDigis->size();
         edm::LogInfo("NtupleCSCTriggerPrimitives") << "Size: ??";
 
-        std::vector<L1TMuon::TriggerPrimitive> trigPrims;
-
-        unsigned n = 0;
 
         // Make trigger primitives
+
+        std::vector<L1TMuon::TriggerPrimitive> trigPrims;
 
         // Loop over chambers
         for (CSCCorrelatedLCTDigiCollection::DigiRangeIterator itr = muonDigis->begin(); itr != muonDigis->end(); ++itr) {
@@ -96,13 +148,39 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
             }
         }
 
+        unsigned n = 0;
+
         // Loop over trigger primitives
         for (std::vector<L1TMuon::TriggerPrimitive>::const_iterator it = trigPrims.cbegin(); it != trigPrims.cend(); ++it) {
+            if (n >= maxN_)
+                break;
 
             if (it->subsystem() == L1TMuon::TriggerPrimitive::kCSC) {
 
                 const CSCDetId cscDet = it->detId<CSCDetId>();
                 const L1TMuon::TriggerPrimitive::CSCData cscData = it->getCSCData();
+
+                const unsigned int isector = (cscDet.endcap()-1)*6 + (cscDet.triggerSector()-1);
+                const unsigned int isubsector = (cscDet.station() != 1) ? 0 : ((cscDet.chamber()%6 > 2) ? 1 : 2);
+
+                // Sanity checks
+                assert(CSCTriggerNumbering::triggerSectorFromLabels(cscDet) == cscDet.triggerSector());
+                assert(CSCTriggerNumbering::triggerCscIdFromLabels(cscDet) == cscDet.triggerCscId());
+                assert(CSCTriggerNumbering::triggerSubSectorFromLabels(cscDet) == (int) isubsector);
+                assert(cscData.cscID == cscDet.triggerCscId());
+
+                // Get ConvertedHit
+                std::vector<L1TMuon::TriggerPrimitive> tester;
+                tester.push_back(*it);
+                const std::vector<ConvertedHit>& convHits = PrimConv(tester, isector);
+
+                ConvertedHit convHit;
+                if (convHits.size()) {
+                    convHit = convHits.front();
+                } else {
+                    convHit.SetNull();  // why fail?
+                }
+
 
                 v_geoId         ->push_back(it->rawId().rawId());
                 v_subsystem     ->push_back(it->subsystem());
@@ -111,6 +189,8 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 v_iring         ->push_back(cscDet.ring());
                 v_ichamber      ->push_back(cscDet.chamber());
                 v_ilayer        ->push_back(cscDet.layer());
+                v_isector       ->push_back(isector);
+                v_isubsector    ->push_back(isubsector);
                 v_triggerSector ->push_back(cscDet.triggerSector());
                 v_triggerCscId  ->push_back(cscDet.triggerCscId());
                 v_trknmb        ->push_back(cscData.trknmb);
@@ -125,6 +205,16 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 v_bx0           ->push_back(cscData.bx0);
                 v_syncErr       ->push_back(cscData.syncErr);
                 v_cscID         ->push_back(cscData.cscID);
+                v_convPhi       ->push_back(convHit.Phi());
+                v_convTheta     ->push_back(convHit.Theta());
+                v_convPhit      ->push_back(convHit.Ph_hit());
+                v_convPhzvl     ->push_back(convHit.Phzvl());
+                v_convZhit      ->push_back(convHit.Zhit());
+                v_convZoneCont  ->push_back(convHit.ZoneContribution());
+                v_globalPhi     ->push_back(getGlobalPhi(isector, convHit.Phi()));
+                v_globalTheta   ->push_back(getGlobalTheta(isector, convHit.Theta()));
+                v_globalEta     ->push_back(getGlobalEta(isector, convHit.Theta()));
+                v_globalRho     ->push_back(0.);
 
                 n++;
             }
@@ -145,6 +235,8 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     iEvent.put(v_iring         , prefix_ + "iring"         + suffix_);
     iEvent.put(v_ichamber      , prefix_ + "ichamber"      + suffix_);
     iEvent.put(v_ilayer        , prefix_ + "ilayer"        + suffix_);
+    iEvent.put(v_isector       , prefix_ + "isector"       + suffix_);
+    iEvent.put(v_isubsector    , prefix_ + "isubsector"    + suffix_);
     iEvent.put(v_triggerSector , prefix_ + "triggerSector" + suffix_);
     iEvent.put(v_triggerCscId  , prefix_ + "triggerCscId"  + suffix_);
     iEvent.put(v_trknmb        , prefix_ + "trknmb"        + suffix_);
@@ -159,6 +251,16 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     iEvent.put(v_bx0           , prefix_ + "bx0"           + suffix_);
     iEvent.put(v_syncErr       , prefix_ + "syncErr"       + suffix_);
     iEvent.put(v_cscID         , prefix_ + "cscID"         + suffix_);
+    iEvent.put(v_convPhi       , prefix_ + "convPhi"       + suffix_);
+    iEvent.put(v_convTheta     , prefix_ + "convTheta"     + suffix_);
+    iEvent.put(v_convPhit      , prefix_ + "convPhit"      + suffix_);
+    iEvent.put(v_convPhzvl     , prefix_ + "convPhzvl"     + suffix_);
+    iEvent.put(v_convZhit      , prefix_ + "convZhit"      + suffix_);
+    iEvent.put(v_convZoneCont  , prefix_ + "convZoneCont"  + suffix_);
+    iEvent.put(v_globalPhi     , prefix_ + "globalPhi"     + suffix_);
+    iEvent.put(v_globalTheta   , prefix_ + "globalTheta"   + suffix_);
+    iEvent.put(v_globalEta     , prefix_ + "globalEta"     + suffix_);
+    iEvent.put(v_globalRho     , prefix_ + "globalRho"     + suffix_);
     iEvent.put(v_size          , prefix_ + "size"          + suffix_);
 
 }
