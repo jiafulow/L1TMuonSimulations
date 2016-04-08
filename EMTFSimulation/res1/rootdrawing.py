@@ -56,8 +56,14 @@ class MyParser:
         self.parser.add_argument("-b", "--batch", action="store_true", help="batch mode without graphics (default: %(default)s)")
         self.parser.add_argument("-v", "--verbose", action="count", default=0, help="verbosity (default: %(default)s)")
 
-    def parse_args(self):
-        self.options = self.parser.parse_args()
+    def add_argument(self, *args, **kwargs):
+        self.parser.add_argument(*args, **kwargs)
+
+    def set_defaults(self, **kwargs):
+        self.parser.set_defaults(**kwargs)
+
+    def parse_args(self, args=None, namespace=None):
+        self.options = self.parser.parse_args(args=args, namespace=namespace)
 
         # Create outdir if necessary
         if not self.options.outdir.endswith("/"):
@@ -193,7 +199,7 @@ def getMaximum(histos):
         maxima.append(h.h.GetMaximum())
     return max(maxima)
 
-def save(imgdir, imgname, redraw_axis=True, dot_pdf=True, dot_root=False, dot_c=False, additional=[]):
+def save(imgdir, imgname, redraw_axis=True, dot_pdf=True, dot_root=False, dot_c=False):
     if redraw_axis:
         gPad.RedrawAxis()
     #gPad.Modified(); gPad.Update()
@@ -206,13 +212,12 @@ def save(imgdir, imgname, redraw_axis=True, dot_pdf=True, dot_root=False, dot_c=
                 for pp in p.GetListOfPrimitives():
                     save_for_root(pp)
             p.Write()
+            if hasattr(p, 'additional'):
+                for pp in p.additional:
+                    pp.Write()
 
         tfile = TFile.Open(imgdir+imgname+".root", "RECREATE")
         save_for_root(gPad)
-
-        if additional:
-            for a in additional:
-                a.Write()
         tfile.Close()
     if dot_c:
         gPad.Print(imgdir+imgname+".C")

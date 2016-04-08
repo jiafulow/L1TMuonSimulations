@@ -8,6 +8,10 @@ from rootdrawing import *
 def drawer_book(options):
     histos = {}
 
+    nbinsx, xmin, xmax = 50, -1, 1
+    hname = "h"
+    histos[hname] = TH1F(hname, "; x", nbinsx, xmin, xmax)
+
     # Style
     for hname, h in histos.iteritems():
         h.style = 0; h.logx = options.logx; h.logy = options.logy
@@ -21,6 +25,10 @@ def drawer_project(tree, histos, options):
     # Loop over events
     for ievt, evt in enumerate(tree):
         if (ievt == options.nentries):  break
+        if (ievt % 1000 == 0):  print "Processing event: %i" % ievt
+
+        hname = "h"
+        histos[hname].Fill(1)
 
     #tree.SetBranchStatus("*", 1)
     return

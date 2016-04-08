@@ -1,4 +1,4 @@
-from ROOT import TColor
+from ROOT import TColor, gROOT
 
 kWhite      = 0     #FFFFFF
 kBlack      = 1     #000000
@@ -15,6 +15,25 @@ kGreen      = 416   #00FF00
 kSpring     = 820   #33FF00
 kYellow     = 400   #FFFF00
 kOrange     = 800   #FFCC00
+
+def get_color_hex(col):
+    return gROOT.GetColor(col).AsHexString()
+
+def lighten_color(col, percent):
+    # This is not accurate. If accuracy is important, convert to HSL
+    col_hex = get_color_hex(col)
+    col_hex = int(col_hex.replace('#','0x'),16)
+    r = (col_hex >> 16) + round(percent * 0.01 * 255)
+    g = ((col_hex >> 8) & 0xFF) + round(percent * 0.01 * 255)
+    b = (col_hex & 0xFF) + round(percent * 0.01 * 255)
+    r = 0 if r<0 else 255 if r>255 else r
+    g = 0 if g<0 else 255 if g>255 else g
+    b = 0 if b<0 else 255 if b>255 else b
+    col_hex = '#%02x%02x%02x' % (r,g,b)
+    return TColor.GetColor(col_hex)
+
+def darken_color(col, percent):
+    return lighten_color(col, -percent)
 
 #TColor.InitializeColors()
 kRed2       = TColor.GetColor("#C02020")
