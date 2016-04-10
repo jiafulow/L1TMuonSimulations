@@ -1,0 +1,146 @@
+# pset_SingleMuon_PositiveEndCap.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt0p0005To0p5_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename pset_SingleMuon_PositiveEndCap.py \
+  --fileout file:SingleMuon_PositiveEndCap.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_0T.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt0p0005To0p5_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 0T \
+  --python_filename pset_SingleMuon_PositiveEndCap_0T.py \
+  --fileout file:SingleMuon_PositiveEndCap_0T.root \
+  --no_exec -n 1000
+
+# ______________________________________________________________________________
+# pset_SingleMuon_PositiveEndCap_3GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt3_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename pset_SingleMuon_PositiveEndCap_3GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_3GeV.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_5GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt5_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename pset_SingleMuon_PositiveEndCap_5GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_5GeV.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_10GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt10_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename pset_SingleMuon_PositiveEndCap_10GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_10GeV.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_20GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt20_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename pset_SingleMuon_PositiveEndCap_20GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_20GeV.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_50GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt50_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename pset_SingleMuon_PositiveEndCap_50GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_50GeV.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_0T_3GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt3_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 0T \
+  --python_filename pset_SingleMuon_PositiveEndCap_0T_3GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_0T_3GeV.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_0T_5GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt5_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 0T \
+  --python_filename pset_SingleMuon_PositiveEndCap_0T_5GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_0T_5GeV.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_0T_10GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt10_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 0T \
+  --python_filename pset_SingleMuon_PositiveEndCap_0T_10GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_0T_10GeV.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_0T_20GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt20_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 0T \
+  --python_filename pset_SingleMuon_PositiveEndCap_0T_20GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_0T_20GeV.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_PositiveEndCap_0T_50GeV.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt50_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 0T \
+  --python_filename pset_SingleMuon_PositiveEndCap_0T_50GeV.py \
+  --fileout file:SingleMuon_PositiveEndCap_0T_50GeV.root \
+  --no_exec -n 1000
+
+
