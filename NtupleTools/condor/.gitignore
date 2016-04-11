@@ -1,0 +1,9 @@
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore
+!jobify.py
+!pack.py
+!retrieve.py
+!pset.py
+!sourceFiles/*
