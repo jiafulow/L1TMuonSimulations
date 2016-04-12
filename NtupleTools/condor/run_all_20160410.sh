@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Pack necessary stuff
-if [ "$1" == "--no-pack" ]
-then
+if [ "$1" == "--no-pack" ]; then
     echo "no pack."
 else
     python pack.py

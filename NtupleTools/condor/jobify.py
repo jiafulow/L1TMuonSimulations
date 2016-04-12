@@ -102,16 +102,13 @@ cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
             myproxy = '/tmp/x509up_u%s' % subprocess.check_output('id -u', shell=True)
             os.environ['X509_USER_PROXY'] = myproxy.rstrip('\n')
 
-        if self.config['MACHINE'] == 'ufl':
-            writeme = \
-'''Universe                = grid
-grid_resource           = condor cms.rc.ufl.edu cms.rc.ufl.edu:9619'''
-        else:
-            writeme = \
-'''Universe                = vanilla'''
+        # NOTE:
+        # for cmslpc, uncomment 'Universe = vanilla' and comment out 'Universe = grid', 'grid_resource'
 
-        writeme += \
-'''
+        writeme = \
+'''#Universe                = vanilla
+Universe                = grid
+grid_resource           = condor osg.rc.ufl.edu osg.rc.ufl.edu:9619
 Notification            = Error
 Executable              = {JOBNAME}/{EXECUTABLE}
 Arguments               = {SOURCEFILE} {MAXEVENTS} {DATASET} {DATASETGROUP} {SELECTION} {PERIOD} {JOBID}
@@ -120,9 +117,10 @@ Output                  = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).stdout
 Error                   = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).stderr
 Log                     = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).out
 Requirements            = (OpSys == "LINUX") && (Arch != "DUMMY")
-request_disk            = 2000000
-request_memory          = 1024
+request_disk            = 1000000
+request_memory          = 1600
 #notify_user             = NOBODY@FNAL.GOV
+use_x509userproxy       = TRUE
 x509userproxy           = $ENV(X509_USER_PROXY)
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
