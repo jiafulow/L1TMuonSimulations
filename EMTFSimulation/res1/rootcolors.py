@@ -16,6 +16,8 @@ kSpring     = 820   #33FF00
 kYellow     = 400   #FFFF00
 kOrange     = 800   #FFCC00
 
+kBird       = 57
+
 def get_color_hex(col):
     return gROOT.GetColor(col).AsHexString()
 

@@ -28,11 +28,12 @@ class MyDrawer:
         gStyle.SetEndErrorSize(2)
         gStyle.SetPadRightMargin(0.05)
         gStyle.SetTitleOffset(1.1, "Y")
-        gStyle.SetLabelSize(0.04, "Y")
+        gStyle.SetLabelSize(0.04, "XY")
         gStyle.SetLabelSize(0.04, "Z")
         gStyle.SetNdivisions(505, "XY")
 
-        gStyle.SetPalette(55)  # rainbow color map
+        #gStyle.SetPalette(55)  # rainbow color map
+        gStyle.SetPalette(kBird)  # new default color map
         gStyle.SetNumberContours(100)
 
         gStyle.SetOptStat(111110)

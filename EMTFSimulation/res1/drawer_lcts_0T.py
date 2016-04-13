@@ -68,10 +68,11 @@ def drawer_project(tree, histos, options):
                 dphi = deltaPhi(part_phi, globalPhi)
                 deta = part_eta - globalEta
 
-                hname = "lcts_dphi_st%i_pt%i" % (st, pt)
-                histos[hname].Fill(dphi)
-                hname = "lcts_deta_st%i_pt%i" % (st, pt)
-                histos[hname].Fill(deta)
+                if st in st_vec and pt in pt_vec:
+                    hname = "lcts_dphi_st%i_pt%i" % (st, pt)
+                    histos[hname].Fill(dphi)
+                    hname = "lcts_deta_st%i_pt%i" % (st, pt)
+                    histos[hname].Fill(deta)
 
     #tree.SetBranchStatus("*", 1)
     return
@@ -79,7 +80,7 @@ def drawer_project(tree, histos, options):
 # ______________________________________________________________________________
 def drawer_draw(histos, options):
     def display_fit(h):
-        h.Fit("gaus")
+        h.Fit("gaus","q")
         h.fit = h.GetFunction("gaus")
         h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
 
@@ -92,7 +93,7 @@ def drawer_draw(histos, options):
             h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
             h.SetLineColor(col); h.SetMarkerColor(col);
         if h.logy:
-            h.SetMaximum(h.GetMaximum() * 14); h.SetMinimum(0.5)
+            h.SetMaximum(h.GetMaximum() * 100); h.SetMinimum(0.5)
         else:
             h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
 
@@ -108,7 +109,7 @@ def drawer_draw(histos, options):
     for st in st_vec:
 
         # phi residuals
-        pt = 10
+        pt = 50
         hname = "lcts_dphi_st%i_pt%i" % (st, pt)
         h = histos[hname]
         hframe = h.Clone(h.GetName().replace("_pt%i" % pt, "_overlay"))
@@ -130,7 +131,7 @@ def drawer_draw(histos, options):
         save(options.outdir, hframe.GetName())
 
         # eta residuals
-        pt = 10
+        pt = 50
         hname = "lcts_deta_st%i_pt%i" % (st, pt)
         h = histos[hname]
         hframe = h.Clone(h.GetName().replace("_pt%i" % pt, "_overlay"))
