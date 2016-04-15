@@ -2,12 +2,15 @@
 
 from rootdrawing import *
 from math import sinh, atan2
+from ROOT import Double
 
 
 # Configurations
 col  = TColor.GetColor("#1f78b4")  # mu0
 fcol = TColor.GetColor("#a6cee3")  # mu0
 mcol = TColor.GetColor("#600000")
+#ecol = TColor.GetColor("#FFD600")
+ecol = TColor.GetColor("#322D8C")
 
 palette = map(lambda x: TColor.GetColor(x), ("#66DD66", "#3333FF", "#990099", "#FFBB44", "#EE4477"))
 
@@ -15,6 +18,51 @@ pt_vec = [3,5,10,20,50]
 st_vec = [11,12,14,21,22,31,32,41,42]  # excluded ME+1/3
 std_vec = [210,211,212,230,240,310,311,312,340,410,411,412]
 
+
+# ______________________________________________________________________________
+# Helper
+def get_integrated(h, forward=True, normalize=False):
+    hintegrated = h.Clone(h.GetName() + "_integrated" + ("f" if forward else "b"))
+    hintegrated.Reset()
+    nbins = h.GetNbinsX()
+    if forward:
+        sum = 0
+        for i in xrange(1, nbins+1):
+            sum += h.GetBinContent(i)
+            hintegrated.SetBinContent(i, sum)
+        if normalize and sum > 0:
+            hintegrated.Scale(1.0/sum)
+    else:
+        sum = 0
+        for i in xrange(nbins, 0, -1):
+            sum += h.GetBinContent(i)
+            hintegrated.SetBinContent(i, sum)
+        if normalize and sum > 0:
+            hintegrated.Scale(1.0/sum)
+    return hintegrated
+
+def get_percentile(h, perc):
+    assert(0 <= perc <= 1)
+    forward = perc >= 0.5
+    hintegrated = get_integrated(h, forward=forward, normalize=True)
+    nbins = h.GetNbinsX()
+    if forward:
+        for i in xrange(nbins, 0, -1):
+            if hintegrated.GetBinContent(i) < perc:
+                break
+        q = hintegrated.GetBinLowEdge(i+1)
+        dint = hintegrated.GetBinContent(i+1) - hintegrated.GetBinContent(i)
+        if dint > 0:
+            q += hintegrated.GetBinWidth(i+1) * (perc - hintegrated.GetBinContent(i))/dint
+    else:
+        for i in xrange(1, nbins+1):
+            if hintegrated.GetBinContent(i) < (1-perc):
+                break
+        q = hintegrated.GetBinLowEdge(i)
+        dint = hintegrated.GetBinContent(i-1) - hintegrated.GetBinContent(i)
+        if dint > 0:
+            q -= hintegrated.GetBinWidth(i) * ((1-perc) - hintegrated.GetBinContent(i))/dint
+    return q
 
 # ______________________________________________________________________________
 # Drawer
@@ -202,41 +250,120 @@ def drawer_project(tree, histos, options):
 # ______________________________________________________________________________
 def drawer_draw(histos, options):
 
+    average = lambda x, y: 0.5*(x+y)
+    absdiff = lambda x, y: abs(x-y)
+
+    tlatex2 = TLatex()
+    tlatex2.SetNDC(False)
+    tlatex2.SetTextFont(62)
+    tlatex2.SetTextSize(0.03)
+    tlatex2.SetTextColor(0)
+    tlatex2.SetTextAngle(90)
+    tlatex2.SetTextAlign(22)
+
+    def display_percentile_y(h2):
+        frame90 = h2.Clone(h2.GetName() + "_frame90")
+        frame95 = h2.Clone(h2.GetName() + "_frame95")
+        frame99 = h2.Clone(h2.GetName() + "_frame99")
+        frame90.Reset()
+        frame95.Reset()
+        frame99.Reset()
+        frame90.GetYaxis().SetTitle("90% cov on " + frame90.GetYaxis().GetTitle())
+        frame95.GetYaxis().SetTitle("95% cov on " + frame95.GetYaxis().GetTitle())
+        frame99.GetYaxis().SetTitle("99% cov on " + frame99.GetYaxis().GetTitle())
+
+        nbinsx = h2.GetNbinsX()
+        gr90 = TGraphErrors(nbinsx)
+        gr95 = TGraphErrors(nbinsx)
+        gr99 = TGraphErrors(nbinsx)
+        gr90.SetName(h2.GetName() + "_gr90")
+        gr95.SetName(h2.GetName() + "_gr95")
+        gr99.SetName(h2.GetName() + "_gr99")
+
+        for i in xrange(1, nbinsx+1):
+            hpy = h2.ProjectionY(h2.GetName() + "_py", i, i)
+            # 90% coverage
+            up90 = get_percentile(hpy, 0.95)
+            low90 = get_percentile(hpy, 0.05)
+            # 95% coverage
+            up95 = get_percentile(hpy, 0.975)
+            low95 = get_percentile(hpy, 0.025)
+            # 99% coverage
+            up99 = get_percentile(hpy, 0.995)
+            low99 = get_percentile(hpy, 0.005)
+
+            if hpy.GetEntries() > 20:
+                gr90.SetPoint(i, h2.GetXaxis().GetBinCenter(i), average(up90,low90))
+                gr90.SetPointError(i, 0.5*h2.GetXaxis().GetBinWidth(i), 0.5*absdiff(up90,low90))
+                gr95.SetPoint(i, h2.GetXaxis().GetBinCenter(i), average(up95,low95))
+                gr95.SetPointError(i, 0.5*h2.GetXaxis().GetBinWidth(i), 0.5*absdiff(up95,low95))
+                gr99.SetPoint(i, h2.GetXaxis().GetBinCenter(i), average(up99,low99))
+                gr99.SetPointError(i, 0.5*h2.GetXaxis().GetBinWidth(i), 0.5*absdiff(up99,low99))
+        h2.additional = [frame90, frame95, frame99, gr90, gr95, gr99]
+        return
+
     for hname, h in histos.iteritems():
 
         if h.ClassName() == "TH1F":
-            if h.style == 0:  # filled
-                h.SetLineWidth(2); h.SetMarkerSize(0)
-                h.SetLineColor(col); h.SetFillColor(fcol)
-            elif h.style == 1:  # marker
-                h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
-                h.SetLineColor(col); h.SetMarkerColor(col);
-            if h.logy:
-                h.SetMaximum(h.GetMaximum() * 14); h.SetMinimum(0.5)
-            else:
-                h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
+            if False:
+                # Draw TH1 plots
+                if h.style == 0:  # filled
+                    h.SetLineWidth(2); h.SetMarkerSize(0)
+                    h.SetLineColor(col); h.SetFillColor(fcol)
+                elif h.style == 1:  # marker
+                    h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
+                    h.SetLineColor(col); h.SetMarkerColor(col);
+                if h.logy:
+                    h.SetMaximum(h.GetMaximum() * 14); h.SetMinimum(0.5)
+                else:
+                    h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
 
-            h.Draw("hist")
-            gPad.SetLogy(h.logy)
-
-            CMS_label()
-            save(options.outdir, hname)
+                h.Draw("hist")
+                gPad.SetLogy(h.logy)
+                CMS_label()
+                save(options.outdir, hname)
 
         elif h.ClassName() == "TH2F":
             pass
 
         elif h.ClassName() == "TProfile":
-            h2 = histos[hname.replace("_pr_", "_vs_")]
-            h2.SetStats(0); h2.Draw("COLZ")
+            if False:
+                # Draw profile plots on top of TH2
+                h2 = histos[hname.replace("_pr_", "_vs_")]
+                if h.style == 0:
+                    h.SetMarkerStyle(20); h.SetMarkerColor(mcol); h.SetLineColor(mcol)
 
-            if h.style == 0:
-                h.SetMarkerStyle(20); h.SetMarkerColor(mcol); h.SetLineColor(mcol)
+                h2.SetStats(0); h2.Draw("COLZ")
+                h.SetStats(0); h.Draw("same")
+                gPad.SetLogy(h.logy)
+                CMS_label()
+                save(options.outdir, hname)
 
-            h.SetStats(0); h.Draw("same")
-            gPad.SetLogy(h.logy)
+            if True:
+                # Draw coverage plots
+                h2 = histos[hname.replace("_pr_", "_vs_")]
+                display_percentile_y(h2)
 
-            CMS_label()
-            save(options.outdir, hname)
+                frame90, frame95, frame99, gr90, gr95, gr99 = h2.additional
+
+                for (frame, gr) in [(frame90, gr90), (frame95, gr95), (frame99, gr99)]:
+                    frame.GetYaxis().SetTitleSize(0.05)
+                    gr.SetFillColor(ecol)
+
+                    frame.SetStats(0); frame.Draw()
+                    gr.Draw("2")  # filled error band
+
+                    nbinsx = gr.GetN()
+                    for i in xrange(nbinsx):
+                        x, y = Double(1), Double(2)
+                        gr.GetPoint(i, x, y)
+                        ey = gr.GetErrorY(i)
+                        if ey > 0:
+                            tlatex2.DrawLatex(x, y, "%.3f" % (ey*2))
+
+                    gPad.SetLogy(h.logy)
+                    CMS_label()
+                    save(options.outdir, gr.GetName())
 
     return
 
