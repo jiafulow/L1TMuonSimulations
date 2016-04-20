@@ -11,6 +11,13 @@
 <use name="DataFormats/TrackReco"/>
 <use name="DataFormats/VertexReco"/>
 
+<!--use name="Geometry/DTGeometry"/-->
+<!--use name="Geometry/RPCGeometry"/-->
+<use name="Geometry/CSCGeometry"/>
+<use name="Geometry/Records"/>
+<use name="MagneticField/Records"/>
+<use name="MagneticField/Engine"/>
+
 <use name="L1Trigger/L1TMuon"/>
 
 <!--use   name="root"/-->
