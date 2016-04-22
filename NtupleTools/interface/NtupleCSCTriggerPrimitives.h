@@ -17,8 +17,8 @@
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 
 #include "Geometry/CSCGeometry/interface/CSCGeometry.h"
-#include <Geometry/CSCGeometry/interface/CSCLayerGeometry.h>
-#include <Geometry/Records/interface/MuonGeometryRecord.h>
+#include "Geometry/CSCGeometry/interface/CSCLayerGeometry.h"
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
@@ -45,17 +45,23 @@ class NtupleCSCTriggerPrimitives : public edm::EDProducer {
     const MagneticField * theMagneticField_;
     std::unique_ptr<L1TMuon::GeometryTranslator> theGeometryTranslator_;
 
-    const edm::InputTag inputTag_;
+    //const edm::InputTag wireTag_;
+    //const edm::InputTag stripTag_;
+    //const edm::InputTag compTag_;
+    //const edm::InputTag alctTag_;
+    //const edm::InputTag clctTag_;
+    const edm::InputTag corrlctTag_;
     const std::string   prefix_, suffix_;
 
     StringCutObjectSelector<CSCCorrelatedLCTDigi> selector_;
     const unsigned maxN_;
 
-    //edm::EDGetTokenT<CSCWireDigiCollection>          wireToken_;
-    //edm::EDGetTokenT<CSCStripDigiCollection>         stripToken_;
-    //edm::EDGetTokenT<CSCALCTDigiCollection>          alctToken_;
-    //edm::EDGetTokenT<CSCCLCTDigiCollection>          clctToken_;
-    edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> token_;
+    //edm::EDGetTokenT<CSCWireDigiCollection>             wireToken_;
+    //edm::EDGetTokenT<CSCStripDigiCollection>            stripToken_;
+    //edm::EDGetTokenT<CSCComparatorDigiCollection>       compToken_;
+    //edm::EDGetTokenT<CSCALCTDigiCollection>             alctToken_;
+    //edm::EDGetTokenT<CSCCLCTDigiCollection>             clctToken_;
+    edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection>    corrlctToken_;
 };
 
 #endif

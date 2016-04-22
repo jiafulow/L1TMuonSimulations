@@ -8,14 +8,17 @@
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 //#include "L1Trigger/CSCCommonTrigger/interface/CSCPatternLUT.h"
 
-#include "L1Trigger/L1TMuonEndCap/interface/PrimitiveConverter.h"
-//#include "L1Trigger/L1TMuonEndCap/interface/BXAnalyzer.h"
-//#include "L1Trigger/L1TMuonEndCap/interface/ZoneCreation.h"
-//#include "L1Trigger/L1TMuonEndCap/interface/PatternRecognition.h"
+#include "tmp/PrimitiveConverterTmp.h"
+using namespace TMP;
 
 
 NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& iConfig) :
-  inputTag_(iConfig.getParameter<edm::InputTag>("inputTag")),
+  //wireTag_(iConfig.getParameter<edm::InputTag>("wireTag")),
+  //stripTag_(iConfig.getParameter<edm::InputTag>("stripTag")),
+  //compTag_(iConfig.getParameter<edm::InputTag>("compTag")),
+  //alctTag_(iConfig.getParameter<edm::InputTag>("alctTag")),
+  //clctTag_(iConfig.getParameter<edm::InputTag>("clctTag")),
+  corrlctTag_(iConfig.getParameter<edm::InputTag>("corrlctTag")),
   prefix_  (iConfig.getParameter<std::string>("prefix")),
   suffix_  (iConfig.getParameter<std::string>("suffix")),
   selector_(iConfig.existsAs<std::string>("cut") ? iConfig.getParameter<std::string>("cut") : "", true),
@@ -23,7 +26,12 @@ NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& 
 
     theGeometryTranslator_.reset(new L1TMuon::GeometryTranslator());
 
-    token_ = consumes<CSCCorrelatedLCTDigiCollection>(inputTag_);
+    //wireToken_ = consumes<CSCCorrelatedLCTDigiCollection>(wireTag_);
+    //stripToken_ = consumes<CSCCorrelatedLCTDigiCollection>(stripTag_);
+    //compToken_ = consumes<CSCCorrelatedLCTDigiCollection>(compTag_);
+    //alctToken_ = consumes<CSCCorrelatedLCTDigiCollection>(alctTag_);
+    //clctToken_ = consumes<CSCCorrelatedLCTDigiCollection>(clctTag_);
+    corrlctToken_ = consumes<CSCCorrelatedLCTDigiCollection>(corrlctTag_);
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
@@ -111,11 +119,10 @@ float getConvGlobalEta(unsigned int isector, int itheta) {
     if (isector/6 == 1) feta = -feta;
     return feta;
 }
-//float getConvGlobalRho()
-double getThetaFromEta(double eta) {
-    double cottheta = std::sinh(eta);
-    return 1.0/std::atan(cottheta);
-}
+//double getThetaFromEta(double eta) {
+//    double cottheta = std::sinh(eta);
+//    return 1.0/std::atan(cottheta);
+//}
 }
 
 void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -162,13 +169,13 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
 
     //__________________________________________________________________________
 
-    edm::Handle<CSCCorrelatedLCTDigiCollection> muonDigis;
-    //iEvent.getByLabel(inputTag_, muonDigis);
-    if (!token_.isUninitialized())
-        iEvent.getByToken(token_, muonDigis);
+    edm::Handle<CSCCorrelatedLCTDigiCollection> corrlcts;
+    //iEvent.getByLabel(corrlctTag_, corrlcts);
+    if (!corrlctToken_.isUninitialized())
+        iEvent.getByToken(corrlctToken_, corrlcts);
 
-    if (muonDigis.isValid()) {
-        //edm::LogInfo("NtupleCSCTriggerPrimitives") << "Size: " << muonDigis->size();
+    if (corrlcts.isValid()) {
+        //edm::LogInfo("NtupleCSCTriggerPrimitives") << "Size: " << corrlcts->size();
         edm::LogInfo("NtupleCSCTriggerPrimitives") << "Size: ??";
 
 
@@ -177,7 +184,7 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
         std::vector<L1TMuon::TriggerPrimitive> trigPrims;
 
         // Loop over chambers
-        for (CSCCorrelatedLCTDigiCollection::DigiRangeIterator itr = muonDigis->begin(); itr != muonDigis->end(); ++itr) {
+        for (CSCCorrelatedLCTDigiCollection::DigiRangeIterator itr = corrlcts->begin(); itr != corrlcts->end(); ++itr) {
 
             // Loop over digis
             for (CSCCorrelatedLCTDigiCollection::const_iterator it = (*itr).second.first; it != (*itr).second.second; ++it) {
@@ -280,7 +287,7 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
         *v_size = v_geoId->size();
 
     } else {
-        edm::LogError("NtupleCSCTriggerPrimitives") << "Cannot get the product: " << inputTag_;
+        edm::LogError("NtupleCSCTriggerPrimitives") << "Cannot get the product: " << corrlctTag_;
     }
 
 
