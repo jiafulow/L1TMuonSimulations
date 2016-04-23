@@ -123,7 +123,7 @@ float getConvGlobalEta(unsigned int isector, int itheta) {
 //    double cottheta = std::sinh(eta);
 //    return 1.0/std::atan(cottheta);
 //}
-}
+}  // end anonymous namespace
 
 void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
