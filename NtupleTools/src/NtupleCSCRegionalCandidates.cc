@@ -46,7 +46,7 @@ NtupleCSCRegionalCandidates::NtupleCSCRegionalCandidates(const edm::ParameterSet
     produces<std::vector<std::vector<int> > >      (prefix_ + "convHits@" + "zoneCont"         + suffix_);
     produces<std::vector<std::vector<int> > >      (prefix_ + "convHits@" + "bxgroupCont"      + suffix_);
     produces<std::vector<int> >                    (prefix_ + "convHits@" + "isector"          + suffix_);
-    produces<unsigned>                             (prefix_ + "convHits@" + "size"             + suffix_);  // FIXME
+    produces<unsigned>                             (prefix_ + "convHits@" + "size"             + suffix_);
     // zones
     produces<std::vector<std::vector<unsigned> > > (prefix_ + "zones@"    + "convHitRefs"      + suffix_);
     produces<std::vector<std::vector<unsigned> > > (prefix_ + "zones@"    + "zhitStations"     + suffix_);
@@ -54,8 +54,8 @@ NtupleCSCRegionalCandidates::NtupleCSCRegionalCandidates(const edm::ParameterSet
     produces<std::vector<int> >                    (prefix_ + "zones@"    + "izone"            + suffix_);
     produces<std::vector<int> >                    (prefix_ + "zones@"    + "ibxgroup"         + suffix_);
     produces<std::vector<int> >                    (prefix_ + "zones@"    + "isector"          + suffix_);
-    produces<unsigned>                             (prefix_ + "zones@"    + "size"             + suffix_);  // FIXME
-    // roads = "matching outputs"
+    produces<unsigned>                             (prefix_ + "zones@"    + "size"             + suffix_);
+    // roads
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "rank"             + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "layer"            + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "straightness"     + suffix_);
@@ -64,22 +64,61 @@ NtupleCSCRegionalCandidates::NtupleCSCRegionalCandidates(const edm::ParameterSet
     produces<std::vector<std::vector<unsigned> > > (prefix_ + "roads@"    + "dedupConvHitRefs" + suffix_);
     produces<std::vector<std::vector<unsigned> > > (prefix_ + "roads@"    + "phiConvHitRefs"   + suffix_);
     produces<std::vector<std::vector<unsigned> > > (prefix_ + "roads@"    + "thetaConvHitRefs" + suffix_);
-    produces<std::vector<int> >                    (prefix_ + "roads@"    + "dphiMask"         + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "roads@"    + "dphiMask"         + suffix_);  // FIXME
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "dphi1"            + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "dphi2"            + suffix_);
-    produces<std::vector<int> >                    (prefix_ + "roads@"    + "dthetaMask"       + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "roads@"    + "dthetaMask"       + suffix_);  // FIXME
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "dtheta1"          + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "dtheta2"          + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "precisePhi"       + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "preciseTheta"     + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "preciseRank"      + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "roads@"    + "ibesttrack"       + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "iwinner"          + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "isuperstrip"      + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "izone"            + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "ibxgroup"         + suffix_);
     produces<std::vector<int> >                    (prefix_ + "roads@"    + "isector"          + suffix_);
-    produces<unsigned>                             (prefix_ + "roads@"    + "size"             + suffix_);  // FIXME
-    //produces<unsigned>                        (prefix_ + "size"            + suffix_);
+    produces<unsigned>                             (prefix_ + "roads@"    + "size"             + suffix_);
+    // internal tracks
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "phi"              + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "theta"            + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "rank"             + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "dphi1"            + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "dphi2"            + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "dtheta1"          + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "dtheta2"          + suffix_);
+    produces<std::vector<std::vector<int> > >      (prefix_ + "itracks@"  + "phis"             + suffix_);
+    produces<std::vector<std::vector<int> > >      (prefix_ + "itracks@"  + "thetas"           + suffix_);
+    produces<std::vector<float> >                  (prefix_ + "itracks@"  + "pt"               + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "me1address"       + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "me2address"       + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "combaddress"      + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "mode"             + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "ebx"              + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "sebx"             + suffix_);
+    produces<std::vector<bool> >                   (prefix_ + "itracks@"  + "isEndcap"         + suffix_);
+    produces<std::vector<float> >                  (prefix_ + "itracks@"  + "globalPhi"        + suffix_);
+    produces<std::vector<float> >                  (prefix_ + "itracks@"  + "globalTheta"      + suffix_);
+    produces<std::vector<float> >                  (prefix_ + "itracks@"  + "globalEta"        + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "ibesttrack"       + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "itracks@"  + "isector"          + suffix_);
+    produces<std::vector<unsigned> >               (prefix_ + "itracks@"  + "roadRef"          + suffix_);
+    produces<unsigned>                             (prefix_ + "itracks@"  + "size"             + suffix_);
+    // regional muon candidates
+    produces<std::vector<int> >                    (prefix_ + "emuons@"   + "hwPt"             + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "emuons@"   + "hwPhi"            + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "emuons@"   + "hwEta"            + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "emuons@"   + "hwSign"           + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "emuons@"   + "hwSignValid"      + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "emuons@"   + "hwQual"           + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "emuons@"   + "link"             + suffix_);
+    produces<std::vector<int> >                    (prefix_ + "emuons@"   + "processor"        + suffix_);
+    produces<std::vector<uint16_t> >               (prefix_ + "emuons@"   + "trackFinderType"  + suffix_);
+    produces<std::vector<bool> >                   (prefix_ + "emuons@"   + "hwHF"             + suffix_);
+    produces<std::vector<ULong64_t> >              (prefix_ + "emuons@"   + "dataword"         + suffix_);
+    //produces<std::vector<std::map<int,int> > >     (prefix_ + "emuons@"   + "trackAddress"     + suffix_);
+    produces<unsigned>                             (prefix_ + "emuons@"   + "size"             + suffix_);
 }
 
 NtupleCSCRegionalCandidates::~NtupleCSCRegionalCandidates() {}
@@ -93,6 +132,27 @@ ConvHitKey make_convHitKey(int sector, int id, int strip, int wire) {
 typedef std::tuple<int, int, int, int> RoadKey;
 RoadKey make_roadKey(int sector, int bxgroup, int zone, int superstrip) {
     return std::make_tuple(sector, bxgroup, zone, superstrip);
+}
+
+float getConvGlobalPhi(unsigned int isector, int iphi) {
+    if (iphi == -999)  return -999.;
+    float fphi = (iphi*0.0166666) + (isector%6)*60.0 + 13.0;
+    fphi *= M_PI / 180.0;
+    if (fphi > M_PI) fphi -= 2*M_PI;  // convert from [0,2pi] to [-pi,pi]
+    return fphi;
+}
+float getConvGlobalTheta(unsigned int isector, int itheta) {
+    if (itheta == -999)  return -999.;
+    float ftheta = (itheta*0.2851562) + 8.5;
+    ftheta *= M_PI / 180.0;
+    return ftheta;
+}
+float getConvGlobalEta(unsigned int isector, int itheta) {
+    if (itheta == -999)  return -999.;
+    float ftheta = getConvGlobalTheta(isector, itheta);
+    float feta = - std::log(std::tan(ftheta/2.0));
+    if (isector/6 == 1) feta = -feta;
+    return feta;
 }
 }  // end anonymous namespace
 
@@ -130,27 +190,64 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
     std::auto_ptr<std::vector<int> >                    v3_straightness    (new std::vector<int>());
     std::auto_ptr<std::vector<bool> >                   v3_isDuplicate     (new std::vector<bool>());
     std::auto_ptr<std::vector<std::vector<unsigned> > > v3_convHitRefs     (new std::vector<std::vector<unsigned> >());
-    std::auto_ptr<std::vector<std::vector<unsigned> > > v3_dedupConvHitRefs  (new std::vector<std::vector<unsigned> >());
+    std::auto_ptr<std::vector<std::vector<unsigned> > > v3_dedupConvHitRefs(new std::vector<std::vector<unsigned> >());
     std::auto_ptr<std::vector<std::vector<unsigned> > > v3_phiConvHitRefs  (new std::vector<std::vector<unsigned> >());
     std::auto_ptr<std::vector<std::vector<unsigned> > > v3_thetaConvHitRefs(new std::vector<std::vector<unsigned> >());
-    std::auto_ptr<std::vector<int> >                    v3_dphiMask        (new std::vector<int>());  // FIXME
+    std::auto_ptr<std::vector<int> >                    v3_dphiMask        (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_dphi1           (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_dphi2           (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >                    v3_dthetaMask      (new std::vector<int>());  // FIXME
+    std::auto_ptr<std::vector<int> >                    v3_dthetaMask      (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_dtheta1         (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_dtheta2         (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_precisePhi      (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_preciseTheta    (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_preciseRank     (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v3_ibesttrack      (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_iwinner         (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_isuperstrip     (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_izone           (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_ibxgroup        (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    v3_isector         (new std::vector<int>());
     std::auto_ptr<unsigned>                             v3_size            (new unsigned(0));
-    // FIXME: Best tracks
-    // FIXME: Internal tracks
-    // FIXME: Regional muon cands
+    // internal tracks
+    std::auto_ptr<std::vector<int> >                    v4_phi             (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_theta           (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_rank            (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_dphi1           (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_dphi2           (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_dtheta1         (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_dtheta2         (new std::vector<int>());
+    std::auto_ptr<std::vector<std::vector<int> > >      v4_phis            (new std::vector<std::vector<int> >());
+    std::auto_ptr<std::vector<std::vector<int> > >      v4_thetas          (new std::vector<std::vector<int> >());
+    std::auto_ptr<std::vector<float> >                  v4_pt              (new std::vector<float>());
+    std::auto_ptr<std::vector<int> >                    v4_me1address      (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_me2address      (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_combaddress     (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_mode            (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_ebx             (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_sebx            (new std::vector<int>());
+    std::auto_ptr<std::vector<bool> >                   v4_isEndcap        (new std::vector<bool>());
+    std::auto_ptr<std::vector<float> >                  v4_globalPhi       (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >                  v4_globalTheta     (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >                  v4_globalEta       (new std::vector<float>());
+    std::auto_ptr<std::vector<int> >                    v4_ibesttrack      (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v4_isector         (new std::vector<int>());
+    std::auto_ptr<std::vector<unsigned> >               v4_roadRef         (new std::vector<unsigned>());
+    std::auto_ptr<unsigned>                             v4_size            (new unsigned(0));
+    // regional muon candidates
+    std::auto_ptr<std::vector<int> >                    v5_hwPt            (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v5_hwPhi           (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v5_hwEta           (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v5_hwSign          (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v5_hwSignValid     (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v5_hwQual          (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v5_link            (new std::vector<int>());
+    std::auto_ptr<std::vector<int> >                    v5_processor       (new std::vector<int>());
+    std::auto_ptr<std::vector<uint16_t> >               v5_trackFinderType (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<bool> >                   v5_hwHF            (new std::vector<bool>());
+    std::auto_ptr<std::vector<ULong64_t> >              v5_dataword        (new std::vector<ULong64_t>());
+    //std::auto_ptr<std::vector<std::map<int,int> > >     v5_trackAddress    (new std::vector<std::map<int,int> >());
+    std::auto_ptr<unsigned>                             v5_size            (new unsigned(0));
     //std::auto_ptr<unsigned>                        v_size            (new unsigned(0));
 
     std::auto_ptr<l1t::RegionalMuonCandBxCollection> OutputCands(  // MODIFIED
@@ -251,36 +348,6 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
         std::vector<ConvertedHit> ConvHits = PrimConv(tester, SectIndex);
         CHits[SectIndex] = ConvHits;
 
-        // _____________________________________________________________________
-        // NTUPLE: Store convHits
-        for (std::vector<ConvertedHit>::const_iterator it = ConvHits.begin(); it != ConvHits.end(); ++it) {
-            ConvertedHit convHit = *it;
-
-            v1_phi             ->push_back(convHit.Phi());
-            v1_theta           ->push_back(convHit.Theta());
-            v1_phit            ->push_back(convHit.Ph_hit());
-            v1_phzvl           ->push_back(convHit.Phzvl());
-            v1_station         ->push_back(convHit.Station());
-            v1_sub             ->push_back(convHit.Sub());
-            v1_id              ->push_back(convHit.Id());
-            v1_quality         ->push_back(convHit.Quality());
-            v1_pattern         ->push_back(convHit.Pattern());
-            v1_wire            ->push_back(convHit.Wire());
-            v1_strip           ->push_back(convHit.Strip());
-            v1_zhit            ->push_back(convHit.Zhit());
-            v1_bx              ->push_back(convHit.BX());
-            v1_zoneCont        ->push_back(convHit.ZoneContribution());
-            v1_bxgroupCont     ->push_back(std::vector<int>());  // to be filled
-            v1_isector         ->push_back(SectIndex);
-
-            // Make a link
-            const ConvHitKey convHitKey = make_convHitKey(SectIndex, convHit.Id(), convHit.Strip(), convHit.Wire());
-            const unsigned cur_size = convHitRefMap.size();
-            convHitRefMap.insert(std::make_pair(convHitKey, cur_size));
-        }
-        // _____________________________________________________________________
-        // END NTUPLE
-
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////print values for input into Alex's
         /// emulator code/////////////////////////////////////////////////////
@@ -310,6 +377,99 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
 
         std::vector<std::vector<ConvertedHit>> GroupedHits = GroupBX(ConvHits);
 
+        ////////////////////////////////////////////////////////  Creates a zone
+        /// for each of the three groups created in the BX Grouper module.
+        ////////// Creat Zones for pattern Recognition /////////  The output of
+        /// this module not only contains the zones but also the
+        ////////////////////////////////////////////////////////  reference back
+        /// to the TriggerPrimitives that went into making them.
+
+        std::vector<ZonesOutput> Zout = Zones(GroupedHits);
+
+        ///////////////////////////////
+        ///// Pattern Recognition /////  Applies pattern recognition logic on
+        /// each of the 3 BX groups and assigns a quality to each keystrip in
+        /// the
+        /// zone.
+        ///// & quality assinment /////  The delete duplicate patterns function
+        /// looks at the 3 BX groups and deletes duplicate patterns found from
+        /// the
+        ///////////////////////////////  same hits. This is where the BX
+        /// analysis ends; Only 1 list of found patterns is given to the next
+        /// module.
+
+        std::vector<PatternOutput> Pout = Patterns(Zout);
+
+        PatternOutput Test = DeleteDuplicatePatterns(Pout);
+
+        // PrintQuality(Test.detected);
+
+        ///////////////////////////////
+        //////Sector Sorting/////////// Sorts through the patterns found in each
+        /// zone and selects the best three per zone to send to the next module.
+        ///////Finding 3 Best Pattern//
+        ///////////////////////////////
+
+        SortingOutput Sout = SortSect(Test);
+
+        //////////////////////////////////
+        ///////// Match ph patterns ////// Loops over each sorted pattern and
+        /// then loops over all possible triggerprimitives which could have made
+        /// the pattern
+        ////// to segment inputs ///////// and matches the associated full
+        /// precision triggerprimitives to the detected pattern.
+        //////////////////////////////////
+
+        MatchingOutput Mout = PhiMatching(Sout);
+        MO[SectIndex] = Mout;
+
+        /////////////////////////////////
+        //////// Calculate delta //////// Once we have matched the hits we
+        /// calculate the delta phi and theta between all
+        ////////    ph and th    //////// stations present.
+        /////////////////////////////////
+
+        std::vector<std::vector<DeltaOutput>> Dout = CalcDeltas(Mout); ////
+
+        /////////////////////////////////
+        /////// Sorts and gives /////////  Loops over all of the found
+        /// tracks(looking across zones) and selects the best three per sector.
+        ////// Best 3 tracks/sector /////  Here ghost busting is done to delete
+        /// tracks which are comprised of the same associated stubs.
+        /////////////////////////////////
+
+        std::vector<BTrack> Bout = BestTracks(Dout);
+        PTracks[SectIndex] = Bout;
+
+
+        // _____________________________________________________________________
+        // NTUPLE: Store convHits
+        for (std::vector<ConvertedHit>::const_iterator it = ConvHits.begin(); it != ConvHits.end(); ++it) {
+            ConvertedHit convHit = *it;
+
+            v1_phi             ->push_back(convHit.Phi());
+            v1_theta           ->push_back(convHit.Theta());
+            v1_phit            ->push_back(convHit.Ph_hit());
+            v1_phzvl           ->push_back(convHit.Phzvl());
+            v1_station         ->push_back(convHit.Station());
+            v1_sub             ->push_back(convHit.Sub());
+            v1_id              ->push_back(convHit.Id());
+            v1_quality         ->push_back(convHit.Quality());
+            v1_pattern         ->push_back(convHit.Pattern());
+            v1_wire            ->push_back(convHit.Wire());
+            v1_strip           ->push_back(convHit.Strip());
+            v1_zhit            ->push_back(convHit.Zhit());
+            v1_bx              ->push_back(convHit.BX());
+            v1_zoneCont        ->push_back(convHit.ZoneContribution());
+            v1_bxgroupCont     ->push_back(std::vector<int>());  // to be filled
+            v1_isector         ->push_back(SectIndex);
+
+            // Make a link
+            const ConvHitKey convHitKey = make_convHitKey(SectIndex, convHit.Id(), convHit.Strip(), convHit.Wire());
+            const unsigned cur_size = convHitRefMap.size();
+            convHitRefMap.insert(std::make_pair(convHitKey, cur_size));
+        }
+
         // _____________________________________________________________________
         // NTUPLE: Update convHits bxgroupCont
         assert(GroupedHits.size() == 3);
@@ -323,17 +483,6 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
                 v1_bxgroupCont->at(convHitRef).push_back(i);
             }
         }
-        // _____________________________________________________________________
-        // END NTUPLE
-
-        ////////////////////////////////////////////////////////  Creates a zone
-        /// for each of the three groups created in the BX Grouper module.
-        ////////// Creat Zones for pattern Recognition /////////  The output of
-        /// this module not only contains the zones but also the
-        ////////////////////////////////////////////////////////  reference back
-        /// to the TriggerPrimitives that went into making them.
-
-        std::vector<ZonesOutput> Zout = Zones(GroupedHits);
 
         // _____________________________________________________________________
         // NTUPLE: Store zones
@@ -374,24 +523,6 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
                 }
             }
         }
-        // _____________________________________________________________________
-        // END NTUPLE
-
-        ///////////////////////////////
-        ///// Pattern Recognition /////  Applies pattern recognition logic on
-        /// each of the 3 BX groups and assigns a quality to each keystrip in
-        /// the
-        /// zone.
-        ///// & quality assinment /////  The delete duplicate patterns function
-        /// looks at the 3 BX groups and deletes duplicate patterns found from
-        /// the
-        ///////////////////////////////  same hits. This is where the BX
-        /// analysis ends; Only 1 list of found patterns is given to the next
-        /// module.
-
-        std::vector<PatternOutput> Pout = Patterns(Zout);
-
-        PatternOutput Test = DeleteDuplicatePatterns(Pout);
 
         // _____________________________________________________________________
         // NTUPLE: Store roads
@@ -419,6 +550,7 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
                         v3_precisePhi      ->push_back(-999);                     // to be updated
                         v3_preciseTheta    ->push_back(-999);                     // to be updated
                         v3_preciseRank     ->push_back(-999);                     // to be updated
+                        v3_ibesttrack      ->push_back(-999);                     // to be updated
                         v3_iwinner         ->push_back(-999);                     // to be updated
                         v3_isuperstrip     ->push_back(k);
                         v3_izone           ->push_back(j);
@@ -453,16 +585,19 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
             }
         }
 
+        // _____________________________________________________________________
+        // NTUPLE: Update roads
         for (int j=0; j<4; j++) {  // loop over zones
             for (int k=0; k<128; k++) {  // loop over superstrips
                 const PatternOutput& pattern = Test;
 
-                if (pattern.detected.rank.at(j).at(k) > 0) {
+                if (pattern.detected.rank.at(j).at(k) > 0) {  // sparsify
                     int ibxgroup = -999;
                     for (int i=0; i<3; i++) {  // loop over bxgroups
                         const RoadKey roadKey = make_roadKey(SectIndex, i, j, k);
                         if (roadRefMap.find(roadKey) != roadRefMap.end()) {
-                            if (pattern.detected.rank.at(j).at(k) == Pout.at(i).detected.rank.at(j).at(k)) {
+                            const unsigned roadRef = roadRefMap.at(roadKey);
+                            if (pattern.detected.rank.at(j).at(k) == v3_rank->at(roadRef)) {
                                 ibxgroup = i;
                                 break;
                             }
@@ -499,37 +634,6 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
                 }
             }
         }
-        // _____________________________________________________________________
-        // END NTUPLE
-
-        // PrintQuality(Test.detected);
-
-        ///////////////////////////////
-        //////Sector Sorting/////////// Sorts through the patterns found in each
-        /// zone and selects the best three per zone to send to the next module.
-        ///////Finding 3 Best Pattern//
-        ///////////////////////////////
-
-        SortingOutput Sout = SortSect(Test);
-
-        //////////////////////////////////
-        ///////// Match ph patterns ////// Loops over each sorted pattern and
-        /// then loops over all possible triggerprimitives which could have made
-        /// the pattern
-        ////// to segment inputs ///////// and matches the associated full
-        /// precision triggerprimitives to the detected pattern.
-        //////////////////////////////////
-
-        MatchingOutput Mout = PhiMatching(Sout);
-        MO[SectIndex] = Mout;
-
-        /////////////////////////////////
-        //////// Calculate delta //////// Once we have matched the hits we
-        /// calculate the delta phi and theta between all
-        ////////    ph and th    //////// stations present.
-        /////////////////////////////////
-
-        std::vector<std::vector<DeltaOutput>> Dout = CalcDeltas(Mout); ////
 
         // _____________________________________________________________________
         // NTUPLE: Store roads (2)
@@ -548,7 +652,8 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
                     for (int i=0; i<3; i++) {  // loop over bxgroups
                         const RoadKey roadKey = make_roadKey(SectIndex, i, j, k);
                         if (roadRefMap.find(roadKey) != roadRefMap.end()) {
-                            if (winner.Rank() == Pout.at(i).detected.rank.at(j).at(k)) {
+                            const unsigned roadRef = roadRefMap.at(roadKey);
+                            if (winner.Rank() == v3_rank->at(roadRef)) {
                                 ibxgroup = i;
                                 break;
                             }
@@ -585,28 +690,53 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
                     }
 
                     DeltaOutput deltas = Dout.at(j).at(l);
-                    v3_dphi1           ->at(roadRef) = deltas.Deltas().at(0).at(0);
-                    v3_dphi2           ->at(roadRef) = deltas.Deltas().at(0).at(1);
-                    v3_dtheta1         ->at(roadRef) = deltas.Deltas().at(1).at(0);
-                    v3_dtheta2         ->at(roadRef) = deltas.Deltas().at(1).at(1);
+                    assert(deltas.Deltas().size() == 2 && deltas.Deltas().at(0).size() == 2 && deltas.Deltas().at(1).size() == 2);
+                    v3_dphi1           ->at(roadRef) = deltas.Deltas()[0][0];
+                    v3_dphi2           ->at(roadRef) = deltas.Deltas()[0][1];
+                    v3_dtheta1         ->at(roadRef) = deltas.Deltas()[1][0];
+                    v3_dtheta2         ->at(roadRef) = deltas.Deltas()[1][1];
                     v3_precisePhi      ->at(roadRef) = deltas.Phi();
                     v3_preciseTheta    ->at(roadRef) = deltas.Theta();
                     v3_preciseRank     ->at(roadRef) = deltas.GetWinner().Rank();
                 }
             }
         }
+
+        // _____________________________________________________________________
+        // NTUPLE: Store roads (3)
+        assert(Bout.size() == 3);
+        for (int l=0; l<3; l++) {  // loop over best winners (per sector)
+            const BTrack& btrack = Bout.at(l);
+
+            if (btrack.phi > 0) {  // sparsify
+                Winner winner = btrack.winner;
+
+                int k = winner.Strip();
+                int ibxgroup = -999;
+                int jzone = -999;
+                for (int i=0; i<3; i++) {  // loop over bxgroups
+                    for (int j=0; j<4; j++) {  // loop over zones
+                        const RoadKey& roadKey = make_roadKey(SectIndex, i, j, k);
+                        if (roadRefMap.find(roadKey) != roadRefMap.end()) {
+                            const unsigned roadRef = roadRefMap.at(roadKey);
+                            if (winner.Rank() == v3_preciseRank->at(roadRef)) {
+                                ibxgroup = i;
+                                jzone = j;
+                                break;
+                            }
+                        }
+                    }
+                }
+                assert(ibxgroup != -999 && jzone != -999);
+                const RoadKey roadKey = make_roadKey(SectIndex, ibxgroup, jzone, k);
+                const unsigned roadRef = roadRefMap.at(roadKey);
+                assert(btrack.phi == v3_precisePhi->at(roadRef));
+                assert(btrack.theta == v3_preciseTheta->at(roadRef));
+                v3_ibesttrack      ->at(roadRef) = l;
+            }
+        }
         // _____________________________________________________________________
         // END NTUPLE
-
-        /////////////////////////////////
-        /////// Sorts and gives /////////  Loops over all of the found
-        /// tracks(looking across zones) and selects the best three per sector.
-        ////// Best 3 tracks/sector /////  Here ghost busting is done to delete
-        /// tracks which are comprised of the same associated stubs.
-        /////////////////////////////////
-
-        std::vector<BTrack> Bout = BestTracks(Dout);
-        PTracks[SectIndex] = Bout;
     }
 
     ///////////////////////////////////////
@@ -740,6 +870,56 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
 
             if (!ME13 && fabs(eta) > 1.1)
                 holder.push_back(outPair);
+
+            // _________________________________________________________________
+            // NTUPLE: Store internal tracks
+            Winner winner = AllTracks[fbest].winner;
+            int SectIndex = sector;
+            int k = winner.Strip();
+            int ibxgroup = -999;
+            int jzone = -999;
+            for (int i=0; i<3; i++) {  // loop over bxgroups
+                for (int j=0; j<4; j++) {  // loop over zones
+                    const RoadKey& roadKey = make_roadKey(SectIndex, i, j, k);
+                    if (roadRefMap.find(roadKey) != roadRefMap.end()) {
+                        const unsigned roadRef = roadRefMap.at(roadKey);
+                        if (winner.Rank() == v3_preciseRank->at(roadRef)) {
+                            ibxgroup = i;
+                            jzone = j;
+                            break;
+                        }
+                    }
+                }
+            }
+            assert(ibxgroup != -999 && jzone != -999);
+            const RoadKey roadKey = make_roadKey(SectIndex, ibxgroup, jzone, k);
+            const unsigned roadRef = roadRefMap.at(roadKey);
+
+            v4_phi        ->push_back(AllTracks[fbest].phi);
+            v4_theta      ->push_back(AllTracks[fbest].theta);
+            v4_rank       ->push_back(AllTracks[fbest].winner.Rank());
+            v4_dphi1      ->push_back(AllTracks[fbest].deltas[0][0]);
+            v4_dphi2      ->push_back(AllTracks[fbest].deltas[0][1]);
+            v4_dtheta1    ->push_back(AllTracks[fbest].deltas[1][0]);
+            v4_dtheta2    ->push_back(AllTracks[fbest].deltas[1][1]);
+            v4_phis       ->push_back(tempTrack.phis);
+            v4_thetas     ->push_back(tempTrack.thetas);
+            v4_pt         ->push_back(xmlpt * 1.4);
+            v4_me1address ->push_back(me1address);
+            v4_me2address ->push_back(me2address);
+            v4_combaddress->push_back(CombAddress);
+            v4_mode       ->push_back(mode);
+            v4_ebx        ->push_back(ebx);
+            v4_sebx       ->push_back(sebx);
+            v4_isEndcap   ->push_back(!ME13 && fabs(eta) > 1.1);
+            v4_globalPhi  ->push_back(getConvGlobalPhi(sector, AllTracks[fbest].phi));
+            v4_globalTheta->push_back(getConvGlobalTheta(sector, AllTracks[fbest].theta));
+            v4_globalEta  ->push_back(getConvGlobalEta(sector, AllTracks[fbest].theta));
+            v4_ibesttrack ->push_back(fbest);
+            v4_isector    ->push_back(sector);
+            v4_roadRef    ->push_back(roadRef);
+            // _________________________________________________________________
+            // END NTUPLE
         }
     }
 
@@ -778,21 +958,40 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
         edm::LogInfo("NtupleCSCRegionalCandidates") << "Size: ??";
 
         // _____________________________________________________________________
-        // Begin sanity check
-
+        // NTUPLE: Store: regional muond candidates
         l1t::RegionalMuonCandBxCollection::const_iterator iter1 = tracks->begin();
         l1t::RegionalMuonCandBxCollection::const_iterator iter2 = OutputCands->begin();
         for (; iter1 != tracks->end(); ++iter1, ++iter2) {
             assert(iter1->hwPt() == iter2->hwPt());
+            assert(iter1->hwPhi() == iter2->hwPhi());
+            assert(iter1->hwEta() == iter2->hwEta());
+
+            l1t::RegionalMuonCandBxCollection::const_iterator it = iter1;
+            v5_hwPt           ->push_back(it->hwPt());
+            v5_hwPhi          ->push_back(it->hwPhi());
+            v5_hwEta          ->push_back(it->hwEta());
+            v5_hwSign         ->push_back(it->hwSign());
+            v5_hwSignValid    ->push_back(it->hwSignValid());
+            v5_hwQual         ->push_back(it->hwQual());
+            v5_link           ->push_back(it->link());
+            v5_processor      ->push_back(it->processor());
+            v5_trackFinderType->push_back(it->trackFinderType());
+            v5_hwHF           ->push_back(it->hwHF());
+            v5_dataword       ->push_back(it->dataword());
         }
-
         // _____________________________________________________________________
-        // End sanity check
-
+        // END NTUPLE
     } else {
         edm::LogError("NtupleCSCRegionalCandidates") << "Cannot get the product: " << trackTag_;
     }
 
+    //__________________________________________________________________________
+    // NTUPLE: Store output sizes
+    *v1_size = v1_isector->size();
+    *v2_size = v2_isector->size();
+    *v3_size = v3_isector->size();
+    *v4_size = v4_isector->size();
+    *v5_size = v5_hwPt->size();
 
     //__________________________________________________________________________
     // convHits
@@ -839,12 +1038,50 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
     iEvent.put(v3_precisePhi      , prefix_ + "roads@"    + "precisePhi"       + suffix_);
     iEvent.put(v3_preciseTheta    , prefix_ + "roads@"    + "preciseTheta"     + suffix_);
     iEvent.put(v3_preciseRank     , prefix_ + "roads@"    + "preciseRank"      + suffix_);
+    iEvent.put(v3_ibesttrack      , prefix_ + "roads@"    + "ibesttrack"       + suffix_);
     iEvent.put(v3_iwinner         , prefix_ + "roads@"    + "iwinner"          + suffix_);
     iEvent.put(v3_isuperstrip     , prefix_ + "roads@"    + "isuperstrip"      + suffix_);
     iEvent.put(v3_izone           , prefix_ + "roads@"    + "izone"            + suffix_);
     iEvent.put(v3_ibxgroup        , prefix_ + "roads@"    + "ibxgroup"         + suffix_);
     iEvent.put(v3_isector         , prefix_ + "roads@"    + "isector"          + suffix_);
     iEvent.put(v3_size            , prefix_ + "roads@"    + "size"             + suffix_);
-    //iEvent.put(v_size            , prefix_ + "size"            + suffix_);
-
+    // internal tracks
+    iEvent.put(v4_phi             , prefix_ + "itracks@"  + "phi"              + suffix_);
+    iEvent.put(v4_theta           , prefix_ + "itracks@"  + "theta"            + suffix_);
+    iEvent.put(v4_rank            , prefix_ + "itracks@"  + "rank"             + suffix_);
+    iEvent.put(v4_dphi1           , prefix_ + "itracks@"  + "dphi1"            + suffix_);
+    iEvent.put(v4_dphi2           , prefix_ + "itracks@"  + "dphi2"            + suffix_);
+    iEvent.put(v4_dtheta1         , prefix_ + "itracks@"  + "dtheta1"          + suffix_);
+    iEvent.put(v4_dtheta2         , prefix_ + "itracks@"  + "dtheta2"          + suffix_);
+    iEvent.put(v4_phis            , prefix_ + "itracks@"  + "phis"             + suffix_);
+    iEvent.put(v4_thetas          , prefix_ + "itracks@"  + "thetas"           + suffix_);
+    iEvent.put(v4_pt              , prefix_ + "itracks@"  + "pt"               + suffix_);
+    iEvent.put(v4_me1address      , prefix_ + "itracks@"  + "me1address"       + suffix_);
+    iEvent.put(v4_me2address      , prefix_ + "itracks@"  + "me2address"       + suffix_);
+    iEvent.put(v4_combaddress     , prefix_ + "itracks@"  + "combaddress"      + suffix_);
+    iEvent.put(v4_mode            , prefix_ + "itracks@"  + "mode"             + suffix_);
+    iEvent.put(v4_ebx             , prefix_ + "itracks@"  + "ebx"              + suffix_);
+    iEvent.put(v4_sebx            , prefix_ + "itracks@"  + "sebx"             + suffix_);
+    iEvent.put(v4_isEndcap        , prefix_ + "itracks@"  + "isEndcap"         + suffix_);
+    iEvent.put(v4_globalPhi       , prefix_ + "itracks@"  + "globalPhi"        + suffix_);
+    iEvent.put(v4_globalTheta     , prefix_ + "itracks@"  + "globalTheta"      + suffix_);
+    iEvent.put(v4_globalEta       , prefix_ + "itracks@"  + "globalEta"        + suffix_);
+    iEvent.put(v4_ibesttrack      , prefix_ + "itracks@"  + "ibesttrack"       + suffix_);
+    iEvent.put(v4_isector         , prefix_ + "itracks@"  + "isector"          + suffix_);
+    iEvent.put(v4_roadRef         , prefix_ + "itracks@"  + "roadRef"          + suffix_);
+    iEvent.put(v4_size            , prefix_ + "itracks@"  + "size"             + suffix_);
+    // regional muon candidates
+    iEvent.put(v5_hwPt            , prefix_ + "emuons@"   + "hwPt"             + suffix_);
+    iEvent.put(v5_hwPhi           , prefix_ + "emuons@"   + "hwPhi"            + suffix_);
+    iEvent.put(v5_hwEta           , prefix_ + "emuons@"   + "hwEta"            + suffix_);
+    iEvent.put(v5_hwSign          , prefix_ + "emuons@"   + "hwSign"           + suffix_);
+    iEvent.put(v5_hwSignValid     , prefix_ + "emuons@"   + "hwSignValid"      + suffix_);
+    iEvent.put(v5_hwQual          , prefix_ + "emuons@"   + "hwQual"           + suffix_);
+    iEvent.put(v5_link            , prefix_ + "emuons@"   + "link"             + suffix_);
+    iEvent.put(v5_processor       , prefix_ + "emuons@"   + "processor"        + suffix_);
+    iEvent.put(v5_trackFinderType , prefix_ + "emuons@"   + "trackFinderType"  + suffix_);
+    iEvent.put(v5_hwHF            , prefix_ + "emuons@"   + "hwHF"             + suffix_);
+    iEvent.put(v5_dataword        , prefix_ + "emuons@"   + "dataword"         + suffix_);
+    //iEvent.put(v5_trackAddress    , prefix_ + "emuons@"   + "trackAddress"     + suffix_);
+    iEvent.put(v5_size            , prefix_ + "emuons@"   + "size"             + suffix_);
 }

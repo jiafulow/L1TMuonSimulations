@@ -1,10 +1,7 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleCSCTriggerPrimitives.h"
 
-//#include "DataFormats/MuonDetId/interface/DTChamberId.h"
-//#include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
-
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 //#include "L1Trigger/CSCCommonTrigger/interface/CSCPatternLUT.h"
 
@@ -330,5 +327,4 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     iEvent.put(v_convGlobalEta   , prefix_ + "convGlobalEta"   + suffix_);
     iEvent.put(v_convGlobalRho   , prefix_ + "convGlobalRho"   + suffix_);
     iEvent.put(v_size            , prefix_ + "size"            + suffix_);
-
 }
