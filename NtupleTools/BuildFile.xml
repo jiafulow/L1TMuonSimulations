@@ -10,6 +10,9 @@
 <use name="DataFormats/MuonReco"/>
 <use name="DataFormats/TrackReco"/>
 <use name="DataFormats/VertexReco"/>
+<use name="SimDataFormats/Track"/>
+<use name="SimDataFormats/Vertex"/>
+<use name="SimDataFormats/TrackingAnalysis"/>
 
 <!--use name="Geometry/DTGeometry"/-->
 <!--use name="Geometry/RPCGeometry"/-->

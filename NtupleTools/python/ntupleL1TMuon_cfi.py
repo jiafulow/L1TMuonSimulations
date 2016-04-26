@@ -17,4 +17,21 @@ ntupleCSCRegionalCandidates = cms.EDProducer('NtupleCSCRegionalCandidates',
     maxN = cms.uint32(999999)
 )
 
-ntupleL1TMuon = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleCSCRegionalCandidates)
+ntupleRPCTriggerPrimitives = cms.EDProducer('NtupleRPCTriggerPrimitives',
+    inputTag = cms.InputTag('simMuonRPCDigis'),
+    prefix = cms.string('RPCStubs@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
+
+ntupleDTTriggerPrimitives = cms.EDProducer('NtupleDTTriggerPrimitives',
+    chambPhTag = cms.InputTag('simDtTriggerPrimitiveDigis'),
+    chambThTag = cms.InputTag('simDtTriggerPrimitiveDigis'),
+    prefix = cms.string('DTStubs@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
+
+ntupleL1TMuon = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleCSCRegionalCandidates * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives)
