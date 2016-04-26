@@ -143,7 +143,6 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt50_Positive
   --fileout file:SingleMuon_PositiveEndCap_0T_50GeV.root \
   --no_exec -n 1000
 
-
 # ______________________________________________________________________________
 # pset_SingleMuon_NegativeEndCap.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2000_NegativeEndCap_cfi.py \
@@ -155,6 +154,18 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_NegativeEndCap.py \
   --fileout file:SingleMuon_NegativeEndCap.root \
+  --no_exec -n 1000
+
+# pset_SingleMuon_NegativeEndCap_0T.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2000_NegativeEndCap_cfi.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 0T \
+  --python_filename pset_SingleMuon_NegativeEndCap_0T.py \
+  --fileout file:SingleMuon_NegativeEndCap_0T.root \
   --no_exec -n 1000
 
 # pset_SingleMuon_PositiveEndCap_flatPt.py
@@ -181,4 +192,18 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt2To200_Nega
   --fileout file:SingleMuon_NegativeEndCap_flatPt.root \
   --no_exec -n 1000
 
+# ______________________________________________________________________________
+# pset_SingleNeutrino_PU30.py
+# official --pileup_input "dbs:/MinBias_TuneCUETP8M1_13TeV-pythia8/RunIISummer15GS-MCRUN2_71_V1-v2/GEN-SIM" \
+cmsDriver.py L1TMuonSimulations/Configuration/python/HCA-RunIISummer15GS-00002-fragment.py \
+  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
+  --era Run2_25ns \
+  --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_all \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename pset_SingleNeutrino_PU30.py \
+  --fileout file:SingleNeutrino_PU30.root \
+  --no_exec -n 10
 
