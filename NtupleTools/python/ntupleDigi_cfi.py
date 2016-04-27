@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-ntupleTrackingParticles = cms.EDProducer('NTupleTrackingParticles',
+ntupleTrackingParticles = cms.EDProducer('NtupleTrackingParticles',
     inputTag = cms.InputTag('mix', 'MergedTrackTruth'),
     prefix = cms.string('trkParts@'),
     suffix = cms.string(''),
@@ -8,7 +8,7 @@ ntupleTrackingParticles = cms.EDProducer('NTupleTrackingParticles',
     maxN = cms.uint32(999999)
 )
 
-ntupleTrackingVertices = cms.EDProducer('NTupleTrackingVertices',
+ntupleTrackingVertices = cms.EDProducer('NtupleTrackingVertices',
     inputTag = cms.InputTag('mix', 'MergedTrackTruth'),
     prefix = cms.string('trkVertices@'),
     suffix = cms.string(''),

@@ -6,4 +6,5 @@ from L1TMuonSimulations.NtupleTools.ntupleDigi_cfi import *
 from L1TMuonSimulations.NtupleTools.ntupleL1TMuon_cfi import *
 from L1TMuonSimulations.NtupleTools.ntupleMaker_cfi import *
 
-ntupleSequence = cms.Sequence(ntupleEventInfo * ntupleGen * ntupleSim * ntupleDigi * ntupleL1TMuon * ntupler)
+#ntupleSequence = cms.Sequence(ntupleEventInfo * ntupleGen * ntupleSim * ntupleDigi * ntupleL1TMuon * ntupler)
+ntupleSequence = cms.Sequence(ntupleEventInfo * ntupleGen * ntupleL1TMuon * ntupler)

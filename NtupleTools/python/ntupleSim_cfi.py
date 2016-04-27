@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-ntupleSimTracks = cms.EDProducer('NTupleSimTracks',
+ntupleSimTracks = cms.EDProducer('NtupleSimTracks',
     inputTag = cms.InputTag('g4SimHits'),
     prefix = cms.string('simTracks@'),
     suffix = cms.string(''),
@@ -8,7 +8,7 @@ ntupleSimTracks = cms.EDProducer('NTupleSimTracks',
     maxN = cms.uint32(999999)
 )
 
-ntupleSimVertices = cms.EDProducer('NTupleSimVertices',
+ntupleSimVertices = cms.EDProducer('NtupleSimVertices',
     inputTag = cms.InputTag('g4SimHits'),
     prefix = cms.string('simVertices@'),
     suffix = cms.string(''),
