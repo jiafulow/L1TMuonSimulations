@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
+import glob
 import os
 import re
-import glob
 import subprocess
 
 class Retriever(object):
 
-    def __init__(self, chk='.checkfile.txt', logname='res'):
+    def __init__(self, chk='.checkfile.txt', logname='res', outname='out'):
 
         self.chk = chk
         self.logname = logname
+        self.outname = outname
         self.datasets = []
         self.target = ''
 
@@ -26,8 +27,8 @@ class Retriever(object):
 
         with open(self.chk) as f:
             for line in f.readlines():
-                dataset, njobs, nfiles = line.rstrip('\n').split(' ')
-                self.datasets.append((dataset, int(njobs), int(nfiles)))
+                jobpath, njobs, nfiles = line.rstrip('\n').split(' ')
+                self.datasets.append((jobpath, int(njobs), int(nfiles)))
 
         # Safety check
         for dataset in self.datasets:
@@ -46,7 +47,7 @@ class Retriever(object):
 
         files = []
         for dataset in self.datasets:
-            files.append('%s/*.root' % dataset[0])
+            files.append('%s/%s/*.root' % (dataset[0], self.outname))
 
         if not files:
             raise Exception('No files to be added.')
