@@ -98,9 +98,9 @@ class CondorJobType(object):
             self.jobid += 1
             self.config['JOBID'] = self.jobid
 
-        self.add_check()
-
         self.upload_tarball()
+
+        self.add_check()
 
         self.submit_jobs()
         return
@@ -319,16 +319,21 @@ echo "Job finished on host `hostname` on `date`"
         os.chmod(self.exe_name, 0744)  # make executable
         return
 
-    def add_check(self):
+    def upload_tarball(self):
+        # Only upload once
+        if not open(self.chk_name,'r').read() == '':
+            return
+
+        print "[INFO   ] Uploading tarball ..."
         commands = \
-'''echo {JOBPATH} {NJOBS} `wc -l < {SOURCEFILE}` >> {CHECKFILE}
+'''lcg-cp -v -b -D srmv2 --connect-timeout 180 {TARBALL} {TARBALL2} >& /dev/null
 '''.format(**self.config)
         self.execute_commands(commands)
         return
 
-    def upload_tarball(self):
+    def add_check(self):
         commands = \
-'''lcg-cp -v -b -D srmv2 --connect-timeout 180 {TARBALL} {TARBALL2} >& /dev/null
+'''echo {JOBPATH} {NJOBS} `wc -l < {SOURCEFILE}` >> {CHECKFILE}
 '''.format(**self.config)
         self.execute_commands(commands)
         return
