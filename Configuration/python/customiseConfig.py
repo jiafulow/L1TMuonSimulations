@@ -10,7 +10,6 @@ def read_pileup_input(filename):
     return readFiles
 
 def add_pileup(process):
-
     RunIISummer15GS = True
 
     if RunIISummer15GS:
@@ -25,13 +24,22 @@ def add_pileup(process):
         # PU30
         process.mix.input.nbPileupEvents.probValue = cms.vdouble(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
         process.simHcalDigis.markAndPass = cms.bool(True)
-
     return process
 
+def cust_event_content(process):
+    alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT']
+    for a in alist:
+        b=a+'output'
+        if hasattr(process,b):
+            getattr(process,b).outputCommands.append('keep *_mix_MergedTrackTruth_*')
+    return process
 
-def cust_all(process):
+def cust_pgun(process):
+    cust_event_content(process)
+    return process
 
+def cust_pileup(process):
     add_pileup(process)
-
+    cust_event_content(process)
     return process
 

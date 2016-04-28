@@ -1,9 +1,10 @@
 # pset_SingleMuon_PositiveEndCap.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2000_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_PositiveEndCap.py \
@@ -12,10 +13,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2
 
 # pset_SingleMuon_PositiveEndCap_0T.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2000_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 0T \
   --python_filename pset_SingleMuon_PositiveEndCap_0T.py \
@@ -25,10 +27,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2
 # ______________________________________________________________________________
 # pset_SingleMuon_PositiveEndCap_3GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt3_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_PositiveEndCap_3GeV.py \
@@ -37,10 +40,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt3_PositiveE
 
 # pset_SingleMuon_PositiveEndCap_5GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt5_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_PositiveEndCap_5GeV.py \
@@ -49,10 +53,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt5_PositiveE
 
 # pset_SingleMuon_PositiveEndCap_10GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt10_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_PositiveEndCap_10GeV.py \
@@ -61,10 +66,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt10_Positive
 
 # pset_SingleMuon_PositiveEndCap_20GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt20_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_PositiveEndCap_20GeV.py \
@@ -73,10 +79,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt20_Positive
 
 # pset_SingleMuon_PositiveEndCap_50GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt50_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_PositiveEndCap_50GeV.py \
@@ -85,10 +92,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt50_Positive
 
 # pset_SingleMuon_PositiveEndCap_0T_3GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt3_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 0T \
   --python_filename pset_SingleMuon_PositiveEndCap_0T_3GeV.py \
@@ -97,10 +105,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt3_PositiveE
 
 # pset_SingleMuon_PositiveEndCap_0T_5GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt5_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 0T \
   --python_filename pset_SingleMuon_PositiveEndCap_0T_5GeV.py \
@@ -109,10 +118,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt5_PositiveE
 
 # pset_SingleMuon_PositiveEndCap_0T_10GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt10_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 0T \
   --python_filename pset_SingleMuon_PositiveEndCap_0T_10GeV.py \
@@ -121,10 +131,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt10_Positive
 
 # pset_SingleMuon_PositiveEndCap_0T_20GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt20_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 0T \
   --python_filename pset_SingleMuon_PositiveEndCap_0T_20GeV.py \
@@ -133,10 +144,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt20_Positive
 
 # pset_SingleMuon_PositiveEndCap_0T_50GeV.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt50_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 0T \
   --python_filename pset_SingleMuon_PositiveEndCap_0T_50GeV.py \
@@ -146,10 +158,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt50_Positive
 # ______________________________________________________________________________
 # pset_SingleMuon_NegativeEndCap.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2000_NegativeEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_NegativeEndCap.py \
@@ -158,10 +171,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2
 
 # pset_SingleMuon_NegativeEndCap_0T.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2000_NegativeEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 0T \
   --python_filename pset_SingleMuon_NegativeEndCap_0T.py \
@@ -170,10 +184,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To2
 
 # pset_SingleMuon_PositiveEndCap_flatPt.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt2To200_PositiveEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_PositiveEndCap_flatPt.py \
@@ -182,10 +197,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt2To200_Posi
 
 # pset_SingleMuon_NegativeEndCap_flatPt.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt2To200_NegativeEndCap_cfi.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pgun \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_NegativeEndCap_flatPt.py \
@@ -196,11 +212,11 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatPt2To200_Nega
 # pset_SingleNeutrino_PU30.py
 # official --pileup_input "dbs:/MinBias_TuneCUETP8M1_13TeV-pythia8/RunIISummer15GS-MCRUN2_71_V1-v2/GEN-SIM" \
 cmsDriver.py L1TMuonSimulations/Configuration/python/HCA-RunIISummer15GS-00002-fragment.py \
-  --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@frozen25ns \
   --mc --datatier GEN-SIM-RAW --eventcontent RAWSIM --processName RAWSIM \
   --era Run2_25ns \
   --conditions 76X_mcRun2_asymptotic_v12 \
-  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_all \
+  --customise L1TMuonSimulations/Configuration/customiseConfig.cust_pileup \
   --beamspot Realistic50ns13TeVCollision \
   --magField 38T_PostLS1 \
   --python_filename pset_SingleNeutrino_PU30.py \
