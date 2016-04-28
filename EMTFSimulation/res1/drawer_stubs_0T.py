@@ -27,10 +27,10 @@ def drawer_book(options):
         for st in st_vec:
             nbinsx, xmin, xmax = 50, -0.1, 0.1
 
-            hname = "lcts_dphi_st%i_pt%i" % (st, pt)
+            hname = "stubs_dphi_st%i_pt%i" % (st, pt)
             histos[hname] = TH1F(hname, "; #phi(Gen) - #phi(Emu) [rad], %s" % (label_st(st)), nbinsx, xmin, xmax)
 
-            hname = "lcts_deta_st%i_pt%i" % (st, pt)
+            hname = "stubs_deta_st%i_pt%i" % (st, pt)
             histos[hname] = TH1F(hname, "; #eta(Gen) - #eta(Emu), %s" % (label_st(st)), nbinsx, xmin, xmax)
 
     # Style
@@ -41,7 +41,9 @@ def drawer_book(options):
 
 # ______________________________________________________________________________
 def drawer_project(tree, histos, options):
-    #tree.SetBranchStatus("*", 0)
+    tree.SetBranchStatus("*", 0)
+    tree.SetBranchStatus("genParts_*", 1)
+    tree.SetBranchStatus("CSCStubs_*", 1)
 
     # Loop over events
     for ievt, evt in enumerate(tree):
@@ -62,19 +64,17 @@ def drawer_project(tree, histos, options):
         is_endcap = 1.25 < part_eta < 2.4
 
         if pt > 0 and is_endcap:
-            for (istation, iring, globalPhi, globalEta) in izip(evt.cscCLCTs_istation, evt.cscCLCTs_iring, evt.cscCLCTs_globalPhi, evt.cscCLCTs_globalEta):
+            for (istation, iring, globalPhi, globalEta) in izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_globalPhi, evt.CSCStubs_globalEta):
                 st = istation * 10 + iring
 
                 dphi = deltaPhi(part_phi, globalPhi)
                 deta = part_eta - globalEta
 
                 if st in st_vec and pt in pt_vec:
-                    hname = "lcts_dphi_st%i_pt%i" % (st, pt)
+                    hname = "stubs_dphi_st%i_pt%i" % (st, pt)
                     histos[hname].Fill(dphi)
-                    hname = "lcts_deta_st%i_pt%i" % (st, pt)
+                    hname = "stubs_deta_st%i_pt%i" % (st, pt)
                     histos[hname].Fill(deta)
-
-    #tree.SetBranchStatus("*", 1)
     return
 
 # ______________________________________________________________________________
@@ -86,23 +86,26 @@ def drawer_draw(histos, options):
 
     for hname, h in histos.iteritems():
 
-        if h.style == 0:  # filled
-            h.SetLineWidth(2); h.SetMarkerSize(0)
-            h.SetLineColor(col); h.SetFillColor(fcol)
-        elif h.style == 1:  # marker
-            h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
-            h.SetLineColor(col); h.SetMarkerColor(col);
-        if h.logy:
-            h.SetMaximum(h.GetMaximum() * 100); h.SetMinimum(0.5)
-        else:
-            h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
+        if h.ClassName() == "TH1F":
+            if True:
+                # Draw TH1 plots
+                if h.style == 0:  # filled
+                    h.SetLineWidth(2); h.SetMarkerSize(0)
+                    h.SetLineColor(col); h.SetFillColor(fcol)
+                elif h.style == 1:  # marker
+                    h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
+                    h.SetLineColor(col); h.SetMarkerColor(col);
+                if h.logy:
+                    h.SetMaximum(h.GetMaximum() * 100); h.SetMinimum(0.5)
+                else:
+                    h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
 
-        h.Draw("E")
-        display_fit(h)
-        gPad.SetLogy(h.logy)
+                h.Draw("E")
+                display_fit(h)
+                gPad.SetLogy(h.logy)
 
-        CMS_0T_label()
-        save(options.outdir, hname)
+                CMS_0T_label()
+                save(options.outdir, hname)
 
 
     # Specialized: overlay different pT
@@ -110,7 +113,7 @@ def drawer_draw(histos, options):
 
         # phi residuals
         pt = 50
-        hname = "lcts_dphi_st%i_pt%i" % (st, pt)
+        hname = "stubs_dphi_st%i_pt%i" % (st, pt)
         h = histos[hname]
         hframe = h.Clone(h.GetName().replace("_pt%i" % pt, "_overlay"))
         hframe.Reset()
@@ -118,7 +121,7 @@ def drawer_draw(histos, options):
 
         moveLegend(0.12,0.68,0.55,0.92); tlegend.Clear()
         for i, pt in enumerate(pt_vec):
-            hname = "lcts_dphi_st%i_pt%i" % (st, pt)
+            hname = "stubs_dphi_st%i_pt%i" % (st, pt)
             h = histos[hname]
             h.SetLineColor(palette[i]); h.SetMarkerColor(palette[i]); h.fit.SetLineColor(palette[i])
 
@@ -132,7 +135,7 @@ def drawer_draw(histos, options):
 
         # eta residuals
         pt = 50
-        hname = "lcts_deta_st%i_pt%i" % (st, pt)
+        hname = "stubs_deta_st%i_pt%i" % (st, pt)
         h = histos[hname]
         hframe = h.Clone(h.GetName().replace("_pt%i" % pt, "_overlay"))
         hframe.Reset()
@@ -140,7 +143,7 @@ def drawer_draw(histos, options):
 
         moveLegend(0.12,0.68,0.55,0.92); tlegend.Clear()
         for i, pt in enumerate(pt_vec):
-            hname = "lcts_deta_st%i_pt%i" % (st, pt)
+            hname = "stubs_deta_st%i_pt%i" % (st, pt)
             h = histos[hname]
             h.SetLineColor(palette[i]); h.SetMarkerColor(palette[i]); h.fit.SetLineColor(palette[i])
 

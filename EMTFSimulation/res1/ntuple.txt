@@ -1,4 +1,0 @@
-#/cms/data/store/user/jiafulow/L1MuonTrigger/7_6_1_ntuple/ntuple_add.root
-#/cms/data/store/user/jiafulow/L1MuonTrigger/7_6_1_ntuple/ntuple_add_0T.root
-/cms/data/store/user/jiafulow/L1MuonTrigger/7_6_1_ntuple/ntuple_add_pt.root
-#/cms/data/store/user/jiafulow/L1MuonTrigger/7_6_1_ntuple/ntuple_add_0T_pt.root

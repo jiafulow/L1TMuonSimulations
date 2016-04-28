@@ -85,10 +85,10 @@ def drawer_book(options):
     for pt in pt_vec:
         for st in st_vec:
             nbinsx, xmin, xmax = 60, -1.1, 0.1
-            hname = "lcts_dphi_st%i_pt%i" % (st, pt)
+            hname = "stubs_dphi_st%i_pt%i" % (st, pt)
             histos[hname] = TH1F(hname, "; #phi(Gen) - #phi(Emu) [rad], %s" % (label_st(st)), nbinsx, xmin, xmax)
             nbinsx, xmin, xmax = 60, -0.6, 0.6
-            hname = "lcts_deta_st%i_pt%i" % (st, pt)
+            hname = "stubs_deta_st%i_pt%i" % (st, pt)
             histos[hname] = TH1F(hname, "; #eta(Gen) - #eta(Emu), %s" % (label_st(st)), nbinsx, xmin, xmax)
 
         for std in std_vec:
@@ -100,9 +100,9 @@ def drawer_book(options):
             else:
                 nbinsx, xmin, xmax = 60, -0.1, 0.1
 
-            hname = "lcts_dphi_std%i_pt%i" % (std, pt)
+            hname = "stubs_dphi_std%i_pt%i" % (std, pt)
             histos[hname] = TH1F(hname, "; #phi(%s) - #phi(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsx, xmin, xmax)
-            hname = "lcts_deta_std%i_pt%i" % (std, pt)
+            hname = "stubs_deta_std%i_pt%i" % (std, pt)
             histos[hname] = TH1F(hname, "; #eta(%s) - #eta(%s)" % (label_std_i(std), label_std_j(std)), nbinsx, xmin, xmax)
 
     # TH2F
@@ -117,15 +117,15 @@ def drawer_book(options):
                 nbinsx, xmin, xmax = 60, -0.1, 0.1
             nbinsy, ymin, ymax = 16, 0.9, 2.5
 
-            hname = "lcts_dphi_vs_eta_std%i_pt%i" % (std, pt)
+            hname = "stubs_dphi_vs_eta_std%i_pt%i" % (std, pt)
             histos[hname] = TH2F(hname, "; #eta(Gen); #phi(%s) - #phi(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, nbinsx, xmin, xmax)
-            hname = "lcts_deta_vs_eta_std%i_pt%i" % (std, pt)
+            hname = "stubs_deta_vs_eta_std%i_pt%i" % (std, pt)
             histos[hname] = TH2F(hname, "; #eta(Gen); #eta(%s) - #eta(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, nbinsx, xmin, xmax)
 
             # error bar indicates std dev
-            hname = "lcts_dphi_pr_eta_std%i_pt%i" % (std, pt)
+            hname = "stubs_dphi_pr_eta_std%i_pt%i" % (std, pt)
             histos[hname] = TProfile(hname, "; #eta(Gen); #phi(%s) - #phi(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, xmin, xmax, 's')
-            hname = "lcts_deta_pr_eta_std%i_pt%i" % (std, pt)
+            hname = "stubs_deta_pr_eta_std%i_pt%i" % (std, pt)
             histos[hname] = TProfile(hname, "; #eta(Gen); #eta(%s) - #eta(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, xmin, xmax, 's')
 
     # Style
@@ -141,7 +141,9 @@ def drawer_book(options):
 
 # ______________________________________________________________________________
 def drawer_project(tree, histos, options):
-    #tree.SetBranchStatus("*", 0)
+    tree.SetBranchStatus("*", 0)
+    tree.SetBranchStatus("genParts_*", 1)
+    tree.SetBranchStatus("CSCStubs_*", 1)
 
     # Loop over events
     for ievt, evt in enumerate(tree):
@@ -163,7 +165,7 @@ def drawer_project(tree, histos, options):
         is_endcap = 1.25 < part_eta < 2.4
 
         if pt > 0 and is_endcap:
-            for (istation, iring, globalPhi, globalEta) in izip(evt.cscCLCTs_istation, evt.cscCLCTs_iring, evt.cscCLCTs_globalPhi, evt.cscCLCTs_globalEta):
+            for (istation, iring, globalPhi, globalEta) in izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_globalPhi, evt.CSCStubs_globalEta):
                 st = istation * 10 + iring
 
                 dphi = deltaPhi(part_phi, globalPhi)
@@ -173,13 +175,13 @@ def drawer_project(tree, histos, options):
                     dphi = -dphi
 
                 if st in st_vec and pt in pt_vec:
-                    hname = "lcts_dphi_st%i_pt%i" % (st, pt)
+                    hname = "stubs_dphi_st%i_pt%i" % (st, pt)
                     histos[hname].Fill(dphi)
-                    hname = "lcts_deta_st%i_pt%i" % (st, pt)
+                    hname = "stubs_deta_st%i_pt%i" % (st, pt)
                     histos[hname].Fill(deta)
 
-            for imuon1, (istation1, iring1, globalPhi1, globalEta1) in enumerate(izip(evt.cscCLCTs_istation, evt.cscCLCTs_iring, evt.cscCLCTs_globalPhi, evt.cscCLCTs_globalEta)):
-                for imuon2, (istation2, iring2, globalPhi2, globalEta2) in enumerate(izip(evt.cscCLCTs_istation, evt.cscCLCTs_iring, evt.cscCLCTs_globalPhi, evt.cscCLCTs_globalEta)):
+            for imuon1, (istation1, iring1, globalPhi1, globalEta1) in enumerate(izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_globalPhi, evt.CSCStubs_globalEta)):
+                for imuon2, (istation2, iring2, globalPhi2, globalEta2) in enumerate(izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_globalPhi, evt.CSCStubs_globalEta)):
 
                     if imuon1 >= imuon2:
                         continue
@@ -229,22 +231,20 @@ def drawer_project(tree, histos, options):
 
                     for std in std_more:
                         if std in std_vec and pt in pt_vec:
-                            hname = "lcts_dphi_std%i_pt%i" % (std, pt)
+                            hname = "stubs_dphi_std%i_pt%i" % (std, pt)
                             histos[hname].Fill(dphi)
-                            hname = "lcts_deta_std%i_pt%i" % (std, pt)
+                            hname = "stubs_deta_std%i_pt%i" % (std, pt)
                             histos[hname].Fill(deta)
 
-                            hname = "lcts_dphi_vs_eta_std%i_pt%i" % (std, pt)
+                            hname = "stubs_dphi_vs_eta_std%i_pt%i" % (std, pt)
                             histos[hname].Fill(part_eta, dphi)
-                            hname = "lcts_deta_vs_eta_std%i_pt%i" % (std, pt)
+                            hname = "stubs_deta_vs_eta_std%i_pt%i" % (std, pt)
                             histos[hname].Fill(part_eta, deta)
 
-                            hname = "lcts_dphi_pr_eta_std%i_pt%i" % (std, pt)
+                            hname = "stubs_dphi_pr_eta_std%i_pt%i" % (std, pt)
                             histos[hname].Fill(part_eta, dphi)
-                            hname = "lcts_deta_pr_eta_std%i_pt%i" % (std, pt)
+                            hname = "stubs_deta_pr_eta_std%i_pt%i" % (std, pt)
                             histos[hname].Fill(part_eta, deta)
-
-    #tree.SetBranchStatus("*", 1)
     return
 
 # ______________________________________________________________________________
@@ -305,7 +305,7 @@ def drawer_draw(histos, options):
     for hname, h in histos.iteritems():
 
         if h.ClassName() == "TH1F":
-            if False:
+            if True:
                 # Draw TH1 plots
                 if h.style == 0:  # filled
                     h.SetLineWidth(2); h.SetMarkerSize(0)
@@ -327,7 +327,7 @@ def drawer_draw(histos, options):
             pass
 
         elif h.ClassName() == "TProfile":
-            if False:
+            if True:
                 # Draw profile plots on top of TH2
                 h2 = histos[hname.replace("_pr_", "_vs_")]
                 if h.style == 0:

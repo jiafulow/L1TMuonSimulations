@@ -1,0 +1,3 @@
+python drawer_stubs_0T.py ntuple_p_gev_0T.root  -b
+
+python drawer_stubs.py ntuple_p.root  -b
