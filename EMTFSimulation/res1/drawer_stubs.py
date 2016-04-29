@@ -26,19 +26,19 @@ def get_integrated(h, forward=True, normalize=False):
     hintegrated.Reset()
     nbins = h.GetNbinsX()
     if forward:
-        sum = 0
+        entries = 0
         for i in xrange(1, nbins+1):
-            sum += h.GetBinContent(i)
-            hintegrated.SetBinContent(i, sum)
-        if normalize and sum > 0:
-            hintegrated.Scale(1.0/sum)
+            entries += h.GetBinContent(i)
+            hintegrated.SetBinContent(i, entries)
+        if normalize and entries > 0:
+            hintegrated.Scale(1.0/entries)
     else:
-        sum = 0
+        entries = 0
         for i in xrange(nbins, 0, -1):
-            sum += h.GetBinContent(i)
-            hintegrated.SetBinContent(i, sum)
-        if normalize and sum > 0:
-            hintegrated.Scale(1.0/sum)
+            entries += h.GetBinContent(i)
+            hintegrated.SetBinContent(i, entries)
+        if normalize and entries > 0:
+            hintegrated.Scale(1.0/entries)
     return hintegrated
 
 def get_percentile(h, perc):
@@ -70,7 +70,7 @@ def drawer_book(options):
     histos = {}
 
     def label_st(st):
-        d = {11: 'ME+1/1b', 12: 'ME+1/2', 13: 'ME+1/3', 14: 'ME+1/1a', 21: 'ME+2/1', 22: 'ME+2/2', 31: 'ME+3/1', 32: 'ME+3/2', 41: 'ME+4/1', 42: 'ME+4/2'}
+        d = {10: 'ME+1/1', 11: 'ME+1/1b', 12: 'ME+1/2', 13: 'ME+1/3', 14: 'ME+1/1a', 20: 'ME+2', 21: 'ME+2/1', 22: 'ME+2/2', 30: 'ME+3', 31: 'ME+3/1', 32: 'ME+3/2', 40: 'ME+4', 41: 'ME+4/1', 42: 'ME+4/2'}
         return d[st]
 
     def label_std_i(std):

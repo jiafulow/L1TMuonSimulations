@@ -121,8 +121,11 @@ def deltaPhi(phi1, phi2):
     while result <= -pi:  result += 2*pi
     return result
 
+def deltaEta(eta1, eta2):
+    return eta1 - eta2
+
 def deltaR(eta1, phi1, eta2, phi2):
-    deta = eta1 - eta2
+    deta = deltaEta(eta1, eta2)
     dphi = deltaPhi(phi1, phi2)
     return sqrt(deta*deta + dphi*dphi)
 
