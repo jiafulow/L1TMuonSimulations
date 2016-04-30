@@ -10,9 +10,52 @@ fcol = TColor.GetColor("#a6cee3")  # mu0
 
 #pt_vec = [3,5,10,20,50]
 #st_vec = [11,12,14,21,22,31,32,41,42]  # excluded ME+1/3
-st_vec_1 = [10, 12, 20, 30, 40]  # excluded ME+1/3
+st0_vec = [10, 12, 20, 30, 40]  # excluded ME+1/3
 std_vec = [210,211,212,230,240,310,311,312,340,410,411,412]
 
+
+# ______________________________________________________________________________
+# Helper
+
+def getConvGlobalPhi(isector, iphi):
+    if iphi == -999:  return -999.
+    fphi = ((iphi)*0.0166666) + (isector%6)*60.0 + 13.0
+    fphi *= pi / 180.0
+    if fphi > pi:  fphi -= 2*pi  # convert from [0,2pi] to [-pi,pi]
+    return fphi
+
+def getConvGlobalTheta(isector, itheta):
+    if itheta == -999:  return -999.
+    ftheta = (itheta*0.2851562) + 8.5
+    ftheta *= pi / 180.0
+    return ftheta
+
+def getConvGlobalEta(isector, itheta):
+    if itheta == -999:  return -999.
+    ftheta = getConvGlobalTheta(isector, itheta)
+    feta = - log(tan(ftheta/2.0))
+    if isector/6 == 1:  feta = -feta
+    return feta
+
+def make_tgraph(hname, htitle, nbinsx=100, xmin=-1, xmax=1):
+    tgraph = TGraph(nbinsx)
+    tgraph.h = TH1F(hname+"_frame", htitle, nbinsx, xmin, xmax)
+    tgraph.SetName(hname)
+    tgraph.xx = []
+    tgraph.yy = []
+    return tgraph
+
+def fill_tgraph(tgraph, x, y):
+    tgraph.xx.append(x)
+    tgraph.yy.append(y)
+    return
+
+def freeze_tgraph(tgraph):
+    n = len(tgraph.xx)
+    tgraph.Set(n)
+    for i in xrange(n):
+        tgraph.SetPoint(i, tgraph.xx[i], tgraph.yy[i])
+    return
 
 # ______________________________________________________________________________
 # Drawer
@@ -32,14 +75,14 @@ def drawer_book(options):
         return d[std]
 
     # TH1F
-    for st in st_vec_1:
+    for st0 in st0_vec:
         nbinsx, xmin, xmax = 50, -0.012, -0.004
-        hname = "emtf_residual_convGlobalPhi_st%i" % (st)
-        histos[hname] = TH1F(hname, "; #phi(%s) - FW #phi(%s) [rad]" % (label_st(st), label_st(st)), nbinsx, xmin, xmax)
+        hname = "emtf_residual_convGlobalPhi_st%i" % (st0)
+        histos[hname] = TH1F(hname, "; #phi(%s) - emu #phi(%s) [rad]" % (label_st(st0), label_st(st0)), nbinsx, xmin, xmax)
 
         nbinsx, xmin, xmax = 50, -0.015, 0.065
-        hname = "emtf_residual_convGlobalTheta_st%i" % (st)
-        histos[hname] = TH1F(hname, "; #theta(%s) - FW #theta(%s) [rad]" % (label_st(st), label_st(st)), nbinsx, xmin, xmax)
+        hname = "emtf_residual_convGlobalTheta_st%i" % (st0)
+        histos[hname] = TH1F(hname, "; #theta(%s) - emu #theta(%s) [rad]" % (label_st(st0), label_st(st0)), nbinsx, xmin, xmax)
 
     hname = "genParts_pt"
     histos[hname] = TH1F(hname, "; gen p_{T} [GeV]", 100, 0, 2000)
@@ -50,6 +93,17 @@ def drawer_book(options):
     hname = "genParts_phi"
     histos[hname] = TH1F(hname, "; gen #phi [rad]", 64, -3.2, 3.2)
 
+    # TGraph
+    for st0 in st0_vec:
+        hname = "emtf_scatter_globalPhi_st%i" % (st0)
+        histos[hname] = make_tgraph(hname, "; emu integer #phi(%s); #phi(%s) [rad]" % (label_st(st0), label_st(st0)))
+        hname = "emtf_scatter_globalTheta_st%i" % (st0)
+        histos[hname] = make_tgraph(hname, "; emu integer #theta(%s); #theta(%s) [rad]" % (label_st(st0), label_st(st0)))
+
+        hname = "emtf_scatter_convGlobalPhi_st%i" % (st0)
+        histos[hname] = make_tgraph(hname, "; emu integer #phi(%s); emu #phi(%s) [rad]" % (label_st(st0), label_st(st0)))
+        hname = "emtf_scatter_convGlobalTheta_st%i" % (st0)
+        histos[hname] = make_tgraph(hname, "; emu integer #theta(%s); emu #theta(%s) [rad]" % (label_st(st0), label_st(st0)))
 
     # Style
     for hname, h in histos.iteritems():
@@ -60,6 +114,8 @@ def drawer_book(options):
         elif h.ClassName() == "TH2F":
             h.style = 0; h.logx = False; h.logy = False
         elif h.ClassName() == "TProfile":
+            h.style = 0; h.logx = False; h.logy = False
+        elif h.ClassName() == "TGraph":
             h.style = 0; h.logx = False; h.logy = False
     donotdelete.append(histos)
     return histos
@@ -95,24 +151,43 @@ def drawer_project(tree, histos, options):
             hname = "genParts_phi"
             histos[hname].Fill(part_phi)
 
-            for t in izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_globalPhi, evt.CSCStubs_globalTheta, evt.CSCStubs_globalEta, evt.CSCStubs_convGlobalPhi, evt.CSCStubs_convGlobalTheta, evt.CSCStubs_convGlobalEta):
+            for t in izip(evt.CSCStubs_isector, evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_globalPhi, evt.CSCStubs_globalTheta, evt.CSCStubs_globalEta, evt.CSCStubs_convGlobalPhi, evt.CSCStubs_convGlobalTheta, evt.CSCStubs_convGlobalEta, evt.CSCStubs_convPhi, evt.CSCStubs_convTheta):
 
-                (istation, iring, globalPhi, globalTheta, globalEta, convGlobalPhi, convGlobalTheta, convGlobalEta) = t
+                (isector, istation, iring, globalPhi, globalTheta, globalEta, convGlobalPhi, convGlobalTheta, convGlobalEta, convPhi, convTheta) = t
 
-                #st = istation * 10 + iring
-                st = istation * 10
+                if istation == 1 and iring == 3:  # skip ME+1/3
+                    continue
+
+                st0 = istation * 10
                 if istation == 1 and iring == 2:
-                    st = istation * 10 + iring
+                    st0 = istation * 10 + iring
 
-                dphi = deltaPhi(globalPhi, convGlobalPhi)
-                dtheta = deltaPhi(globalTheta, convGlobalTheta)
+                #dphi = deltaPhi(globalPhi, convGlobalPhi)
+                #dtheta = deltaPhi(globalTheta, convGlobalTheta)
                 #deta = deltaEta(globalEta, convGlobalEta)
 
-                if st in st_vec_1:
-                    hname = "emtf_residual_convGlobalPhi_st%i" % (st)
+                dphi = deltaPhi(globalPhi, getConvGlobalPhi(isector, convPhi))
+                dtheta = deltaPhi(globalTheta, getConvGlobalTheta(isector, convTheta))
+
+                if st0 in st0_vec:
+                    hname = "emtf_residual_convGlobalPhi_st%i" % (st0)
                     histos[hname].Fill(dphi)
-                    hname = "emtf_residual_convGlobalTheta_st%i" % (st)
+                    hname = "emtf_residual_convGlobalTheta_st%i" % (st0)
                     histos[hname].Fill(dtheta)
+
+                #if abs(getConvGlobalPhi(isector, convPhi) - convGlobalPhi) > 1e-5:
+                #    raise Exception("Inconsistent in converted hit global phi coordinate: %.6f vs %.6f" % (getConvGlobalPhi(isector, convPhi), convGlobalPhi))
+
+                if convPhi != -999 and convTheta != -999:
+                    hname = "emtf_scatter_globalPhi_st%i" % (st0)
+                    fill_tgraph(histos[hname], convPhi, globalPhi)
+                    hname = "emtf_scatter_globalTheta_st%i" % (st0)
+                    fill_tgraph(histos[hname], convTheta, globalTheta)
+
+                    hname = "emtf_scatter_convGlobalPhi_st%i" % (st0)
+                    fill_tgraph(histos[hname], convPhi, getConvGlobalPhi(isector, convPhi))
+                    hname = "emtf_scatter_convGlobalTheta_st%i" % (st0)
+                    fill_tgraph(histos[hname], convTheta, getConvGlobalTheta(isector, convTheta))
     return
 
 # ______________________________________________________________________________
@@ -120,7 +195,7 @@ def drawer_draw(histos, options):
     for hname, h in histos.iteritems():
 
         if h.ClassName() == "TH1F":
-            if True:
+            if False:
                 # Draw TH1 plots
                 if h.style == 0:  # filled
                     h.SetLineWidth(2); h.SetMarkerSize(0)
@@ -137,6 +212,21 @@ def drawer_draw(histos, options):
                 gPad.SetLogy(h.logy)
                 CMS_label()
                 save(options.outdir, hname)
+
+        elif h.ClassName() == "TGraph":
+            if True:
+                freeze_tgraph(h)
+                h.SetMarkerStyle(6); h.SetMarkerColor(2)
+
+                #if hname != "emtf_scatter_convGlobalPhi_st20":  # FIXME
+                #    continue
+
+                h.Draw("ap")
+                h.GetXaxis().SetTitle(h.h.GetXaxis().GetTitle())
+                h.GetYaxis().SetTitle(h.h.GetYaxis().GetTitle())
+                gPad.SetLogy(h.logy)
+                CMS_label()
+                save(options.outdir, hname, dot_pdf=False)
     return
 
 # ______________________________________________________________________________

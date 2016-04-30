@@ -10,7 +10,7 @@ fcol = TColor.GetColor("#a6cee3")  # mu0
 
 mode_vec = [11, 13, 14, 15] # excluded 7
 
-ept_vec = [5, 7, 10]  # trigger pt
+ept_vec = [11, 16, 20]  # trigger pt
 eeta_vec = [0, 1, 2]
 eeta_boundaries = (0.9, 1.2, 2.1, 2.4)
 
@@ -37,13 +37,13 @@ def drawer_book(options):
     for eeta in eeta_vec:
         for ept in ept_vec:
             hname = "emtf_efficiency_pt_eeta%i_ept%i" % (eeta, ept)
-            histos[hname] = TEfficiency(hname, "; p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
+            histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
 
     # Resolution (2D)
     for eeta in eeta_vec:
         hname = "emtf_resolution_2d_pt_eeta%i" % (eeta)
         #histos[hname] = TH2F(hname, "; q/p_{T} [GeV]; trigger q/p_{T} [GeV]", 100, -0.5, 0.5, 100, -0.5, 0.5)
-        histos[hname] = TH2F(hname, "; q/p_{T} [GeV]; trigger q/p_{T} [GeV]", 100, -0.5, 0.5, 50, 0, 0.5)
+        histos[hname] = TH2F(hname, "; gen q/p_{T} [GeV]; trigger q/p_{T} [GeV]", 100, -0.5, 0.5, 50, 0, 0.5)
 
     # Style
     for hname, h in histos.iteritems():
