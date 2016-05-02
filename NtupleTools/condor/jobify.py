@@ -308,7 +308,7 @@ EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then echo "lcg-cp rootfile exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
 # Done
-rm input.txt modify_source_file.py *.tgz *.root
+rm input.txt modify_source_file.py PSet.* *.tgz *.root
 echo "Exit status is $EXIT_STATUS"
 echo "Job finished on host `hostname` on `date`"
 '''.format(**self.config)
