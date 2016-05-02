@@ -162,7 +162,7 @@ def drawer_project(tree, histos, options):
             if 0.98 < part_pt/float(x) < 1.02:
                 pt = x
 
-        is_endcap = 1.25 < part_eta < 2.4
+        is_endcap = 1.24 < part_eta < 2.4
 
         if pt > 0 and is_endcap:
             for (istation, iring, globalPhi, globalEta) in izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_globalPhi, evt.CSCStubs_globalEta):

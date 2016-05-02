@@ -80,13 +80,13 @@ def drawer_project(tree, histos, options):
         part_charge = evt.genParts_charge[0]
         part_isector = (part_phi * (180.0/pi) - 15.0) / 60.
 
-        is_endcap = 1.25 < part_eta < 2.4
+        is_endcap = 1.24 < part_eta < 2.4
 
         if part_pt > 0 and is_endcap:
 
             for (mode, pt, globalPhi, globalEta) in izip(evt.CSCTracks_itracks_mode, evt.CSCTracks_itracks_pt, evt.CSCTracks_itracks_globalPhi, evt.CSCTracks_itracks_globalEta):
 
-                #is_endcap = 1.25 < globalEta < 2.4
+                #is_endcap = 1.24 < globalEta < 2.4
                 #is_ok = pt > 2
                 trigger = (mode in mode_vec) and ((1.0/pt - 1.0/part_pt) < (0.05*5))
 

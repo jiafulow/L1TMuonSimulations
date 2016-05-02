@@ -101,7 +101,7 @@ def drawer_project(tree, histos, options):
 
         for (mode, pt, globalPhi, globalEta) in izip(evt.CSCTracks_itracks_mode, evt.CSCTracks_itracks_pt, evt.CSCTracks_itracks_globalPhi, evt.CSCTracks_itracks_globalEta):
 
-            is_endcap = 1.25 < globalEta < 2.4
+            is_endcap = 1.24 < globalEta < 2.4
             is_ok = pt > 2
 
             if is_endcap and is_ok:

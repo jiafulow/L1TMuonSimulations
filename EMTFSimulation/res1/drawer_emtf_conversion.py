@@ -138,7 +138,7 @@ def drawer_project(tree, histos, options):
         part_theta = atan2(evt.genParts_pt[0], evt.genParts_pz[0])
         part_charge = evt.genParts_charge[0]
 
-        is_endcap = 1.25 < part_eta < 2.4
+        is_endcap = 1.24 < part_eta < 2.4
 
         if part_pt > 0 and is_endcap:
 
