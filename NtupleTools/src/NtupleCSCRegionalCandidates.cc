@@ -145,13 +145,13 @@ float getConvGlobalTheta(unsigned int isector, int itheta) {
     if (itheta == -999)  return -999.;
     float ftheta = (itheta*0.2851562) + 8.5;
     ftheta *= M_PI / 180.0;
+    if (isector/6 == 1) ftheta = -ftheta;
     return ftheta;
 }
 float getConvGlobalEta(unsigned int isector, int itheta) {
     if (itheta == -999)  return -999.;
     float ftheta = getConvGlobalTheta(isector, itheta);
     float feta = - std::log(std::tan(ftheta/2.0));
-    if (isector/6 == 1) feta = -feta;
     return feta;
 }
 }  // end anonymous namespace

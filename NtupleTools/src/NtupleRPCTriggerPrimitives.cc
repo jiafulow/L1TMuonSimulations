@@ -26,6 +26,13 @@ NtupleRPCTriggerPrimitives::NtupleRPCTriggerPrimitives(const edm::ParameterSet& 
     produces<std::vector<unsigned> >          (prefix_ + "strip"           + suffix_);
     produces<std::vector<unsigned> >          (prefix_ + "layer"           + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "bx"              + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalPhi"       + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalTheta"     + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalEta"       + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalRho"       + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalX"         + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalY"         + suffix_);
+    produces<std::vector<float> >             (prefix_ + "globalZ"         + suffix_);
     produces<unsigned>                        (prefix_ + "size"            + suffix_);
 }
 
@@ -49,6 +56,13 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     std::auto_ptr<std::vector<unsigned> >          v_strip           (new std::vector<unsigned>());
     std::auto_ptr<std::vector<unsigned> >          v_layer           (new std::vector<unsigned>());
     std::auto_ptr<std::vector<uint16_t> >          v_bx              (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<float> >             v_globalPhi       (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_globalTheta     (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_globalEta       (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_globalRho       (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_globalX         (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_globalY         (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_globalZ         (new std::vector<float>());
     std::auto_ptr<unsigned>                        v_size            (new unsigned(0));
 
 
@@ -92,6 +106,11 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 const RPCDetId rpcDet = it->detId<RPCDetId>();
                 const L1TMuon::TriggerPrimitive::RPCData rpcData = it->getRPCData();
 
+                // Global coordinates
+                //const double globalPhi = theGeometryTranslator_->calculateGlobalPhi(*it);
+                //const double globalEta = theGeometryTranslator_->calculateGlobalEta(*it);
+                const GlobalPoint& gp = theGeometryTranslator_->getGlobalPoint(*it);
+
                 v_geoId           ->push_back(it->rawId().rawId());
                 v_subsystem       ->push_back(it->subsystem());
                 v_iregion         ->push_back(rpcDet.region());
@@ -104,6 +123,13 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 v_strip           ->push_back(rpcData.strip);
                 v_layer           ->push_back(rpcData.layer);
                 v_bx              ->push_back(rpcData.bx);
+                v_globalPhi       ->push_back(gp.phi());
+                v_globalTheta     ->push_back(gp.theta());
+                v_globalEta       ->push_back(gp.eta());
+                v_globalRho       ->push_back(gp.perp());
+                v_globalX         ->push_back(gp.x());
+                v_globalY         ->push_back(gp.y());
+                v_globalZ         ->push_back(gp.z());
 
                 n++;
             }
@@ -129,5 +155,12 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     iEvent.put(v_strip           , prefix_ + "strip"           + suffix_);
     iEvent.put(v_layer           , prefix_ + "layer"           + suffix_);
     iEvent.put(v_bx              , prefix_ + "bx"              + suffix_);
+    iEvent.put(v_globalPhi       , prefix_ + "globalPhi"       + suffix_);
+    iEvent.put(v_globalTheta     , prefix_ + "globalTheta"     + suffix_);
+    iEvent.put(v_globalEta       , prefix_ + "globalEta"       + suffix_);
+    iEvent.put(v_globalRho       , prefix_ + "globalRho"       + suffix_);
+    iEvent.put(v_globalX         , prefix_ + "globalX"         + suffix_);
+    iEvent.put(v_globalY         , prefix_ + "globalY"         + suffix_);
+    iEvent.put(v_globalZ         , prefix_ + "globalZ"         + suffix_);
     iEvent.put(v_size            , prefix_ + "size"            + suffix_);
 }
