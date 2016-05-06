@@ -50,7 +50,6 @@ def drawer_draw(histos, options):
 
         h.Draw("hist")
         gPad.SetLogy(h.logy)
-
         CMS_label()
         save(options.outdir, hname)
     return

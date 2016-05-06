@@ -15,6 +15,7 @@ from itertools import izip
 from array import array
 import argparse
 import tempfile
+import json
 
 # ______________________________________________________________________________
 # Classes
@@ -47,7 +48,6 @@ class MyDrawer:
 class MyParser:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
-
         outdir = (self.parser.prog.replace("drawer_", "figures_"))[:-3]
         self.parser.add_argument("infile", help="input file (either .root file or .txt file listing .root files)")
         self.parser.add_argument("--outdir", default=outdir, help="output directory (default: %(default)s)")
@@ -69,8 +69,8 @@ class MyParser:
         # Create outdir if necessary
         if not self.options.outdir.endswith("/"):
             self.options.outdir += "/"
-        if gSystem.AccessPathName(self.options.outdir):
-            gSystem.mkdir(self.options.outdir)
+        if not os.path.exists(self.options.outdir):
+            os.makedirs(self.options.outdir)
 
         # Make input file list
         if not self.options.infile.endswith(".root") and not self.options.infile.endswith(".txt"):
@@ -108,6 +108,9 @@ tlegend.SetBorderSize(0)
 tline = TLine()
 tline.SetLineColor(kGray+2)
 tline.SetLineStyle(2)
+
+col = kBlack
+fcol = kRed
 
 donotdelete = []  # persist in memory
 
@@ -225,3 +228,16 @@ def save(imgdir, imgname, redraw_axis=True, dot_pdf=True, dot_root=False, dot_c=
         tfile.Close()
     if dot_c:
         gPad.Print(imgdir+imgname+".C")
+
+# ______________________________________________________________________________
+# Useful functions
+
+convert_key_to_int = lambda pairs: dict([(int(k),v) for (k,v) in pairs])
+
+def get_reverse_map(direct_map):
+    reverse_map = {}
+    for i in xrange(6*8):
+        for m in direct_map[i]:
+            reverse_map.setdefault(m, []).append(i)
+    return reverse_map
+

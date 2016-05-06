@@ -6,13 +6,7 @@ __init__.py
 *.d
 *.so
 *.root
-AutoDict_vector*
-AutoDict_map*
-AutoDict_less*
-
-# CRAB
-crab.history
-crab_0_*
+AutoDict_*
 
 # Other
 *~
