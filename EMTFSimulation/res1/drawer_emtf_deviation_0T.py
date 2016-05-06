@@ -21,21 +21,27 @@ def drawer_book(options):
 
     def label_st(st):
         d = {10: 'ME+1/1', 11: 'ME+1/1b', 12: 'ME+1/2', 13: 'ME+1/3', 14: 'ME+1/1a', 20: 'ME+2', 21: 'ME+2/1', 22: 'ME+2/2', 30: 'ME+3', 31: 'ME+3/1', 32: 'ME+3/2', 40: 'ME+4', 41: 'ME+4/1', 42: 'ME+4/2'}
-        return d[st]
+        ret = d[st]
+        if options.east:
+            ret = d[st].replace("ME+", "ME-")
+        return ret
 
     for pt in pt_vec:
         for st in st_vec:
+            nbinsx, xmin, xmax = 60, -0.15, 0.15
+            hname = "emtf_dphi_st%i_pt%i" % (st, pt)
+            histos[hname] = TH1F(hname, "; #phi(muon) - #phi(%s) [rad]" % (label_st(st)), nbinsx, xmin, xmax)
             nbinsx, xmin, xmax = 50, -0.1, 0.1
-
-            hname = "stubs_dphi_st%i_pt%i" % (st, pt)
-            histos[hname] = TH1F(hname, "; #phi(Gen) - #phi(Emu) [rad], %s" % (label_st(st)), nbinsx, xmin, xmax)
-
-            hname = "stubs_deta_st%i_pt%i" % (st, pt)
-            histos[hname] = TH1F(hname, "; #eta(Gen) - #eta(Emu), %s" % (label_st(st)), nbinsx, xmin, xmax)
+            hname = "emtf_dtheta_st%i_pt%i" % (st, pt)
+            histos[hname] = TH1F(hname, "; #theta(muon) - #theta(%s) [rad]" % (label_st(st)), nbinsx, xmin, xmax)
+            nbinsx, xmin, xmax = 50, -0.2, 0.2
+            hname = "emtf_deta_st%i_pt%i" % (st, pt)
+            histos[hname] = TH1F(hname, "; #eta(muon) - #eta(%s)" % (label_st(st)), nbinsx, xmin, xmax)
 
     # Style
     for hname, h in histos.iteritems():
         h.style = 1; h.logx = options.logx; h.logy = options.logy
+        h.logy = True  # always log-y
     donotdelete.append(histos)
     return histos
 
@@ -55,6 +61,7 @@ def drawer_project(tree, histos, options):
         part_eta = evt.genParts_eta[0]
         #part_cottheta = sinh(evt.genParts_eta[0])
         part_theta = atan2(evt.genParts_pt[0], evt.genParts_pz[0])
+        part_charge = evt.genParts_charge[0]
 
         pt = 0
         for x in pt_vec:
@@ -64,21 +71,35 @@ def drawer_project(tree, histos, options):
         is_endcap = 1.24 < part_eta < 2.4
 
         if pt > 0 and is_endcap:
-            for (istation, iring, globalPhi, globalEta) in izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_globalPhi, evt.CSCStubs_globalEta):
+            for (istation, iring, globalPhi, globalTheta, globalEta) in izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_globalPhi, evt.CSCStubs_globalTheta, evt.CSCStubs_globalEta):
+
+                if istation == 1 and iring == 3:  # skip ME+1/3
+                    continue
+
                 st = istation * 10 + iring
 
                 dphi = deltaPhi(part_phi, globalPhi)
-                deta = part_eta - globalEta
+                dtheta = deltaPhi(part_theta, globalTheta)
+                deta = deltaEta(part_eta, globalEta)
 
-                if st in st_vec and pt in pt_vec:
-                    hname = "stubs_dphi_st%i_pt%i" % (st, pt)
-                    histos[hname].Fill(dphi)
-                    hname = "stubs_deta_st%i_pt%i" % (st, pt)
-                    histos[hname].Fill(deta)
+                hname = "emtf_dphi_st%i_pt%i" % (st, pt)
+                histos[hname].Fill(dphi)
+                hname = "emtf_dtheta_st%i_pt%i" % (st, pt)
+                histos[hname].Fill(dtheta)
+                hname = "emtf_deta_st%i_pt%i" % (st, pt)
+                histos[hname].Fill(deta)
     return
 
 # ______________________________________________________________________________
 def drawer_draw(histos, options):
+
+    tlegend2 = TLegend(0.70,0.74,0.96,0.94)
+    tlegend2.SetFillStyle(0)
+    tlegend2.SetLineColor(0)
+    tlegend2.SetShadowColor(0)
+    tlegend2.SetBorderSize(0)
+    tlegend2.SetTextFont(42)
+
     def display_fit(h):
         h.Fit("gaus","q")
         h.fit = h.GetFunction("gaus")
@@ -98,63 +119,38 @@ def drawer_draw(histos, options):
                 if h.logy:
                     h.SetMaximum(h.GetMaximum() * 100); h.SetMinimum(0.5)
                 else:
-                    h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
+                    h.SetMaximum(h.GetMaximum() * 1.5); h.SetMinimum(0.)
 
                 h.Draw("E")
                 display_fit(h)
                 gPad.SetLogy(h.logy)
-
                 CMS_0T_label()
                 save(options.outdir, hname)
 
 
     # Specialized: overlay different pT
-    for st in st_vec:
+    if True:
+        for var in ["dphi", "dtheta", "deta"]:
+            for st in st_vec:
+                pt = 50
+                hname = "emtf_%s_st%i_pt%i" % (var, st, pt)
+                h = histos[hname]
+                hframe = h.Clone(h.GetName().replace("_pt%i" % pt, "_overlay"))
+                hframe.Reset()
+                hframe.SetStats(0); hframe.Draw()
 
-        # phi residuals
-        pt = 50
-        hname = "stubs_dphi_st%i_pt%i" % (st, pt)
-        h = histos[hname]
-        hframe = h.Clone(h.GetName().replace("_pt%i" % pt, "_overlay"))
-        hframe.Reset()
-        hframe.SetStats(0); hframe.Draw()
+                moveLegend(tlegend,0.12,0.68,0.55,0.92); tlegend.Clear()
+                for i, pt in enumerate(pt_vec):
+                    hname = "emtf_%s_st%i_pt%i" % (var, st, pt)
+                    h = histos[hname]
+                    h.SetLineColor(palette[i]); h.SetMarkerColor(palette[i]); h.fit.SetLineColor(palette[i])
+                    h.SetStats(0); h.Draw("same E")
+                    tlegend.AddEntry(h, "#color[%i]{#sigma(p_{T} = %i GeV) = %.4f}" % (palette[i], pt, h.fit.GetParameter(2)), "")
+                tlegend.Draw()
 
-        moveLegend(0.12,0.68,0.55,0.92); tlegend.Clear()
-        for i, pt in enumerate(pt_vec):
-            hname = "stubs_dphi_st%i_pt%i" % (st, pt)
-            h = histos[hname]
-            h.SetLineColor(palette[i]); h.SetMarkerColor(palette[i]); h.fit.SetLineColor(palette[i])
-
-            h.SetStats(0); h.Draw("same E")
-            tlegend.AddEntry(h, "#color[%i]{#sigma(p_{T} = %i GeV) = %.4f}" % (palette[i], pt, h.fit.GetParameter(2)), "")
-        tlegend.Draw()
-
-        gPad.SetLogy(h.logy)
-        CMS_0T_label()
-        save(options.outdir, hframe.GetName())
-
-        # eta residuals
-        pt = 50
-        hname = "stubs_deta_st%i_pt%i" % (st, pt)
-        h = histos[hname]
-        hframe = h.Clone(h.GetName().replace("_pt%i" % pt, "_overlay"))
-        hframe.Reset()
-        hframe.SetStats(0); hframe.Draw()
-
-        moveLegend(0.12,0.68,0.55,0.92); tlegend.Clear()
-        for i, pt in enumerate(pt_vec):
-            hname = "stubs_deta_st%i_pt%i" % (st, pt)
-            h = histos[hname]
-            h.SetLineColor(palette[i]); h.SetMarkerColor(palette[i]); h.fit.SetLineColor(palette[i])
-
-            h.SetStats(0); h.Draw("same E")
-            tlegend.AddEntry(h, "#color[%i]{#sigma(p_{T} = %i GeV) = %.5f}" % (palette[i], pt, h.fit.GetParameter(2)), "")
-        tlegend.Draw()
-
-        gPad.SetLogy(h.logy)
-        CMS_0T_label()
-        save(options.outdir, hframe.GetName())
-
+                gPad.SetLogy(h.logy)
+                CMS_0T_label()
+                save(options.outdir, hframe.GetName())
     return
 
 # ______________________________________________________________________________
@@ -183,8 +179,7 @@ if __name__ == '__main__':
 
     # Setup argument parser
     parser = MyParser()
-    parser.set_defaults(logy=True)
-
+    parser.add_argument("--east", action="store_true", help="Draw for East (i.e. negative) endcap (default: %(default)s)")
     options = parser.parse_args()
 
     # Call the main function

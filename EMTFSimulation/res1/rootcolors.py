@@ -17,6 +17,7 @@ kYellow     = 400   #FFFF00
 kOrange     = 800   #FFCC00
 
 kBird       = 57
+kViridis    = 112
 
 def get_color_hex(col):
     return gROOT.GetColor(col).AsHexString()

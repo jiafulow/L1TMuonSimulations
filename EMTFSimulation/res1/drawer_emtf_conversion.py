@@ -9,9 +9,8 @@ col  = TColor.GetColor("#1f78b4")  # mu0
 fcol = TColor.GetColor("#a6cee3")  # mu0
 
 #pt_vec = [3,5,10,20,50]
-#st_vec = [11,12,14,21,22,31,32,41,42]  # excluded ME+1/3
-st0_vec = [10, 12, 20, 30, 40]  # excluded ME+1/3
-std_vec = [210,211,212,230,240,310,311,312,340,410,411,412]
+st_vec = [11,12,14,21,22,31,32,41,42]  # excluded ME+1/3
+st0_vec = [11,12,20,30,40]  # excluded ME+1/3
 
 
 # ______________________________________________________________________________
@@ -28,13 +27,13 @@ def getConvGlobalTheta(isector, itheta):
     if itheta == -999:  return -999.
     ftheta = (itheta*0.2851562) + 8.5
     ftheta *= pi / 180.0
+    if isector/6 == 1:  ftheta = -ftheta
     return ftheta
 
 def getConvGlobalEta(isector, itheta):
     if itheta == -999:  return -999.
     ftheta = getConvGlobalTheta(isector, itheta)
     feta = - log(tan(ftheta/2.0))
-    if isector/6 == 1:  feta = -feta
     return feta
 
 def make_tgraph(hname, htitle, nbinsx=100, xmin=-1, xmax=1):
@@ -64,25 +63,29 @@ def drawer_book(options):
 
     def label_st(st):
         d = {10: 'ME+1/1', 11: 'ME+1/1b', 12: 'ME+1/2', 13: 'ME+1/3', 14: 'ME+1/1a', 20: 'ME+2', 21: 'ME+2/1', 22: 'ME+2/2', 30: 'ME+3', 31: 'ME+3/1', 32: 'ME+3/2', 40: 'ME+4', 41: 'ME+4/1', 42: 'ME+4/2'}
-        return d[st]
+        ret = d[st]
+        if options.east:
+            ret = d[st].replace("ME+", "ME-")
+        return ret
 
-    def label_std_i(std):
-        d = {210: 'ME+2', 211: 'ME+2', 212: 'ME+2', 230: 'ME+2', 240: 'ME+2', 310: 'ME+3', 311: 'ME+3', 312: 'ME+3', 340: 'ME+3', 410: 'ME+4', 411: 'ME+4', 412: 'ME+4'}
-        return d[std]
-
-    def label_std_j(std):
-        d = {210: 'ME+1', 211: 'ME+1/1', 212: 'ME+1/2', 230: 'ME+3', 240: 'ME+4', 310: 'ME+1', 311: 'ME+1/1', 312: 'ME+1/2', 340: 'ME+4', 410: 'ME+1', 411: 'ME+1/1', 412: 'ME+1/2'}
-        return d[std]
+    def label_st0(st):
+        d = {11: 'ME+1/1b', 12: 'ME+1/2', 20: 'ME+2', 30: 'ME+3', 40: 'ME+4'}
+        ret = d[st]
+        if options.east:
+            ret = d[st].replace("ME+", "ME-")
+        return ret
 
     # TH1F
-    for st0 in st0_vec:
+    for st in st_vec:
         nbinsx, xmin, xmax = 50, -0.012, -0.004
-        hname = "emtf_residual_convGlobalPhi_st%i" % (st0)
-        histos[hname] = TH1F(hname, "; #phi(%s) - emu #phi(%s) [rad]" % (label_st(st0), label_st(st0)), nbinsx, xmin, xmax)
+        hname = "emtf_error_convGlobalPhi_st%i" % (st)
+        histos[hname] = TH1F(hname, "; #phi(%s) - emu #phi(%s) [rad]" % (label_st(st), label_st(st)), nbinsx, xmin, xmax)
 
-        nbinsx, xmin, xmax = 50, -0.015, 0.065
-        hname = "emtf_residual_convGlobalTheta_st%i" % (st0)
-        histos[hname] = TH1F(hname, "; #theta(%s) - emu #theta(%s) [rad]" % (label_st(st0), label_st(st0)), nbinsx, xmin, xmax)
+        nbinsx, xmin, xmax = 50, -0.01, 0.01
+        if st in [11, 14]:  # ME1/1a, ME1/1b
+            nbinsx, xmin, xmax = 50, -0.02, 0.02
+        hname = "emtf_error_convGlobalTheta_st%i" % (st)
+        histos[hname] = TH1F(hname, "; #theta(%s) - emu #theta(%s) [rad]" % (label_st(st), label_st(st)), nbinsx, xmin, xmax)
 
     hname = "genParts_pt"
     histos[hname] = TH1F(hname, "; gen p_{T} [GeV]", 100, 0, 2000)
@@ -95,14 +98,14 @@ def drawer_book(options):
 
     # TGraph
     for st0 in st0_vec:
-        hname = "emtf_scatter_globalPhi_st%i" % (st0)
+        hname = "emtf_error_scatter_globalPhi_st%i" % (st0)
         histos[hname] = make_tgraph(hname, "; emu integer #phi(%s); #phi(%s) [rad]" % (label_st(st0), label_st(st0)))
-        hname = "emtf_scatter_globalTheta_st%i" % (st0)
+        hname = "emtf_error_scatter_globalTheta_st%i" % (st0)
         histos[hname] = make_tgraph(hname, "; emu integer #theta(%s); #theta(%s) [rad]" % (label_st(st0), label_st(st0)))
 
-        hname = "emtf_scatter_convGlobalPhi_st%i" % (st0)
+        hname = "emtf_error_scatter_convGlobalPhi_st%i" % (st0)
         histos[hname] = make_tgraph(hname, "; emu integer #phi(%s); emu #phi(%s) [rad]" % (label_st(st0), label_st(st0)))
-        hname = "emtf_scatter_convGlobalTheta_st%i" % (st0)
+        hname = "emtf_error_scatter_convGlobalTheta_st%i" % (st0)
         histos[hname] = make_tgraph(hname, "; emu integer #theta(%s); emu #theta(%s) [rad]" % (label_st(st0), label_st(st0)))
 
     # Style
@@ -158,9 +161,14 @@ def drawer_project(tree, histos, options):
                 if istation == 1 and iring == 3:  # skip ME+1/3
                     continue
 
+                st = istation * 10 + iring
+
                 st0 = istation * 10
-                if istation == 1 and iring == 2:
-                    st0 = istation * 10 + iring
+                if istation == 1:
+                    if iring == 1 or iring == 4:
+                        st0 = 11
+                    if iring == 2:
+                        st0 = 12
 
                 #dphi = deltaPhi(globalPhi, convGlobalPhi)
                 #dtheta = deltaPhi(globalTheta, convGlobalTheta)
@@ -169,24 +177,24 @@ def drawer_project(tree, histos, options):
                 dphi = deltaPhi(globalPhi, getConvGlobalPhi(isector, convPhi))
                 dtheta = deltaPhi(globalTheta, getConvGlobalTheta(isector, convTheta))
 
-                if st0 in st0_vec:
-                    hname = "emtf_residual_convGlobalPhi_st%i" % (st0)
+                if st in st_vec:
+                    hname = "emtf_error_convGlobalPhi_st%i" % (st)
                     histos[hname].Fill(dphi)
-                    hname = "emtf_residual_convGlobalTheta_st%i" % (st0)
+                    hname = "emtf_error_convGlobalTheta_st%i" % (st)
                     histos[hname].Fill(dtheta)
 
                 #if abs(getConvGlobalPhi(isector, convPhi) - convGlobalPhi) > 1e-5:
                 #    raise Exception("Inconsistent in converted hit global phi coordinate: %.6f vs %.6f" % (getConvGlobalPhi(isector, convPhi), convGlobalPhi))
 
                 if convPhi != -999 and convTheta != -999:
-                    hname = "emtf_scatter_globalPhi_st%i" % (st0)
+                    hname = "emtf_error_scatter_globalPhi_st%i" % (st0)
                     fill_tgraph(histos[hname], convPhi, globalPhi)
-                    hname = "emtf_scatter_globalTheta_st%i" % (st0)
+                    hname = "emtf_error_scatter_globalTheta_st%i" % (st0)
                     fill_tgraph(histos[hname], convTheta, globalTheta)
 
-                    hname = "emtf_scatter_convGlobalPhi_st%i" % (st0)
+                    hname = "emtf_error_scatter_convGlobalPhi_st%i" % (st0)
                     fill_tgraph(histos[hname], convPhi, getConvGlobalPhi(isector, convPhi))
-                    hname = "emtf_scatter_convGlobalTheta_st%i" % (st0)
+                    hname = "emtf_error_scatter_convGlobalTheta_st%i" % (st0)
                     fill_tgraph(histos[hname], convTheta, getConvGlobalTheta(isector, convTheta))
     return
 
@@ -195,7 +203,7 @@ def drawer_draw(histos, options):
     for hname, h in histos.iteritems():
 
         if h.ClassName() == "TH1F":
-            if False:
+            if True:
                 # Draw TH1 plots
                 if h.style == 0:  # filled
                     h.SetLineWidth(2); h.SetMarkerSize(0)
@@ -218,7 +226,7 @@ def drawer_draw(histos, options):
                 freeze_tgraph(h)
                 h.SetMarkerStyle(6); h.SetMarkerColor(2)
 
-                #if hname != "emtf_scatter_convGlobalPhi_st20":  # FIXME
+                #if hname != "emtf_error_scatter_convGlobalPhi_st20":  # FIXME
                 #    continue
 
                 h.Draw("ap")
@@ -255,6 +263,7 @@ if __name__ == '__main__':
 
     # Setup argument parser
     parser = MyParser()
+    parser.add_argument("--east", action="store_true", help="Draw for East (i.e. negative) endcap (default: %(default)s)")
     options = parser.parse_args()
 
     # Call the main function

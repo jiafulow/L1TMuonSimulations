@@ -1,5 +1,8 @@
 {
 
+gROOT->LoadMacro("tdrstyle.C");
+setTDRStyle();
+
 // _____________________________________________________________________________
 // Positive endcap
 
@@ -9,7 +12,7 @@ if (1) {
     TString outdir = "figures_emtf_conversion/";
 
     // xyz_view
-    if (0) {
+    if (1) {
         tree->Draw("CSCStubs_globalY:CSCStubs_globalX:CSCStubs_globalRho/tan(CSCStubs_globalTheta)", "CSCStubs_convPhi!=-999 && CSCStubs_istation==1", "");
         htemp->SetTitle("; z(ME+1) [cm]; x(ME+1) [cm]; y(ME+1) [cm]");
         gPad->Modified();
@@ -51,61 +54,61 @@ if (1) {
         gPad->Print(outdir+"xyz_view_emu_ME+4.png");
     }
 
-    // theta residual vs phi
-    if (0) {
+    // theta error vs phi
+    if (1) {
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==1 && CSCStubs_iring==4", "");
         htemp->SetTitle("; #phi(ME+1/1a) [rad]; #theta(ME+1/1a) - emu #theta(ME+1/1a) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+11a.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+11a.png");
 
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==1 && CSCStubs_iring==1", "");
         htemp->SetTitle("; #phi(ME+1/1b) [rad]; #theta(ME+1/1b) - emu #theta(ME+1/1b) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+11b.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+11b.png");
 
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==1 && CSCStubs_iring==2", "");
         htemp->SetTitle("; #phi(ME+1/2) [rad]; #theta(ME+1/2) - emu #theta(ME+1/2) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+12.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+12.png");
 
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==1 && CSCStubs_iring==3", "");
         htemp->SetTitle("; #phi(ME+1/3) [rad]; #theta(ME+1/3) - emu #theta(ME+1/3) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+13.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+13.png");
 
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==2 && CSCStubs_iring==1", "");
         htemp->SetTitle("; #phi(ME+2/1) [rad]; #theta(ME+2/1) - emu #theta(ME+2/1) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+21.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+21.png");
 
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==2 && CSCStubs_iring==2", "");
         htemp->SetTitle("; #phi(ME+2/2) [rad]; #theta(ME+2/2) - emu #theta(ME+2/2) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+22.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+22.png");
 
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==3 && CSCStubs_iring==1", "");
         htemp->SetTitle("; #phi(ME+3/1) [rad]; #theta(ME+3/1) - emu #theta(ME+3/1) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+31.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+31.png");
 
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==3 && CSCStubs_iring==2", "");
         htemp->SetTitle("; #phi(ME+3/2) [rad]; #theta(ME+3/2) - emu #theta(ME+3/2) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+32.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+32.png");
 
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==4 && CSCStubs_iring==1", "");
         htemp->SetTitle("; #phi(ME+4/1) [rad]; #theta(ME+4/1) - emu #theta(ME+4/1) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+41.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+41.png");
 
         tree->Draw("CSCStubs_globalTheta-CSCStubs_convGlobalTheta : CSCStubs_globalPhi", "CSCStubs_convPhi!=-999 && CSCStubs_istation==4 && CSCStubs_iring==2", "");
         htemp->SetTitle("; #phi(ME+4/2) [rad]; #theta(ME+4/2) - emu #theta(ME+4/2) [rad]");
         gPad->Modified();
-        gPad->Print(outdir+"theta_residual_vs_phi_ME+42.png");
+        gPad->Print(outdir+"theta_error_vs_phi_ME+42.png");
     }
 
     // theta vs phi
-    if (0) {
+    if (1) {
         int keywire = 10;
         TString str = Form("%d", keywire);
 

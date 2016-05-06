@@ -171,7 +171,7 @@ def drawer_draw(histos, options):
         for y in [0.5, 0.8, 0.9, 0.95, 1.0]:
             tline.DrawLine(xmin, y, xmax, y)
 
-        moveLegend(0.66,0.20,0.90,0.32); tlegend.Clear()
+        moveLegend(tlegend,0.66,0.20,0.90,0.32); tlegend.Clear()
         for ept in ept_vec:
             hname = "emtf_efficiency_pt_eeta%i_ept%i" % (eeta, ept)
             h = histos[hname]

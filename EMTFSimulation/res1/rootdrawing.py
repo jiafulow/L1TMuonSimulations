@@ -140,7 +140,7 @@ def modify_binning(nbins, xmin, xmax):
     binsize = (xmax - xmin) / nbins
     return (nbins + 1, xmin - (binsize/2.), xmax + (binsize/2.))
 
-def moveLegend(x1, y1, x2, y2):
+def moveLegend(tlegend, x1, y1, x2, y2):
     # SetX1NDC, SetX2NDC etc don't update if the tlegend is not drawn first
     # SetX1, SetX2 etc don't update if the tlegend has already been drawn
     # Thanks ROOT!
