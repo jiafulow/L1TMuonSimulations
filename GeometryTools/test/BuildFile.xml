@@ -1,0 +1,13 @@
+<export>
+</export>
+
+<library file="*.cc" name="L1TMuonSimulationsGeometryTools_tests">
+  <!--use name="Geometry/DTGeometry"/-->
+  <!--use name="Geometry/RPCGeometry"/-->
+  <!--use name="Geometry/CSCGeometry"/-->
+  <!--use name="Geometry/Records"/-->
+  <use name="MagneticField/Records"/>
+  <use name="MagneticField/Engine"/>
+  <use name="root"/>
+  <flags EDM_PLUGIN="1"/>
+</library>
