@@ -8,3 +8,4 @@ python drawer_emtf_efficiency.py ntuple_p.root  -b
 
 python drawer_emtf_rates.py ntuple_nu30.root  -b
 
+python drawer_emtf_zones.py ntuple_p.root  -b
