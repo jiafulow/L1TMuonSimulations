@@ -3,6 +3,7 @@
 
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleEventInfo.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleGenParticles.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleGenParticlesToMuon.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleGenEventInfo.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleSimTracks.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleSimVertices.h"
@@ -16,6 +17,7 @@
 
 DEFINE_FWK_MODULE(NtupleEventInfo);
 DEFINE_FWK_MODULE(NtupleGenParticles);
+DEFINE_FWK_MODULE(NtupleGenParticlesToMuon);
 DEFINE_FWK_MODULE(NtupleGenEventInfo);
 DEFINE_FWK_MODULE(NtupleSimTracks);
 DEFINE_FWK_MODULE(NtupleSimVertices);
