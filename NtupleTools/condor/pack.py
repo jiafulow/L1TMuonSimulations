@@ -94,7 +94,7 @@ def main():
     print('[INFO   ] Save pset.py as pickle ...')
     pkl = CMSSWConfig()
     pkl.write_files()
-    print('[INFO   ] %s%s is created (%iM).%s' % ('\033[92m', pkl.pklFileName, os.stat(pkl.pklFileName).st_size >> 20 '\033[0m'))
+    print('[INFO   ] %s%s is created (%iM).%s' % ('\033[92m', pkl.pklFileName, os.stat(pkl.pklFileName).st_size >> 20, '\033[0m'))
 
     print('[INFO   ] Packing tarball ...')
     print('[INFO   ] Using CMSSW_BASE: %s' % (os.environ['CMSSW_BASE']))

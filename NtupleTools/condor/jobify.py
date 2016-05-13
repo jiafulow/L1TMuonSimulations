@@ -137,7 +137,7 @@ cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
         writeme = \
 '''#Universe                = vanilla
 Universe                = grid
-grid_resource           = condor osg.rc.ufl.edu osg.rc.ufl.edu:9619
+grid_resource           = condor cms.rc.ufl.edu cms.rc.ufl.edu:9619
 #grid_resource           = condor red-gw1.unl.edu red-gw1.unl.edu:9619
 Notification            = Error
 Executable              = {JOBNAME}/{EXECUTABLE}
