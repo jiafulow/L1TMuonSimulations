@@ -27,11 +27,43 @@ def drawer_book(options):
     hname = "emtf_dquad_ME12_by_stations"
     histos[hname] = TH2F(hname, "; #Delta quadstrip; station", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
 
-    nbinsy, ymin, ymax = 100, -0.5, 0.5
-    hname = "emtf_dquad_ME11_for_invPt"
-    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; q/p_{T} [1/GeV]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
-    hname = "emtf_dquad_ME12_for_invPt"
-    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; q/p_{T} [1/GeV]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    nbinsy, ymin, ymax = 100, 0.0, 0.5
+    hname = "emtf_dquad_ME11_for_invPt_muplus"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; 1/p_{T} [1/GeV]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME12_for_invPt_muplus"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; 1/p_{T} [1/GeV]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME11_for_invPt_muminus"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; 1/p_{T} [1/GeV]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME12_for_invPt_muminus"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; 1/p_{T} [1/GeV]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+
+    nbinsy, ymin, ymax = 100, 0.15, 0.65
+    hname = "emtf_dquad_ME11_for_theta"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; #theta [rad]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME11_for_theta_st30"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{23}; #theta [rad]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME11_for_theta_st40"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{24}; #theta [rad]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME12_for_theta"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; #theta [rad]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME12_for_theta_st30"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{23}; #theta [rad]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME12_for_theta_st40"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{24}; #theta [rad]", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+
+    nbinsy, ymin, ymax = 100, 1.0, 2.5
+    hname = "emtf_dquad_ME11_for_eta"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; #eta", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME11_for_eta_st30"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{23}; #eta", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME11_for_eta_st40"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{24}; #eta", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME12_for_eta"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{12}; #eta", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME12_for_eta_st30"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{23}; #eta", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
+    hname = "emtf_dquad_ME12_for_eta_st40"
+    histos[hname] = TH2F(hname, "; #Delta quadstrip_{24}; #eta", nbinsx, xmin, xmax, nbinsy, ymin, ymax)
 
     nbinsy, ymin, ymax = 100, -50, 50
     hname = "emtf_dquad_ME11_for_dquad_st30"
@@ -151,8 +183,25 @@ def drawer_project(tree, histos, options):
                 if dquads_st30:  histos[hname].Fill(best_dquad_st30, 3)
                 if dquads_st40:  histos[hname].Fill(best_dquad_st40, 4)
 
-                hname = "emtf_dquad_ME11_for_invPt"
-                histos[hname].Fill(x, float(part_charge)/part_pt)
+                if part_charge == 1:
+                    hname = "emtf_dquad_ME11_for_invPt_muplus"
+                else:
+                    hname = "emtf_dquad_ME11_for_invPt_muminus"
+                histos[hname].Fill(x, 1.0/part_pt)
+
+                hname = "emtf_dquad_ME11_for_theta"
+                histos[hname].Fill(x, part_theta)
+                hname = "emtf_dquad_ME11_for_theta_st30"
+                if dquads_st30:  histos[hname].Fill(best_dquad_st30, part_theta)
+                hname = "emtf_dquad_ME11_for_theta_st40"
+                if dquads_st40:  histos[hname].Fill(best_dquad_st40, part_theta)
+
+                hname = "emtf_dquad_ME11_for_eta"
+                histos[hname].Fill(x, part_eta)
+                hname = "emtf_dquad_ME11_for_eta_st30"
+                if dquads_st30:  histos[hname].Fill(best_dquad_st30, part_eta)
+                hname = "emtf_dquad_ME11_for_eta_st40"
+                if dquads_st40:  histos[hname].Fill(best_dquad_st40, part_eta)
 
                 hname = "emtf_dquad_ME11_for_dquad_st30"
                 if dquads_st30:  histos[hname].Fill(x, best_dquad_st30)
@@ -171,8 +220,25 @@ def drawer_project(tree, histos, options):
                 if dquads_st30:  histos[hname].Fill(best_dquad_st30, 3)
                 if dquads_st40:  histos[hname].Fill(best_dquad_st40, 4)
 
-                hname = "emtf_dquad_ME12_for_invPt"
-                histos[hname].Fill(x, float(part_charge)/part_pt)
+                if part_charge == 1:
+                    hname = "emtf_dquad_ME12_for_invPt_muplus"
+                else:
+                    hname = "emtf_dquad_ME12_for_invPt_muminus"
+                histos[hname].Fill(x, 1.0/part_pt)
+
+                hname = "emtf_dquad_ME12_for_theta"
+                histos[hname].Fill(x, part_theta)
+                hname = "emtf_dquad_ME12_for_theta_st30"
+                if dquads_st30:  histos[hname].Fill(best_dquad_st30, part_theta)
+                hname = "emtf_dquad_ME12_for_theta_st40"
+                if dquads_st40:  histos[hname].Fill(best_dquad_st40, part_theta)
+
+                hname = "emtf_dquad_ME12_for_eta"
+                histos[hname].Fill(x, part_eta)
+                hname = "emtf_dquad_ME12_for_eta_st30"
+                if dquads_st30:  histos[hname].Fill(best_dquad_st30, part_eta)
+                hname = "emtf_dquad_ME12_for_eta_st40"
+                if dquads_st40:  histos[hname].Fill(best_dquad_st40, part_eta)
 
                 hname = "emtf_dquad_ME12_for_dquad_st30"
                 if dquads_st30:  histos[hname].Fill(x, best_dquad_st30)
@@ -186,7 +252,7 @@ def drawer_project(tree, histos, options):
 
 # ______________________________________________________________________________
 def drawer_draw(histos, options):
-    def display_quantiles(h, in_quantiles=[0.90,0.95,0.99], scalebox=(1.,1.)):
+    def display_quantiles(h, in_quantiles=[0.95,0.98,0.99], scalebox=(1.,1.)):
         # Display one-sided confidence intervals, a.k.a quantiles
         n = len(in_quantiles)
         in_quantiles = array('d', in_quantiles)
@@ -256,7 +322,7 @@ def drawer_draw(histos, options):
                         CMS_label()
                         save(options.outdir, h1.GetName())
 
-                if hname in ["emtf_dquad_ME11_for_invPt", "emtf_dquad_ME12_for_invPt", "emtf_dquad_ME11_for_dquad_st30", "emtf_dquad_ME12_for_dquad_st30", "emtf_dquad_ME11_for_dquad_st40", "emtf_dquad_ME12_for_dquad_st40"]:
+                if hname in ["emtf_dquad_ME11_for_dquad_st30", "emtf_dquad_ME12_for_dquad_st30", "emtf_dquad_ME11_for_dquad_st40", "emtf_dquad_ME12_for_dquad_st40"]:
 
                     xlows   = [-49, -15, -7, -3, -1, 0, 1, 2,  8]
                     xhighs  = [-16,  -8, -4, -2, -1, 0, 1, 7, 49]
@@ -270,6 +336,39 @@ def drawer_draw(histos, options):
                         h1.SetLineColor(col); h1.SetFillColor(fcol)
                         h1.Draw("hist")
                         display_quantiles(h1)
+                        CMS_label()
+                        save(options.outdir, h1.GetName())
+
+                # Specialized
+                if hname in ["emtf_dquad_ME11_for_invPt_muminus", "emtf_dquad_ME12_for_invPt_muminus"]:
+                    continue
+                if hname in ["emtf_dquad_ME11_for_invPt_muplus", "emtf_dquad_ME12_for_invPt_muplus"]:
+                    hname_muminus = hname.replace("_muplus", "_muminus")
+                    h_muminus = histos[hname_muminus]
+
+                    xlows   = [-49, -15, -7, -3, -1, 0, 1, 2,  8]
+                    xhighs  = [-16,  -8, -4, -2, -1, 0, 1, 7, 49]
+
+                    for i, (xlow, xhigh) in enumerate(zip(xlows, xhighs)):
+                        h1 = h.ProjectionY(hname + "_py%i" % i, h.GetXaxis().FindFixBin(xlow), h.GetXaxis().FindFixBin(xhigh))
+                        #h1.GetXaxis().SetTitle(h.GetYaxis().GetTitle() + ", #Delta quadstrip_{12}=[%i,%i]" % (xlow, xhigh))
+                        h1.GetXaxis().SetTitle(h.GetYaxis().GetTitle())
+                        h1.SetMaximum(h1.GetMaximum() * 1.4); h1.SetMinimum(0.)
+                        h1.SetLineWidth(2); h1.SetMarkerSize(0)
+                        #h1.SetLineColor(col); h1.SetFillColor(fcol)
+                        h1.SetLineColor(palette[1])  # muplus
+
+                        # Repeat for h_muminus
+                        h1_muminus = h_muminus.ProjectionY(hname_muminus + "_py%i" % i, h_muminus.GetXaxis().FindFixBin(xlow), h_muminus.GetXaxis().FindFixBin(xhigh))
+                        #h1_muminus.GetXaxis().SetTitle(h_muminus.GetYaxis().GetTitle() + ", #Delta quadstrip_{12}=[%i,%i]" % (xlow, xhigh))
+                        h1_muminus.GetXaxis().SetTitle(h_muminus.GetYaxis().GetTitle())
+                        h1_muminus.SetMaximum(h1_muminus.GetMaximum() * 1.4); h1_muminus.SetMinimum(0.)
+                        h1_muminus.SetLineWidth(2); h1_muminus.SetMarkerSize(0)
+                        #h1_muminus.SetLineColor(col); h1_muminus.SetFillColor(fcol)
+                        h1_muminus.SetLineColor(palette[0])  # muminus
+
+                        h1.Draw("hist"); h1_muminus.Draw("hist same")
+                        #display_quantiles(h1)
                         CMS_label()
                         save(options.outdir, h1.GetName())
     return
