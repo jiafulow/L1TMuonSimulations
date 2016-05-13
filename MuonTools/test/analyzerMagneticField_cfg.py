@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 import os
 
-process = cms.Process("Geometry")
+process = cms.Process("Muon")
 
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")

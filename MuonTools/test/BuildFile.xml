@@ -1,7 +1,7 @@
 <export>
 </export>
 
-<library file="*.cc" name="L1TMuonSimulationsGeometryTools_tests">
+<library file="*.cc" name="L1TMuonSimulationsMuonTools_tests">
   <!--use name="Geometry/DTGeometry"/-->
   <!--use name="Geometry/RPCGeometry"/-->
   <!--use name="Geometry/CSCGeometry"/-->
