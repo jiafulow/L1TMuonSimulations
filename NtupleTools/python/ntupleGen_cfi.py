@@ -1,7 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
 ntupleGenParticles = cms.EDProducer('NtupleGenParticles',
-    #inputTag = cms.InputTag('prunedGenParticles'),
     inputTag = cms.InputTag('genParticles'),
     prefix = cms.string('genParts@'),
     suffix = cms.string(''),
@@ -9,14 +8,27 @@ ntupleGenParticles = cms.EDProducer('NtupleGenParticles',
     maxN = cms.uint32(999999)
 )
 
-from L1TMuonSimulations.NtupleTools.simBeamSpot_cfi import simBeamSpot
-from L1TMuonSimulations.NtupleTools.propagator_cfi import SteppingHelixPropagatorAlong, MuonDetLayerGeometryESProducer
+ntupleGenJets = cms.EDProducer('NtupleGenJets',
+    inputTag = cms.InputTag('ak4GenJets'),
+    prefix = cms.string('genJets@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
 
-ntupleGenParticlesToMuon = cms.EDProducer('NtupleGenParticlesToMuon',
-    #inputTag = cms.InputTag('prunedGenParticles'),
-    inputTag = cms.InputTag('genParticles'),
-    beamSpotTag = cms.InputTag('simBeamSpot', 'BeamSpot'),
-    prefix = cms.string('genParts@'),
+ntupleGenMET = cms.EDProducer('NtupleGenMET',
+    inputTag = cms.InputTag('genMetTrue'),
+    prefix = cms.string('genMET@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
+
+from L1TMuonSimulations.NtupleTools.simBeamSpot_cfi import simBeamSpot
+
+ntupleBeamSpot = cms.EDProducer('NtupleBeamSpot',
+    inputTag = cms.InputTag('simBeamSpot', 'BeamSpot'),
+    prefix = cms.string('beamSpot@'),
     suffix = cms.string(''),
     cut = cms.string(''),
     maxN = cms.uint32(999999)
@@ -32,6 +44,7 @@ ntupleGenEventInfo = cms.EDProducer('NtupleGenEventInfo',
     suffix = cms.string(''),
 )
 
-#ntupleGen = cms.Sequence(ntupleGenParticles * ntupleGenEventInfo)
-ntupleGen = cms.Sequence(ntupleGenParticles * (simBeamSpot * ntupleGenParticlesToMuon) * ntupleGenEventInfo)
+#ntupleGen = cms.Sequence(ntupleGenEventInfo * ntupleGenParticles)
+#ntupleGen = cms.Sequence(ntupleGenEventInfo * ntupleGenParticles * (simBeamSpot * ntupleBeamSpot))
+ntupleGen = cms.Sequence(ntupleGenEventInfo * ntupleGenParticles * ntupleGenJets * ntupleGenMET * (simBeamSpot * ntupleBeamSpot))
 
