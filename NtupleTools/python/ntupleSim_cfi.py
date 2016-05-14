@@ -16,4 +16,21 @@ ntupleSimVertices = cms.EDProducer('NtupleSimVertices',
     maxN = cms.uint32(999999)
 )
 
-ntupleSim = cms.Sequence(ntupleSimTracks * ntupleSimVertices)
+ntupleSimHits = cms.EDProducer('NtupleSimHits',
+    inputTag = cms.InputTag('g4SimHits'),
+    simHitCollections = cms.PSet(
+        muon = cms.VInputTag(
+            #cms.InputTag('g4SimHits','MuonDTHits'),
+            cms.InputTag('g4SimHits','MuonCSCHits'),
+            #cms.InputTag('g4SimHits','MuonRPCHits'),
+        ),
+    ),
+    prefix = cms.string('simHits@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
+
+#ntupleSim = cms.Sequence(ntupleSimTracks * ntupleSimVertices)
+ntupleSim = cms.Sequence(ntupleSimTracks * ntupleSimVertices * ntupleSimHits)
+

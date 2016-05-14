@@ -5,6 +5,8 @@
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 //#include "L1Trigger/CSCCommonTrigger/interface/CSCPatternLUT.h"
 
+#include "L1TMuonSimulations/MuonTools/interface/ModuleIdFunctor.h"
+
 #include "tmp/PrimitiveConverterTmp.h"
 using namespace TMP;
 
@@ -31,16 +33,10 @@ NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& 
     corrlctToken_ = consumes<CSCCorrelatedLCTDigiCollection>(corrlctTag_);
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "iendcap"         + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "istation"        + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "iring"           + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "ichamber"        + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "ilayer"          + suffix_);
+    //produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
+    produces<std::vector<uint32_t> >          (prefix_ + "ichamber"        + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "isector"         + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "isubsector"      + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "triggerSector"   + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "triggerCscId"    + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "trknmb"          + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "valid"           + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "quality"         + suffix_);
@@ -128,16 +124,10 @@ float getConvGlobalEta(unsigned int isector, int itheta) {
 void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_iendcap         (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_istation        (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_iring           (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_ichamber        (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_ilayer          (new std::vector<uint16_t>());
+    //std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint32_t> >          v_ichamber        (new std::vector<uint32_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_isector         (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_isubsector      (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_triggerSector   (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_triggerCscId    (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_trknmb          (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_valid           (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_quality         (new std::vector<uint16_t>());
@@ -198,6 +188,9 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
             }
         }
 
+        /// Prepare detId -> moduleId
+        ModuleIdFunctor getModuleId;
+
         unsigned n = 0;
 
         // Loop over trigger primitives
@@ -210,6 +203,7 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 const CSCDetId cscDet = it->detId<CSCDetId>();
                 const L1TMuon::TriggerPrimitive::CSCData cscData = it->getCSCData();
 
+                const unsigned int ichamber = getModuleId(it->rawId());
                 const unsigned int isector = (cscDet.endcap()-1)*6 + (cscDet.triggerSector()-1);
                 const unsigned int isubsector = (cscDet.station() != 1) ? 0 : ((cscDet.chamber()%6 > 2) ? 1 : 2);
 
@@ -237,17 +231,12 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 }
 
 
+                // Fill the vectors
                 v_geoId           ->push_back(it->rawId().rawId());
-                v_subsystem       ->push_back(it->subsystem());
-                v_iendcap         ->push_back(cscDet.endcap());
-                v_istation        ->push_back(cscDet.station());
-                v_iring           ->push_back(cscDet.ring());
-                v_ichamber        ->push_back(cscDet.chamber());
-                v_ilayer          ->push_back(cscDet.layer());
+                //v_subsystem       ->push_back(it->subsystem());
+                v_ichamber        ->push_back(ichamber);
                 v_isector         ->push_back(isector);
                 v_isubsector      ->push_back(isubsector);
-                v_triggerSector   ->push_back(cscDet.triggerSector());
-                v_triggerCscId    ->push_back(cscDet.triggerCscId());
                 v_trknmb          ->push_back(cscData.trknmb);
                 v_valid           ->push_back(cscData.valid);
                 v_quality         ->push_back(cscData.quality);
@@ -291,16 +280,10 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
 
     //__________________________________________________________________________
     iEvent.put(v_geoId           , prefix_ + "geoId"           + suffix_);
-    iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
-    iEvent.put(v_iendcap         , prefix_ + "iendcap"         + suffix_);
-    iEvent.put(v_istation        , prefix_ + "istation"        + suffix_);
-    iEvent.put(v_iring           , prefix_ + "iring"           + suffix_);
+    //iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
     iEvent.put(v_ichamber        , prefix_ + "ichamber"        + suffix_);
-    iEvent.put(v_ilayer          , prefix_ + "ilayer"          + suffix_);
     iEvent.put(v_isector         , prefix_ + "isector"         + suffix_);
     iEvent.put(v_isubsector      , prefix_ + "isubsector"      + suffix_);
-    iEvent.put(v_triggerSector   , prefix_ + "triggerSector"   + suffix_);
-    iEvent.put(v_triggerCscId    , prefix_ + "triggerCscId"    + suffix_);
     iEvent.put(v_trknmb          , prefix_ + "trknmb"          + suffix_);
     iEvent.put(v_valid           , prefix_ + "valid"           + suffix_);
     iEvent.put(v_quality         , prefix_ + "quality"         + suffix_);
