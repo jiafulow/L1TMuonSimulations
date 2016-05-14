@@ -79,3 +79,9 @@ process = cust_all(process)
 
 # End of customisation functions
 
+
+# Configure framework report and summary
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+#process.MessageLogger.cerr.INFO.limit = 1000000
+

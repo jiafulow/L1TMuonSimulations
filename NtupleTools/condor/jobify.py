@@ -186,11 +186,13 @@ echo ">>> arguments: $@"
 MACHINE={MACHINE}
 echo ">>> MACHINE=$MACHINE"
 
-if [ $MACHINE == "ufl.edu" ] && [ ! -z $TMPDIR ]; then
+if [ $MACHINE == "ufl.edu" ] && [ ! -z $OSG_WN_TMP ]; then
     REMOTE_INITIAL_DIR=$(pwd)
-    cp -pr * $TMPDIR
-    cd $TMPDIR
-    echo "*** On ufl.edu machine, cd from $REMOTE_INITIAL_DIR to $TMPDIR"
+    if [ $REMOTE_INITIAL_DIR != $OSG_WN_TMP ]; then
+        cp -pr * $OSG_WN_TMP
+        cd $OSG_WN_TMP
+    fi
+    echo "*** On ufl.edu machine, cd from $REMOTE_INITIAL_DIR to $OSG_WN_TMP"
 fi
 
 RUNTIME_AREA=`pwd`
@@ -237,9 +239,9 @@ SOFTWARE_DIR=`pwd`
 echo ">>> SOFTWARE_DIR=$SOFTWARE_DIR"
 
 # Download tarball
-lcg-cp -v -b -D srmv2 --connect-timeout 180 "{TARBALL2}" ../{TARBALL}
+lcg-cp -v -b -D srmv2 --connect-timeout 180 "{TARBALL2}" "../{TARBALL}" >& /dev/null
 EXIT_STATUS=$?
-if [ $EXIT_STATUS -ne 0 ]; then echo "lcg-cp tarball exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
+if [ $EXIT_STATUS -ne 0 ]; then echo "transfer tarball exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
 # Extract tarball
 tar xzf ../{TARBALL}
@@ -303,9 +305,9 @@ ls -Al $RUNTIME_AREA
 
 # Transfer output file
 ROOTFILE=`ls *_*.root`
-lcg-cp -v -b -D srmv2 --connect-timeout 180 "$ROOTFILE" "{STORAGE}/$ROOTFILE"
+lcg-cp -v -b -D srmv2 --connect-timeout 180 "$ROOTFILE" "{STORAGE}/$ROOTFILE" >& /dev/null
 EXIT_STATUS=$?
-if [ $EXIT_STATUS -ne 0 ]; then echo "lcg-cp rootfile exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
+if [ $EXIT_STATUS -ne 0 ]; then echo "transfer output exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
 # Done
 rm input.txt modify_source_file.py PSet.* *.tgz *.root
@@ -326,7 +328,7 @@ echo "Job finished on host `hostname` on `date`"
 
         print "[INFO   ] Uploading tarball ..."
         commands = \
-'''lcg-cp -v -b -D srmv2 --connect-timeout 180 {TARBALL} {TARBALL2} >& /dev/null
+'''lcg-cp -v -b -D srmv2 --connect-timeout 180 "{TARBALL}" "{TARBALL2}" >& /dev/null
 '''.format(**self.config)
         self.execute_commands(commands)
         return
