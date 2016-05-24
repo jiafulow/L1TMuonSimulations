@@ -1,5 +1,17 @@
 <use name="DataFormats/DetId"/>
 <use name="DataFormats/MuonDetId"/>
+<use name="Geometry/DTGeometry"/>
+<use name="Geometry/RPCGeometry"/>
+<use name="Geometry/CSCGeometry"/>
+<use name="L1Trigger/DTTrackFinder"/>
+<use name="L1Trigger/DTUtilities"/>
+<use name="L1Trigger/CSCCommonTrigger"/>
+<use name="MagneticField/Engine"/>
+<use name="MagneticField/Records"/>
+<use name="TrackingTools/PatternTools"/>
+<use name="TrackingTools/Records"/>
+<use name="RecoMuon/DetLayers"/>
+<use name="RecoMuon/Records"/>
 
 <export>
   <lib name="1"/>

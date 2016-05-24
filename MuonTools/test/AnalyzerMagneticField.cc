@@ -53,7 +53,7 @@ class AnalyzerMagneticField : public edm::EDAnalyzer {
     TTree * ttree_;
     TH2F * h2_bz_;
     TH2F * h2_br_;
-    MyField * myfield_;
+    std::unique_ptr<MyField> myfield_;
 
     /// Configurations
     std::string outname_;
@@ -64,12 +64,10 @@ AnalyzerMagneticField::AnalyzerMagneticField(const edm::ParameterSet& iConfig)
 : outname_(iConfig.getParameter<std::string>("out") ),
   verbose_(iConfig.getParameter<int>("verbosity") ) {
 
-    myfield_ = new MyField();
+    myfield_.reset(new MyField());
 }
 
-AnalyzerMagneticField::~AnalyzerMagneticField() {
-    delete myfield_;
-}
+AnalyzerMagneticField::~AnalyzerMagneticField() {}
 
 void AnalyzerMagneticField::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
     /// Magnetic field setup

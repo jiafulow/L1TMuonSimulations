@@ -2,12 +2,6 @@
 </export>
 
 <library file="*.cc" name="L1TMuonSimulationsMuonTools_tests">
-  <!--use name="Geometry/DTGeometry"/-->
-  <!--use name="Geometry/RPCGeometry"/-->
-  <!--use name="Geometry/CSCGeometry"/-->
-  <!--use name="Geometry/Records"/-->
-  <use name="MagneticField/Records"/>
-  <use name="MagneticField/Engine"/>
   <use name="L1TMuonSimulations/MuonTools"/>
   <use name="root"/>
   <flags EDM_PLUGIN="1"/>
