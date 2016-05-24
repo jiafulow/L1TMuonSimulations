@@ -27,8 +27,8 @@ def drawer_project(tree, histos, options):
         if (ievt == options.nentries):  break
         if (ievt % 1000 == 0):  print "Processing event: %i" % ievt
 
-        hname = "h"
-        histos[hname].Fill(1)
+        #hname = "h"
+        #histos[hname].Fill(1)
 
     #tree.SetBranchStatus("*", 1)
     return
