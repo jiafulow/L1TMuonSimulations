@@ -10,7 +10,7 @@ NtupleRPCTriggerPrimitives::NtupleRPCTriggerPrimitives(const edm::ParameterSet& 
   selector_(iConfig.existsAs<std::string>("cut") ? iConfig.getParameter<std::string>("cut") : "", true),
   maxN_    (iConfig.getParameter<unsigned>("maxN")) {
 
-    theGeometryTranslator_.reset(new L1TMuon::GeometryTranslator());
+    theGeometryTranslator_.reset(new L1TMuon::GeometryTranslator2());
 
     token_ = consumes<RPCDigiCollection>(inputTag_);
 

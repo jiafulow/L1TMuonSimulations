@@ -24,7 +24,8 @@
 
 #include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitive.h"    // why deprecate?
 #include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitiveFwd.h" // why deprecate?
-#include "L1Trigger/L1TMuon/interface/deprecate/GeometryTranslator.h"      // why deprecate?
+//#include "L1Trigger/L1TMuon/interface/deprecate/GeometryTranslator.h"      // why deprecate?
+#include "L1TMuonSimulations/MuonTools/interface/GeometryTranslator2.h"
 
 
 class NtupleCSCTriggerPrimitives : public edm::EDProducer {
@@ -43,7 +44,7 @@ class NtupleCSCTriggerPrimitives : public edm::EDProducer {
     // Event setup
     //const CSCGeometry * theCSCGeometry_;
     //const MagneticField * theMagneticField_;
-    std::unique_ptr<L1TMuon::GeometryTranslator> theGeometryTranslator_;
+    std::unique_ptr<L1TMuon::GeometryTranslator2> theGeometryTranslator_;
 
     //const edm::InputTag wireTag_;
     //const edm::InputTag stripTag_;

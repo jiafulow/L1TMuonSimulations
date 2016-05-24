@@ -10,7 +10,8 @@
 
 #include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitive.h"    // why deprecate?
 #include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitiveFwd.h" // why deprecate?
-#include "L1Trigger/L1TMuon/interface/deprecate/GeometryTranslator.h"      // why deprecate?
+//#include "L1Trigger/L1TMuon/interface/deprecate/GeometryTranslator.h"      // why deprecate?
+#include "L1TMuonSimulations/MuonTools/interface/GeometryTranslator2.h"
 
 
 class NtupleDTTriggerPrimitives : public edm::EDProducer {
@@ -27,7 +28,7 @@ class NtupleDTTriggerPrimitives : public edm::EDProducer {
     //virtual void endRun(const edm::Run&, const edm::EventSetup&);
 
     // Event setup
-    std::unique_ptr<L1TMuon::GeometryTranslator> theGeometryTranslator_;
+    std::unique_ptr<L1TMuon::GeometryTranslator2> theGeometryTranslator_;
 
     const edm::InputTag chambPhTag_;
     const edm::InputTag chambThTag_;

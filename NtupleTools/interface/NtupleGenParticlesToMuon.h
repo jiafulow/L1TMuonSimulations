@@ -7,11 +7,11 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
-#include "MagneticField/Engine/interface/MagneticField.h"
-#include "TrackingTools/GeomPropagators/interface/Propagator.h"
 #include "RecoMuon/DetLayers/interface/MuonDetLayerGeometry.h"
 #include "DataFormats/GeometrySurface/interface/BoundCylinder.h"
 #include "DataFormats/GeometrySurface/interface/BoundDisk.h"
+
+#include "L1TMuonSimulations/MuonTools/interface/GeometryTraverser.h"
 
 
 class NtupleGenParticlesToMuon : public edm::EDProducer {
@@ -28,9 +28,7 @@ class NtupleGenParticlesToMuon : public edm::EDProducer {
     //virtual void endRun(const edm::Run&, const edm::EventSetup&);
 
     // Event setup
-    const MagneticField * theMagneticField_;
-    const Propagator * thePropagator_;
-    const MuonDetLayerGeometry * theMuonGeometry_;
+    std::unique_ptr<GeometryTraverser> theGeometryTraverser_;
     std::vector<const BoundCylinder *> theDTLayers_;
     std::vector<const BoundDisk *> theForwardCSCLayers_;
     std::vector<const BoundDisk *> theBackwardCSCLayers_;

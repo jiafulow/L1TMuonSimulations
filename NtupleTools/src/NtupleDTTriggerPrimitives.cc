@@ -11,7 +11,7 @@ NtupleDTTriggerPrimitives::NtupleDTTriggerPrimitives(const edm::ParameterSet& iC
   selector_(iConfig.existsAs<std::string>("cut") ? iConfig.getParameter<std::string>("cut") : "", true),
   maxN_    (iConfig.getParameter<unsigned>("maxN")) {
 
-    theGeometryTranslator_.reset(new L1TMuon::GeometryTranslator());
+    theGeometryTranslator_.reset(new L1TMuon::GeometryTranslator2());
 
     chambPhToken_ = consumes<L1MuDTChambPhContainer>(chambPhTag_);
     chambThToken_ = consumes<L1MuDTChambThContainer>(chambThTag_);

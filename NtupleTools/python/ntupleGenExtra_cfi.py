@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 from L1TMuonSimulations.NtupleTools.simBeamSpot_cfi import simBeamSpot
-from L1TMuonSimulations.NtupleTools.propagator_cfi import SteppingHelixPropagatorAlong, MuonDetLayerGeometryESProducer
+from L1TMuonSimulations.NtupleTools.propagator_cfi import SteppingHelixPropagatorAlong
 
 ntupleGenParticlesToMuon = cms.EDProducer('NtupleGenParticlesToMuon',
     inputTag = cms.InputTag('genParticles'),

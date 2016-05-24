@@ -48,6 +48,8 @@ NtupleGenParticlesToMuon::NtupleGenParticlesToMuon(const edm::ParameterSet& iCon
     token_ = consumes<reco::GenParticleCollection>(inputTag_);
     beamSpotToken_ = consumes<reco::BeamSpot>(beamSpotTag_);
 
+    theGeometryTraverser_.reset(new GeometryTraverser());
+
     produces<std::vector<float> >               (prefix_ + "invPt"    + suffix_);
     produces<std::vector<float> >               (prefix_ + "cotTheta" + suffix_);
     produces<std::vector<float> >               (prefix_ + "d0"       + suffix_);
@@ -66,47 +68,25 @@ NtupleGenParticlesToMuon::NtupleGenParticlesToMuon(const edm::ParameterSet& iCon
 NtupleGenParticlesToMuon::~NtupleGenParticlesToMuon() {}
 
 void NtupleGenParticlesToMuon::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
-    /// Magnetic field setup
-    edm::ESHandle<MagneticField> magneticFieldHandle;
-    iSetup.get<IdealMagneticFieldRecord>().get(magneticFieldHandle);
-    if (!magneticFieldHandle.isValid()) {
-        edm::LogWarning("NtupleGenParticlesToMuon") << "Unable to get IdealMagneticFieldRecord!";
-    } else {
-        theMagneticField_ = magneticFieldHandle.product();
-    }
+    theGeometryTraverser_->checkAndUpdateGeometry(iSetup);
 
-    // Propagator setup
-    edm::ESHandle<Propagator> propagatorHandle;
-    iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagatorHandle);
-    if (!propagatorHandle.isValid()) {
-        edm::LogWarning("NtupleGenParticlesToMuon") << "Unable to get SteppingHelixPropagatorAlong!";
-    } else {
-        thePropagator_ = propagatorHandle.product();
-    }
-
-    // Muon geometry setup
-    edm::ESHandle<MuonDetLayerGeometry> muonGeometryHandle;
-    iSetup.get<MuonRecoGeometryRecord>().get(muonGeometryHandle);
-    if (!muonGeometryHandle.isValid()) {
-        edm::LogWarning("NtupleGenParticlesToMuon") << "Unable to get MuonRecoGeometryRecord!";
-    } else {
-        theMuonGeometry_ = muonGeometryHandle.product();
-
-        const std::vector<const DetLayer*>& dtLayers = theMuonGeometry_->allDTLayers();
+    // Muon geometry
+    {
+        const std::vector<const DetLayer*>& dtLayers = theGeometryTraverser_->geometry()->allDTLayers();
         for (unsigned i=0; i<dtLayers.size(); i++) {
             const BoundCylinder * surface = dynamic_cast<const BoundCylinder *>(&dtLayers.at(i)->surface());
             theDTLayers_.push_back(surface);
             //std::cout << "DT " << i << " radius: " << surface->radius() << " half length: " << surface->bounds().length()/2.0 << std::endl;
         }
 
-        const std::vector<const DetLayer*>& forwardCSCLayers = theMuonGeometry_->forwardCSCLayers();  // positive
+        const std::vector<const DetLayer*>& forwardCSCLayers = theGeometryTraverser_->geometry()->forwardCSCLayers();  // positive
         for (unsigned i=0; i<forwardCSCLayers.size(); i++) {
             const BoundDisk * surface = dynamic_cast<const BoundDisk *>(&forwardCSCLayers.at(i)->surface());
             theForwardCSCLayers_.push_back(surface);
             //std::cout << "Forward CSC " << i << " innerRadius: " << surface->innerRadius() << " outerRadius: " << surface->outerRadius() << " z: " << surface->position().z() << std::endl;
         }
 
-        const std::vector<const DetLayer*>& backwardCSCLayers = theMuonGeometry_->backwardCSCLayers();  // negative
+        const std::vector<const DetLayer*>& backwardCSCLayers = theGeometryTraverser_->geometry()->backwardCSCLayers();  // negative
         for (unsigned i=0; i<backwardCSCLayers.size(); i++) {
             const BoundDisk * surface = dynamic_cast<const BoundDisk *>(&backwardCSCLayers.at(i)->surface());
             theBackwardCSCLayers_.push_back(surface);
@@ -168,7 +148,7 @@ void NtupleGenParticlesToMuon::produce(edm::Event& iEvent, const edm::EventSetup
                 const GlobalPoint vertex(it->vx(), it->vy(), it->vz());
                 const GlobalVector momentum(it->px(), it->py(), it->pz());
                 const TrackCharge charge(it->charge());
-                FreeTrajectoryState ftsAtProduction(vertex, momentum, charge, theMagneticField_);
+                FreeTrajectoryState ftsAtProduction(vertex, momentum, charge, theGeometryTraverser_->magfield());
                 //std::cout << "part " << it - parts->begin() << " pt " << it->pt() << " eta: " << it->eta() << " phi: " << it->phi() << std::endl;
 
                 // Point of closest approach
@@ -187,72 +167,25 @@ void NtupleGenParticlesToMuon::produce(edm::Event& iEvent, const edm::EventSetup
                 }
 
                 // Propagator
-                // see MuonAnalysis/MuonAssociators/src/PropagateToMuon.cc
-                const Propagator * propagatorBarrel = &*thePropagator_;
-                const Propagator * propagatorEndcap = &*thePropagator_;
                 const std::vector<const BoundCylinder *>& layersBarrel = theDTLayers_;
                 const std::vector<const BoundDisk *>& layersEndcap = (it->eta() > 0) ? theForwardCSCLayers_ : theBackwardCSCLayers_;
 
-                TrajectoryStateOnSurface tsosBarrel;
-                bool isValidBarrel = true;
-                std::vector<GlobalPoint> extrapolatedBarrel;
-
+                std::vector<double> vec_r;
                 for (unsigned i=0; i<layersBarrel.size(); i++) {
-                    if (i == 0) {
-                        tsosBarrel = propagatorBarrel->propagate(ftsAtProduction, *layersBarrel.at(i));
-                    } else if (isValidBarrel) {  // if the previous tsos is valid
-                        tsosBarrel = propagatorBarrel->propagate(tsosBarrel, *layersBarrel.at(i));
-                    }
-
-                    isValidBarrel = tsosBarrel.isValid() &&
-                       fabs(tsosBarrel.globalPosition().z()) <= layersBarrel.at(i)->bounds().length()/2.0;
-                    if (isValidBarrel) {
-                        extrapolatedBarrel.push_back(tsosBarrel.globalPosition());
-                    } else {
-                        extrapolatedBarrel.push_back(GlobalPoint(0., 0., 0.));
-                    }
-                    //std::cout << "part " << it - parts->begin() << " barrel " << i << " isValidBarrel: " << isValidBarrel << " z: " << extrapolatedBarrel.back().z() << std::endl;
+                    vec_r.push_back(layersBarrel.at(i)->radius());
                 }
+                const std::vector<GlobalPoint>& propagatedBarrel = theGeometryTraverser_->propagateBarrels(vec_r);
 
-                TrajectoryStateOnSurface tsosEndcap, tsosEndcap_1;
-                bool isValidEndcap = true, isValidEndcap_1 = true;
-                std::vector<GlobalPoint> extrapolatedEndcap;
-
+                std::vector<double> vec_z;
                 for (unsigned i=0; i<layersEndcap.size(); i++) {
-                    if (i == 0) {
-                        tsosEndcap = propagatorEndcap->propagate(ftsAtProduction, *layersEndcap.at(i));
-                    } else if (i == 1) {
-                        tsosEndcap_1 = tsosEndcap;
-                        isValidEndcap_1 = isValidEndcap;
-                        if (isValidEndcap) {  // if the previous tsos is valid
-                            tsosEndcap = propagatorEndcap->propagate(tsosEndcap, *layersEndcap.at(i));
-                        } else {
-                            tsosEndcap = propagatorEndcap->propagate(ftsAtProduction, *layersEndcap.at(i));
-                        }
-                    } else if (isValidEndcap) {  // if the previous tsos is valid
-                        tsosEndcap = propagatorEndcap->propagate(tsosEndcap, *layersEndcap.at(i));
-                    }
-
-                    isValidEndcap = tsosEndcap.isValid() &&
-                       tsosEndcap.globalPosition().perp() >= layersEndcap.at(i)->innerRadius() &&
-                       tsosEndcap.globalPosition().perp() <= layersEndcap.at(i)->outerRadius();
-                    if (isValidEndcap) {
-                        extrapolatedEndcap.push_back(tsosEndcap.globalPosition());
-                    } else {
-                        extrapolatedEndcap.push_back(GlobalPoint(0., 0., 0.));
-                    }
-                    //std::cout << "part " << it - parts->begin() << " endcap " << i << " isValidEndcap: " << isValidEndcap << " r: " << extrapolatedEndcap.back().perp() << std::endl;
-
-                    if (i == 1 && !isValidEndcap) {  // if the second tsos is invalid, switch back to the first tsos
-                        tsosEndcap = tsosEndcap_1;
-                        isValidEndcap = isValidEndcap_1;
-                    }
+                    vec_z.push_back(layersEndcap.at(i)->position().z());
                 }
+                const std::vector<GlobalPoint>& propagatedEndcap = theGeometryTraverser_->propagateEndcaps(vec_z);
 
                 // Fill the intermediate vectors
                 std::vector<float> globalPhiMB, globalThetaMB, globalEtaMB, globalRhoMB;
-                for (unsigned i=0; i<extrapolatedBarrel.size(); i++) {
-                    const GlobalPoint& gp = extrapolatedBarrel.at(i);
+                for (unsigned i=0; i<propagatedBarrel.size(); i++) {
+                    const GlobalPoint& gp = propagatedBarrel.at(i);
                     globalPhiMB.push_back(gp.phi());
                     globalThetaMB.push_back(gp.theta());
                     globalEtaMB.push_back(gp.eta());
@@ -260,8 +193,8 @@ void NtupleGenParticlesToMuon::produce(edm::Event& iEvent, const edm::EventSetup
                 }
 
                 std::vector<float> globalPhiME, globalThetaME, globalEtaME, globalRhoME;
-                for (unsigned i=0; i<extrapolatedEndcap.size(); i++) {
-                    const GlobalPoint& gp = extrapolatedEndcap.at(i);
+                for (unsigned i=0; i<propagatedEndcap.size(); i++) {
+                    const GlobalPoint& gp = propagatedEndcap.at(i);
                     globalPhiME.push_back(gp.phi());
                     globalThetaME.push_back(gp.theta());
                     globalEtaME.push_back(gp.eta());
