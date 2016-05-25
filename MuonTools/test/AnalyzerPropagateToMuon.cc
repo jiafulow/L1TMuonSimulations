@@ -94,7 +94,7 @@ void AnalyzerPropagateToMuon::beginRun(const edm::Run& iRun, const edm::EventSet
     // Muon geometry
     {
         std::cout << "DT layers" << std::endl;
-        const std::vector<const DetLayer*>& dtLayers = theGeometryTraverser_->geometry()->allDTLayers();
+        const std::vector<const DetLayer*>& dtLayers = theGeometryTraverser_->muonGeometry()->allDTLayers();
         for (unsigned i=0; i<dtLayers.size(); i++) {
             const BoundCylinder * surface = dynamic_cast<const BoundCylinder *>(&dtLayers.at(i)->surface());
             theDTLayers_.push_back(surface);
@@ -103,7 +103,7 @@ void AnalyzerPropagateToMuon::beginRun(const edm::Run& iRun, const edm::EventSet
         }
 
         std::cout << "Forward CSC layers" << std::endl;
-        const std::vector<const DetLayer*>& forwardCSCLayers = theGeometryTraverser_->geometry()->forwardCSCLayers();  // positive
+        const std::vector<const DetLayer*>& forwardCSCLayers = theGeometryTraverser_->muonGeometry()->forwardCSCLayers();  // positive
         for (unsigned i=0; i<forwardCSCLayers.size(); i++) {
             const BoundDisk * surface = dynamic_cast<const BoundDisk *>(&forwardCSCLayers.at(i)->surface());
             theForwardCSCLayers_.push_back(surface);
@@ -112,7 +112,7 @@ void AnalyzerPropagateToMuon::beginRun(const edm::Run& iRun, const edm::EventSet
         }
 
         std::cout << "Backward CSC layers" << std::endl;
-        const std::vector<const DetLayer*>& backwardCSCLayers = theGeometryTraverser_->geometry()->backwardCSCLayers();  // negative
+        const std::vector<const DetLayer*>& backwardCSCLayers = theGeometryTraverser_->muonGeometry()->backwardCSCLayers();  // negative
         for (unsigned i=0; i<backwardCSCLayers.size(); i++) {
             const BoundDisk * surface = dynamic_cast<const BoundDisk *>(&backwardCSCLayers.at(i)->surface());
             theBackwardCSCLayers_.push_back(surface);
@@ -146,13 +146,13 @@ void AnalyzerPropagateToMuon::beginRun(const edm::Run& iRun, const edm::EventSet
                 // Propagate
                 //std::vector<double> vec_r;
                 //for (unsigned i=2; i<770; i+=2) {
-                //    vec_r.push_back(float(i));
+                //    vec_r.push_back(double(i));
                 //}
                 //const std::vector<GlobalPoint>& propagatedBarrel = theGeometryTraverser_->propagateBarrels(vec_r);
 
                 std::vector<double> vec_z;
                 for (unsigned i=2; i<1100; i+=2) {
-                    vec_z.push_back(float(i));
+                    vec_z.push_back(double(i));
                 }
                 const std::vector<GlobalPoint>& propagatedEndcap = theGeometryTraverser_->propagateEndcaps(vec_z);
 

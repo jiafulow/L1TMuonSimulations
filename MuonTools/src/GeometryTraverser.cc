@@ -50,7 +50,7 @@ GlobalPoint GeometryTraverser::propagateEndcap(double z) const {
 }
 
 std::vector<GlobalPoint> GeometryTraverser::propagateBarrels(const std::vector<double>& vec_r) const {
-    FreeTrajectoryState ftsAtProduction(_vertex, _momentum, _charge, magfield());
+    FreeTrajectoryState ftsAtProduction(_vertex, _momentum, _charge, magneticField());
     const Propagator * propagatorBarrel = &*(_propagator.product());
 
     std::vector<BoundCylinder::CylinderPointer> layersBarrelCylinderPointer;
@@ -59,7 +59,7 @@ std::vector<GlobalPoint> GeometryTraverser::propagateBarrels(const std::vector<d
         double radius = vec_r.at(i);
         BoundCylinder::PositionType pos;
         BoundCylinder::RotationType rot;
-        SimpleCylinderBounds bounds(radius-29.1677, radius+29.1677, -659.1, 659.1);
+        SimpleCylinderBounds bounds(radius-29.1677, radius+29.1677, -659.1, 659.1);  // numbers from MB2
         BoundCylinder::CylinderPointer cylinder(new Cylinder(pos, rot, bounds));
         layersBarrelCylinderPointer.push_back(cylinder);
         //const BoundCylinder * surface = new BoundCylinder(pos, rot, bounds);
@@ -101,7 +101,7 @@ std::vector<GlobalPoint> GeometryTraverser::propagateEndcaps(const std::vector<d
         double zPos = vec_z.at(i);
         BoundDisk::PositionType pos(0.,0.,zPos);
         BoundDisk::RotationType rot;
-        SimpleDiskBounds bounds(0., 699.773, -21.8752, 21.8753);
+        SimpleDiskBounds bounds(0., 699.773, -21.8752, 21.8753);  // numbers from ME2
         BoundDisk::DiskPointer disk(new Disk(pos, rot, bounds));
         layersEndcapDiskPointer.push_back(disk);
         //const BoundDisk * surface = new BoundDisk(pos, rot, bounds);

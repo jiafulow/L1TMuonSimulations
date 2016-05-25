@@ -38,11 +38,11 @@ class GeometryTraverser {
 
     void checkAndUpdateGeometry(const edm::EventSetup&);
 
-    const MagneticField* magfield() const { return _magfield.product(); }
+    const MagneticField* magneticField() const { return _magfield.product(); }
 
     const Propagator* propagator() const { return _propagator.product(); }
 
-    const MuonDetLayerGeometry* geometry() const { return _muongeom.product(); }
+    const MuonDetLayerGeometry* muonGeometry() const { return _muongeom.product(); }
 
   private:
     // pointers to the current geometry records

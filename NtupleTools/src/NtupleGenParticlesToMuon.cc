@@ -72,21 +72,21 @@ void NtupleGenParticlesToMuon::beginRun(const edm::Run& iRun, const edm::EventSe
 
     // Muon geometry
     {
-        const std::vector<const DetLayer*>& dtLayers = theGeometryTraverser_->geometry()->allDTLayers();
+        const std::vector<const DetLayer*>& dtLayers = theGeometryTraverser_->muonGeometry()->allDTLayers();
         for (unsigned i=0; i<dtLayers.size(); i++) {
             const BoundCylinder * surface = dynamic_cast<const BoundCylinder *>(&dtLayers.at(i)->surface());
             theDTLayers_.push_back(surface);
             //std::cout << "DT " << i << " radius: " << surface->radius() << " half length: " << surface->bounds().length()/2.0 << std::endl;
         }
 
-        const std::vector<const DetLayer*>& forwardCSCLayers = theGeometryTraverser_->geometry()->forwardCSCLayers();  // positive
+        const std::vector<const DetLayer*>& forwardCSCLayers = theGeometryTraverser_->muonGeometry()->forwardCSCLayers();  // positive
         for (unsigned i=0; i<forwardCSCLayers.size(); i++) {
             const BoundDisk * surface = dynamic_cast<const BoundDisk *>(&forwardCSCLayers.at(i)->surface());
             theForwardCSCLayers_.push_back(surface);
             //std::cout << "Forward CSC " << i << " innerRadius: " << surface->innerRadius() << " outerRadius: " << surface->outerRadius() << " z: " << surface->position().z() << std::endl;
         }
 
-        const std::vector<const DetLayer*>& backwardCSCLayers = theGeometryTraverser_->geometry()->backwardCSCLayers();  // negative
+        const std::vector<const DetLayer*>& backwardCSCLayers = theGeometryTraverser_->muonGeometry()->backwardCSCLayers();  // negative
         for (unsigned i=0; i<backwardCSCLayers.size(); i++) {
             const BoundDisk * surface = dynamic_cast<const BoundDisk *>(&backwardCSCLayers.at(i)->surface());
             theBackwardCSCLayers_.push_back(surface);
@@ -148,7 +148,7 @@ void NtupleGenParticlesToMuon::produce(edm::Event& iEvent, const edm::EventSetup
                 const GlobalPoint vertex(it->vx(), it->vy(), it->vz());
                 const GlobalVector momentum(it->px(), it->py(), it->pz());
                 const TrackCharge charge(it->charge());
-                FreeTrajectoryState ftsAtProduction(vertex, momentum, charge, theGeometryTraverser_->magfield());
+                FreeTrajectoryState ftsAtProduction(vertex, momentum, charge, theGeometryTraverser_->magneticField());
                 //std::cout << "part " << it - parts->begin() << " pt " << it->pt() << " eta: " << it->eta() << " phi: " << it->phi() << std::endl;
 
                 // Point of closest approach
@@ -169,6 +169,7 @@ void NtupleGenParticlesToMuon::produce(edm::Event& iEvent, const edm::EventSetup
                 // Propagator
                 const std::vector<const BoundCylinder *>& layersBarrel = theDTLayers_;
                 const std::vector<const BoundDisk *>& layersEndcap = (it->eta() > 0) ? theForwardCSCLayers_ : theBackwardCSCLayers_;
+                theGeometryTraverser_->setFTS(vertex, momentum, charge);
 
                 std::vector<double> vec_r;
                 for (unsigned i=0; i<layersBarrel.size(); i++) {
