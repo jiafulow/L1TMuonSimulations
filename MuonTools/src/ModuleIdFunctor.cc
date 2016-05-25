@@ -11,7 +11,7 @@ uint32_t ModuleIdFunctor::operator() (const DetId& id) const {
     if (id.det() == DetId::Muon) {
         if (id.subdetId() == (int) MuonSubdetId::CSC) {
             CSCDetId cscDet(id);
-            layer  = cscDet.endcap() * 10 + cscDet.station();
+            layer  = (cscDet.endcap()-1) * 10 + cscDet.station();
             ladder = cscDet.ring();
             module = cscDet.chamber();
         }
