@@ -19,6 +19,19 @@
 using namespace edm;
 using namespace std;
 
+namespace {
+    double get_phi0_from_phiStar(double phiStar, double qOverPt, double rStar) {
+        double mPtFactor = 0.3*3.8*1e-2/2.0;
+        double dphi = - asin(mPtFactor * rStar * qOverPt);
+        return phiStar - dphi;
+    }
+    double get_theta0_from_thetaStar(double thetaStar, double z0, double rStar) {
+        double cotStar = 1.0/tan(thetaStar);
+        double dcot = rStar > 0. ? z0/rStar : 0.;
+        return atan(1.0/(cotStar - dcot));
+    }
+}
+
 FlatRandomPtGunProducer2::FlatRandomPtGunProducer2(const ParameterSet& pset) :
    BaseFlatGunProducer2(pset)
 {
@@ -28,12 +41,17 @@ FlatRandomPtGunProducer2::FlatRandomPtGunProducer2(const ParameterSet& pset) :
   ParameterSet pgun_params =
     pset.getParameter<ParameterSet>("PGunParameters") ;
 
-  fMinPt = pgun_params.getParameter<double>("MinPt");
-  fMaxPt = pgun_params.getParameter<double>("MaxPt");
-  fMinOneOverPt = fMaxPt != 0.0 ? 1.0/fMaxPt : 1e-9;
-  fMaxOneOverPt = fMinPt != 0.0 ? 1.0/fMinPt : 1e-9;
-  fRandomCharge = pgun_params.exists("RandomCharge")? pgun_params.getParameter<bool>("RandomCharge")     : false;
-  fPtSpectrum   = pgun_params.exists("PtSpectrum")  ? pgun_params.getParameter<std::string>("PtSpectrum"): "flatPt";
+  fMinPt         = pgun_params.getParameter<double>("MinPt");
+  fMaxPt         = pgun_params.getParameter<double>("MaxPt");
+  fMinOneOverPt  = fMaxPt != 0.0 ? 1.0/fMaxPt : 1e-9;
+  fMaxOneOverPt  = fMinPt != 0.0 ? 1.0/fMinPt : 1e-9;
+  fXFlatSpread   = pgun_params.exists("XFlatSpread")   ? pgun_params.getParameter<double>("XFlatSpread")     : 0.;
+  fYFlatSpread   = pgun_params.exists("YFlatSpread")   ? pgun_params.getParameter<double>("YFlatSpread")     : 0.;
+  fZFlatSpread   = pgun_params.exists("ZFlatSpread")   ? pgun_params.getParameter<double>("ZFlatSpread")     : 0.;
+  fRStarForPhi   = pgun_params.exists("RStarForPhi")   ? pgun_params.getParameter<double>("RStarForPhi")     : 0.;
+  fRStarForTheta = pgun_params.exists("RStarForTheta") ? pgun_params.getParameter<double>("RStarForTheta")   : 0.;
+  fRandomCharge  = pgun_params.exists("RandomCharge")  ? pgun_params.getParameter<bool>("RandomCharge")      : false;
+  fPtSpectrum    = pgun_params.exists("PtSpectrum")    ? pgun_params.getParameter<std::string>("PtSpectrum") : "flatPt";
 
   produces<HepMCProduct>("unsmeared");
   produces<GenEventInfoProduct>();
@@ -66,7 +84,11 @@ void FlatRandomPtGunProducer2::produce(Event &e, const EventSetup& es)
   //
   // 1st, primary vertex
   //
-  HepMC::GenVertex* Vtx = new HepMC::GenVertex(HepMC::FourVector(0.,0.,0.));
+  //HepMC::GenVertex* Vtx = new HepMC::GenVertex(HepMC::FourVector(0.,0.,0.));
+  double vx = fXFlatSpread > 0. ? CLHEP::RandFlat::shoot(engine, -fXFlatSpread, fXFlatSpread) : 0.;
+  double vy = fYFlatSpread > 0. ? CLHEP::RandFlat::shoot(engine, -fYFlatSpread, fYFlatSpread) : 0.;
+  double vz = fZFlatSpread > 0. ? CLHEP::RandFlat::shoot(engine, -fZFlatSpread, fZFlatSpread) : 0.;
+  HepMC::GenVertex* Vtx = new HepMC::GenVertex(HepMC::FourVector(vx,vy,vz));
 
   // loop over particles
   //
@@ -77,11 +99,11 @@ void FlatRandomPtGunProducer2::produce(Event &e, const EventSetup& es)
     double pt     = 0.0;
     if (fPtSpectrum == "flatPt")
     {
-      pt = fMinPt + xx * (fMaxPt - fMinPt);
+      pt     = fMinPt + xx * (fMaxPt - fMinPt);
     }
     else if (fPtSpectrum == "flatOneOverPt")
     {
-      pt = fMinOneOverPt + xx * (fMaxOneOverPt - fMinOneOverPt);
+      pt     = fMinOneOverPt + xx * (fMaxOneOverPt - fMinOneOverPt);
       if (pt != 0.0)  pt = 1.0/pt;
     }
     else if (fPtSpectrum == "flatOneOverPtCMS")
@@ -91,15 +113,17 @@ void FlatRandomPtGunProducer2::produce(Event &e, const EventSetup& es)
       if (pt != 0.0)  pt = 1.0/pt;
     }
 
-    double eta    = CLHEP::RandFlat::shoot(engine, fMinEta, fMaxEta) ;
-    double phi    = CLHEP::RandFlat::shoot(engine, fMinPhi, fMaxPhi) ;
     int PartID = fPartIDs[ip] ;
     if (fRandomCharge && (CLHEP::RandFlat::shoot(engine, 0.0, 1.0) < 0.5))
       PartID = - PartID;
     const HepPDT::ParticleData*
-      PData = fPDGTable->particle(HepPDT::ParticleID(abs(PartID))) ;
+      PData = fPDGTable->particle(HepPDT::ParticleID(PartID)) ;
     double mass   = PData->mass().value() ;
+    double phi    = CLHEP::RandFlat::shoot(engine, fMinPhi, fMaxPhi) ;
+           phi    = get_phi0_from_phiStar(phi, PData->charge()/pt, fRStarForPhi);
+    double eta    = CLHEP::RandFlat::shoot(engine, fMinEta, fMaxEta) ;
     double theta  = 2.*atan(exp(-eta)) ;
+           theta  = get_theta0_from_thetaStar(theta, vz, fRStarForTheta);
     double mom    = pt/sin(theta) ;
     double px     = pt*cos(phi) ;
     double py     = pt*sin(phi) ;
@@ -107,7 +131,7 @@ void FlatRandomPtGunProducer2::produce(Event &e, const EventSetup& es)
     double energy2= mom*mom + mass*mass ;
     double energy = sqrt(energy2) ;
     HepMC::FourVector p(px,py,pz,energy) ;
-    HepMC::GenParticle* Part = 
+    HepMC::GenParticle* Part =
       new HepMC::GenParticle(p,PartID,1);
     Part->suggest_barcode( barcode ) ;
     barcode++ ;
@@ -121,7 +145,7 @@ void FlatRandomPtGunProducer2::produce(Event &e, const EventSetup& es)
       {
         APartID = PartID ;
       }
-      HepMC::GenParticle* APart = 
+      HepMC::GenParticle* APart =
         new HepMC::GenParticle(ap,APartID,1);
       APart->suggest_barcode( barcode ) ;
       barcode++ ;

@@ -29,6 +29,11 @@ namespace edm
     double            fMaxPt   ;
     double            fMinOneOverPt   ;
     double            fMaxOneOverPt   ;
+    double            fXFlatSpread    ;
+    double            fYFlatSpread    ;
+    double            fZFlatSpread    ;
+    double            fRStarForPhi    ;
+    double            fRStarForTheta  ;
     bool              fRandomCharge   ;
     std::string       fPtSpectrum     ;
 
