@@ -1,0 +1,10 @@
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_1.root
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_2.root
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_3.root
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_4.root
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_5.root
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_6.root
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_7.root
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_8.root
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_9.root
+root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/7_6_1/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160410_151120/0000//SingleMuon_PositiveEndCap_10.root
