@@ -17,7 +17,7 @@ NtupleDTTriggerPrimitives::NtupleDTTriggerPrimitives(const edm::ParameterSet& iC
     chambThToken_ = consumes<L1MuDTChambThContainer>(chambThTag_);
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
+    //produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
     produces<std::vector<float> >             (prefix_ + "globalPhi"       + suffix_);
     produces<std::vector<float> >             (prefix_ + "globalTheta"     + suffix_);
     produces<std::vector<float> >             (prefix_ + "globalEta"       + suffix_);
@@ -37,7 +37,7 @@ void NtupleDTTriggerPrimitives::beginRun(const edm::Run& iRun, const edm::EventS
 void NtupleDTTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
+    //std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<float> >             v_globalPhi       (new std::vector<float>());
     std::auto_ptr<std::vector<float> >             v_globalTheta     (new std::vector<float>());
     std::auto_ptr<std::vector<float> >             v_globalEta       (new std::vector<float>());
@@ -94,7 +94,7 @@ void NtupleDTTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetu
                 // FIXME
 
                 v_geoId           ->push_back(it->rawId().rawId());
-                v_subsystem       ->push_back(it->subsystem());
+                //v_subsystem       ->push_back(it->subsystem());
                 v_globalPhi       ->push_back(gp.phi());
                 v_globalTheta     ->push_back(gp.theta());
                 v_globalEta       ->push_back(gp.eta());
@@ -116,7 +116,7 @@ void NtupleDTTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetu
 
     //__________________________________________________________________________
     iEvent.put(v_geoId           , prefix_ + "geoId"           + suffix_);
-    iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
+    //iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
     iEvent.put(v_globalPhi       , prefix_ + "globalPhi"       + suffix_);
     iEvent.put(v_globalTheta     , prefix_ + "globalTheta"     + suffix_);
     iEvent.put(v_globalEta       , prefix_ + "globalEta"       + suffix_);

@@ -15,7 +15,7 @@ NtupleRPCTriggerPrimitives::NtupleRPCTriggerPrimitives(const edm::ParameterSet& 
     token_ = consumes<RPCDigiCollection>(inputTag_);
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
+    //produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
     produces<std::vector<int> >               (prefix_ + "iregion"         + suffix_);
     produces<std::vector<int> >               (prefix_ + "iring"           + suffix_);
     produces<std::vector<int> >               (prefix_ + "istation"        + suffix_);
@@ -45,7 +45,7 @@ void NtupleRPCTriggerPrimitives::beginRun(const edm::Run& iRun, const edm::Event
 void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
+    //std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<int> >               v_iregion         (new std::vector<int>());
     std::auto_ptr<std::vector<int> >               v_iring           (new std::vector<int>());
     std::auto_ptr<std::vector<int> >               v_istation        (new std::vector<int>());
@@ -112,7 +112,7 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 const GlobalPoint& gp = theGeometryTranslator_->getGlobalPoint(*it);
 
                 v_geoId           ->push_back(it->rawId().rawId());
-                v_subsystem       ->push_back(it->subsystem());
+                //v_subsystem       ->push_back(it->subsystem());
                 v_iregion         ->push_back(rpcDet.region());
                 v_iring           ->push_back(rpcDet.ring());
                 v_istation        ->push_back(rpcDet.station());
@@ -144,7 +144,7 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
 
     //__________________________________________________________________________
     iEvent.put(v_geoId           , prefix_ + "geoId"           + suffix_);
-    iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
+    //iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
     iEvent.put(v_iregion         , prefix_ + "iregion"         + suffix_);
     iEvent.put(v_iring           , prefix_ + "iring"           + suffix_);
     iEvent.put(v_istation        , prefix_ + "istation"        + suffix_);
