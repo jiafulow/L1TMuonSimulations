@@ -1,0 +1,5 @@
+<Flags CXXFLAGS="-O3 -Wno-error=unused-but-set-variable -Wno-error=unused-variable"/>
+<use   name="rootrflx"/>
+<export>
+  <lib   name="1"/>
+</export>

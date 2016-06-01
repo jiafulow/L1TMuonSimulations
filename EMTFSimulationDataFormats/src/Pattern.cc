@@ -1,4 +1,4 @@
-#include "L1TMuonSimulations/EMTFSimulation/interface/Pattern.h"
+#include "L1TMuonSimulations/EMTFSimulationDataFormats/interface/Pattern.h"
 #include <iostream>
 #include <iomanip>
 
