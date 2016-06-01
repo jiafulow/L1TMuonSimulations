@@ -1,0 +1,7 @@
+<Flags CXXFLAGS="-O3 -Wno-error=unused-but-set-variable -Wno-error=unused-variable"/>
+<use   name="root"/>
+<use   name="rootcore"/>
+<use   name="rootgraphics"/>
+<export>
+   <lib   name="1"/>
+</export>
