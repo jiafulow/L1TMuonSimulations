@@ -1,0 +1,4 @@
+<bin name="emtf" file="emtf.cc">
+  <use name="L1TMuonSimulations/EMTFSimulation"/>
+  <use name="boost_program_options"/>
+</bin>
