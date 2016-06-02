@@ -1,3 +1,4 @@
+#include "L1TMuonSimulations/EMTFSimulation/interface/StubSelector.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/PatternGenerator.h"
 
 #include "boost/program_options.hpp"
@@ -27,6 +28,7 @@ int main(int argc, char **argv) {
     generic.add_options()
         ("version"              , "Print version")
         ("help,h"               , "Produce help message")
+        ("selectStubs,S"        , "Select one unique stub per layer")
         ("generateBank,B"       , "Generate associative memory pattern bank")
         ;
 
@@ -106,7 +108,8 @@ int main(int argc, char **argv) {
     }
 
     // Exactly one of these options must be selected
-    int vmcount = vm.count("generateBank")       ;
+    int vmcount = vm.count("selectStubs")       +
+                  vm.count("generateBank")      ;
     if (vmcount != 1) {
         std::cerr << "ERROR: Must select exactly one option: '-B'" << std::endl;
         //std::cout << visible << std::endl;
@@ -128,7 +131,15 @@ int main(int argc, char **argv) {
     // _________________________________________________________________________
     // Call the producers
 
-    if (vm.count("generateBank")) {
+    if (vm.count("selectStubs")) {
+        std::cout << "Start stub selection..." << std::endl;
+
+        StubSelector selector(option);
+        selector.init();
+        selector.run();
+        std::cout << "DONE" << std::endl;
+
+    } else if (vm.count("generateBank")) {
         std::cout << "Start pattern bank generation..." << std::endl;
 
         PatternGenerator generator(option);
