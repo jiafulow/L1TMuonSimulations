@@ -55,8 +55,20 @@ int main(int argc, char **argv) {
         ("minVz"        , po::value<float>(&option.minVz)->default_value(-300.), "Specify min vertex z (cm)")
         ("maxVz"        , po::value<float>(&option.maxVz)->default_value( 300.), "Specify max vertex z (cm)")
 
+        // Trigger tower selection
+        ("tower,t"      , po::value<unsigned>(&option.tower)->default_value(27), "Specify the trigger tower")
+
+        // Trigger sector selection
+        ("sector"       , po::value<unsigned>(&option.sector)->default_value(0), "Specify the trigger sector")
+
+        // Superstrip definition
+        ("superstrip,s" , po::value<std::string>(&option.superstrip)->default_value("ss4"), "Specify the superstrip definition (default: ss4)")
+
+        // Track fitting algorithm
+        ("fitter,f"     , po::value<std::string>(&option.fitter)->default_value("PCA4"), "Select track fitter -- PCA4: PCA fitter 4 params; PCA5: PCA fitter 5 params (default: PCA4)")
+
         // Only for bank generation
-        ("minFrequency" , po::value<int>(&option.minFrequency)->default_value(1), "Specify min frequency of a pattern to be stored or read")
+        ("minPopularity" , po::value<int>(&option.minPopularity)->default_value(1), "Specify min popularity of a pattern to be stored or read")
         ("maxCoverage"  , po::value<float>(&option.maxCoverage)->default_value(1.0), "Specify max coverage of patterns to be stored or read")
         ;
 

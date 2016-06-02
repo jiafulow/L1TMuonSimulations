@@ -1,9 +1,12 @@
 #ifndef EMTFSimulation_PatternGenerator_h_
 #define EMTFSimulation_PatternGenerator_h_
 
+#include "L1TMuonSimulations/EMTFSimulationDataFormats/interface/Pattern.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/Helper.h"
-#include "L1TMuonSimulations/EMTFSimulation/interface/Pattern.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/ProgramOption.h"
+
+#include "L1TMuonSimulations/EMTFSimulation/interface/SuperstripArbiter.h"
+
 
 class PatternGenerator {
   public:
@@ -26,13 +29,15 @@ class PatternGenerator {
     int verbose_;
 
     // Pattern bank data
-    std::map<pattern_type, unsigned>                patternBank_map_;
-    std::vector<std::pair<pattern_type, unsigned> > patternBank_pairs_;
+    std::map<pattern_type, pattern_attr>   patternBank_map_;
+    std::vector<pattern_pair>              patternBank_pairs_;
 
     // Bookkeepers
     float coverage_;
     unsigned coverage_count_;
+
+    // Operators
+    std::unique_ptr<SuperstripArbiter> arbiter_;
 };
 
 #endif
-

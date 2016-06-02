@@ -25,7 +25,12 @@ struct ProgramOption {
     float       minVz;
     float       maxVz;
 
-    int         minFrequency;
+    unsigned    tower;
+    unsigned    sector;
+    std::string superstrip;
+    std::string fitter;
+
+    int         minPopularity;
     float       maxCoverage;
 };
 

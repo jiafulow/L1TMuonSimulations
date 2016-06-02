@@ -31,7 +31,12 @@ std::ostream& operator<<(std::ostream& o, const ProgramOption& po) {
       << "  minVz: "        << po.minVz
       << "  maxVz: "        << po.maxVz
 
-      << "  minFrequency: " << po.minFrequency
+      << "  tower: "        << po.tower
+      << "  sector: "       << po.sector
+      << "  superstrip: "   << po.superstrip
+      << "  fitter: "       << po.fitter
+
+      << "  minPopularity: " << po.minPopularity
       << "  maxCoverage: "  << po.maxCoverage
       ;
 

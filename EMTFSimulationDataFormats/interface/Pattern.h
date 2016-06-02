@@ -23,6 +23,8 @@ struct PatternAttribute {
 };
 typedef PatternAttribute pattern_attr;
 
+typedef std::pair<pattern_type, pattern_attr> pattern_pair;
+
 
 // _____________________________________________________________________________
 // Output streams
