@@ -10,18 +10,18 @@ fcol = TColor.GetColor("#a6cee3")  # mu0
 
 mode_vec = [11, 13, 14, 15] # excluded 7
 
-ept_vec = [11, 16, 20]  # trigger pt
-eeta_vec = [0, 1, 2]
-eeta_boundaries = (0.9, 1.2, 2.1, 2.4)
+l1t_pt_vec = [10, 16, 20]  # trigger pt
+l1t_eta_vec = [0, 1, 2, 3]  # 4 trigger eta bins
+l1t_eta_bounds = (1.2, 1.5, 1.8, 2.1, 2.4)
 
 
 # ______________________________________________________________________________
 # Helper
-def get_eeta_bin(eta):
-    if eta < eeta_boundaries[0] or eta >= eeta_boundaries[-1]:
+def get_l1t_eta_bin(eta):
+    if eta < l1t_eta_bounds[0] or eta >= l1t_eta_bounds[-1]:
         return -1
-    for i in xrange(1,len(eeta_boundaries)):
-        if eta < eeta_boundaries[i]:
+    for i in xrange(1,len(l1t_eta_bounds)):
+        if eta < l1t_eta_bounds[i]:
             return i-1
 
 # ______________________________________________________________________________
@@ -34,16 +34,19 @@ def drawer_book(options):
     mybins = list(reversed(mybins))
 
     # Efficiency
-    for eeta in eeta_vec:
-        for ept in ept_vec:
-            hname = "emtf_efficiency_pt_eeta%i_ept%i" % (eeta, ept)
+    for l1eta in l1t_eta_vec:
+        for l1pt in l1t_pt_vec:
+            hname = "emtf_efficiency_pt_l1eta%i_l1pt%i" % (l1eta, l1pt)
             histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
 
     # Resolution (2D)
-    for eeta in eeta_vec:
-        hname = "emtf_resolution_2d_pt_eeta%i" % (eeta)
-        #histos[hname] = TH2F(hname, "; q/p_{T} [GeV]; trigger q/p_{T} [GeV]", 100, -0.5, 0.5, 100, -0.5, 0.5)
-        histos[hname] = TH2F(hname, "; gen q/p_{T} [GeV]; trigger q/p_{T} [GeV]", 100, -0.5, 0.5, 50, 0, 0.5)
+    for l1eta in l1t_eta_vec:
+        hname = "emtf_resolution_2d_pt_l1eta%i" % (l1eta)
+        #histos[hname] = TH2F(hname, "; q/p_{T} [GeV]; L1T q/p_{T} [GeV]", 100, -0.5, 0.5, 100, -0.5, 0.5)
+        histos[hname] = TH2F(hname, "; gen q/p_{T} [1/GeV]; L1T q/p_{T} [1/GeV]", 100, -0.5, 0.5, 50, 0, 0.5)
+
+        hname = "emtf_resolution_2d_dR_l1eta%i" % (l1eta)
+        histos[hname] = TH2F(hname, "; gen q/p_{T} [1/GeV]; L1T #DeltaR @ME2", 100, -0.5, 0.5, 50, 0, 0.3)
 
     # Style
     for hname, h in histos.iteritems():
@@ -80,6 +83,10 @@ def drawer_project(tree, histos, options):
         part_charge = evt.genParts_charge[0]
         part_isector = (part_phi * (180.0/pi) - 15.0) / 60.
 
+        part_globalPhiME2 = evt.genParts_globalPhiME[0][2]
+        part_globalEtaME2 = evt.genParts_globalEtaME[0][2]
+        part_globalThetaME2 = evt.genParts_globalThetaME[0][2]
+
         is_endcap = 1.24 < part_eta < 2.4
 
         if part_pt > 0 and is_endcap:
@@ -88,18 +95,24 @@ def drawer_project(tree, histos, options):
 
                 #is_endcap = 1.24 < globalEta < 2.4
                 #is_ok = pt > 2
-                trigger = (mode in mode_vec) and ((1.0/pt - 1.0/part_pt) < (0.05*5))
+                #trigger = (mode in mode_vec) and ((1.0/pt - 1.0/part_pt) < (0.05*5))
 
-                eeta = get_eeta_bin(part_eta)
-                for ept in ept_vec:
-                    if pt > ept:
-                        hname = "emtf_efficiency_pt_eeta%i_ept%i" % (eeta, ept)
+                dR = deltaR(globalEta, globalPhi, part_globalEtaME2, part_globalPhiME2)
+                trigger = (mode in mode_vec) and (dR < 0.3)
+
+                l1eta = get_l1t_eta_bin(part_eta)
+                for l1pt in l1t_pt_vec:
+                    if pt > l1pt:
+                        hname = "emtf_efficiency_pt_l1eta%i_l1pt%i" % (l1eta, l1pt)
                         histos[hname].Fill(trigger, part_pt)
 
                 # Only one trigger track
                 if len(evt.CSCTracks_itracks_pt) == 1:
-                    hname = "emtf_resolution_2d_pt_eeta%i" % (eeta)
+                    hname = "emtf_resolution_2d_pt_l1eta%i" % (l1eta)
                     histos[hname].Fill(part_charge/part_pt, 1.0/pt)
+
+                    hname = "emtf_resolution_2d_dR_l1eta%i" % (l1eta)
+                    histos[hname].Fill(part_charge/part_pt, dR)
     return
 
 # ______________________________________________________________________________
@@ -147,8 +160,8 @@ def drawer_draw(histos, options):
 
                 h.gr = h.CreateGraph()
                 h.gr.SetMarkerStyle(20)
-                for i in xrange(len(ept_vec)):
-                    if ("ept%i" % ept_vec[i]) in hname:
+                for i in xrange(len(l1t_pt_vec)):
+                    if ("l1pt%i" % l1t_pt_vec[i]) in hname:
                         h.gr.SetMarkerColor(ctapalette[i]); h.gr.SetLineColor(ctapalette[i])
                 h.gr.Draw("p")
 
@@ -158,8 +171,8 @@ def drawer_draw(histos, options):
                 save(options.outdir, hname)
 
     # Specialized: overlay different pt
-    for eeta in eeta_vec:
-        hname = "emtf_efficiency_pt_eeta%i_ept%i" % (eeta, ept_vec[0])
+    for l1eta in l1t_eta_vec:
+        hname = "emtf_efficiency_pt_l1eta%i_l1pt%i" % (l1eta, l1t_pt_vec[0])
         h = histos[hname]
         h1 = h.GetCopyTotalHisto().Clone(h1.GetName()+"_frame")
         h1.Reset()
@@ -172,17 +185,17 @@ def drawer_draw(histos, options):
             tline.DrawLine(xmin, y, xmax, y)
 
         moveLegend(tlegend,0.66,0.20,0.90,0.32); tlegend.Clear()
-        for ept in ept_vec:
-            hname = "emtf_efficiency_pt_eeta%i_ept%i" % (eeta, ept)
+        for l1pt in l1t_pt_vec:
+            hname = "emtf_efficiency_pt_l1eta%i_l1pt%i" % (l1eta, l1pt)
             h = histos[hname]
             h.gr.Draw("p")
-            tlegend.AddEntry(h.gr, "trigger p_{T} > %i" % ept, "p")
+            tlegend.AddEntry(h.gr, "trigger p_{T} > %i" % l1pt, "p")
         tlegend.Draw()
-        tlatex.DrawLatex(0.72, 0.34, "%.1f #leq #eta < %.1f" % (eeta_boundaries[eeta], eeta_boundaries[eeta+1]))
+        tlatex.DrawLatex(0.72, 0.34, "%.1f #leq #eta < %.1f" % (l1t_eta_bounds[l1eta], l1t_eta_bounds[l1eta+1]))
 
         gPad.SetLogx(h.logx)
         CMS_label()
-        save(options.outdir, hname[:hname.find("_ept")])
+        save(options.outdir, hname[:hname.find("_l1pt")])
     return
 
 # ______________________________________________________________________________

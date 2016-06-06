@@ -11,6 +11,8 @@ fcol = TColor.GetColor("#fb9a99")  # nu140
 mode_vec = [11, 13, 14, 15] # excluded 7
 station_vec = [0, 1, 2, 3, 4]
 
+l1t_pt_vec = [10, 16, 20]  # trigger pt
+
 
 # ______________________________________________________________________________
 # Drawer
@@ -30,7 +32,7 @@ def drawer_book(options):
     hname = "emtf_nroads_winner"
     histos[hname] = TH1F(hname, "; EMTF # of roads per sector; Entries/(3BX)", nbinsx, xmin, xmax)
     hname = "emtf_nroads_besttrack"
-    histos[hname] = TH1F(hname, "; EMTF # of roads per sector; Entries/(3BX)", nbinsx, xmin, xmax)
+    histos[hname] = TH1F(hname, "; EMTF # of 'best' roads per sector; Entries/(3BX)", nbinsx, xmin, xmax)
     hname = "emtf_ntracks"
     histos[hname] = TH1F(hname, "; EMTF # of tracks per sector; Entries/(3BX)", nbinsx, xmin, xmax)
 
@@ -203,13 +205,13 @@ def drawer_draw(histos, options):
                         tlatex.DrawLatex(x-0.4, h.GetMaximum()/50., str(x))
                     tlatex.SetNDC(1)
                 elif hname == "emtf_ptcut":
-                    for ix, x in enumerate([11, 16, 20]):
+                    for ix, x in enumerate(l1t_pt_vec):
                         rate = h.GetBinContent(h.FindBin(x))
                         tlatex.DrawLatex(0.67, 0.70-ix*0.04, "Entries /w p_{T}>%3i: %.0f" % (x, rate))
 
                 gPad.SetLogy(h.logy)
                 CMS_label()
-                save(options.outdir, hname)
+                save(options.outdir, hname, dot_root=True)
     return
 
 # ______________________________________________________________________________
