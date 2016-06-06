@@ -3,7 +3,7 @@ tmpargv = sys.argv[:]  # [:] for a copy, not reference
 sys.argv = []
 
 import ROOT
-from ROOT import TH1, TH1F, TH2F, TProfile, TProfile2D, TFile, TFileCollection, TChain, TCanvas, TPad, TLegend, TLatex, TLine, TPolyLine, TBox, TGraph, TGraphErrors, TGraphAsymmErrors, TEfficiency, gROOT, gSystem, gStyle, gPad
+from ROOT import TH1, TH1F, TH2F, TF1, TProfile, TProfile2D, TFile, TFileCollection, TChain, TCanvas, TPad, TLegend, TLatex, TLine, TPolyLine, TBox, TGraph, TGraphErrors, TGraphAsymmErrors, TEfficiency, gROOT, gSystem, gStyle, gPad
 from rootcolors import *
 sys.argv = tmpargv
 

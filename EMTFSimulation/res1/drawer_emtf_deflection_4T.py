@@ -105,12 +105,15 @@ def drawer_book(options):
 
         for std in std_vec:
             nbinsx, xmin, xmax = 100, -0.2, 0.2
+            #nbinsx, xmin, xmax = 50, -0.02, 0.02
             hname = "emtf_dphi_std%i_pt%i" % (std, pt)
             histos[hname] = TH1F(hname, "; #phi(%s) - #phi(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsx, xmin, xmax)
             nbinsx, xmin, xmax = 50, -0.1, 0.1
+            #nbinsx, xmin, xmax = 50, -0.02, 0.02
             hname = "emtf_dtheta_std%i_pt%i" % (std, pt)
             histos[hname] = TH1F(hname, "; #theta(%s) - #theta(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsx, xmin, xmax)
             nbinsx, xmin, xmax = 50, -0.2, 0.2
+            #nbinsx, xmin, xmax = 50, -0.04, 0.04
             hname = "emtf_deta_std%i_pt%i" % (std, pt)
             histos[hname] = TH1F(hname, "; #eta(%s) - #eta(%s)" % (label_std_i(std), label_std_j(std)), nbinsx, xmin, xmax)
 
@@ -282,9 +285,12 @@ def drawer_draw(histos, options):
     tlegend2.SetTextFont(42)
 
     def display_fit(h):
-        h.Fit("gaus","q")
-        h.fit = h.GetFunction("gaus")
-        h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
+        if h.Integral() > 0:
+            h.Fit("gaus","q")
+            h.fit = h.GetFunction("gaus")
+            h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
+        else:
+            h.fit = TF1("fa1", "gaus(0)")
 
     def display_percentile_y(h2):
         frame90 = h2.Clone(h2.GetName() + "_frame90")
@@ -389,7 +395,7 @@ def drawer_draw(histos, options):
                 tlegend2.Draw()
 
                 gPad.SetLogy(h.logy)
-                CMS_0T_label()
+                CMS_label()
                 save(options.outdir, hframe.GetName())
 
     # Specialized: coverage plots
