@@ -8,7 +8,7 @@ else
 fi
 
 # Condor jobs
-python jobify.py NoAnalyzer SingleMuon_sp0 SingleMuon mu0 2016 400
+python jobify.py NoAnalyzer SingleMuon_sp0 SingleMuon mu0 2016 500
 
 # When the condor jobs are done, do this:
 #python retrieve.py
