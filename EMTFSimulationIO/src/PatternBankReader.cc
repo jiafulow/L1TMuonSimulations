@@ -40,11 +40,11 @@ void PatternBankReader::init(TString src) {
         throw std::invalid_argument(msg.Data());
     }
 
-    if (verbose_)  std::cout << "Opening " << src << std::endl;
+    //if (verbose_)  std::cout << "Opening " << src << std::endl;
     tfile_ = TFile::Open(src);
 
     if (tfile_) {
-        if (verbose_)  std::cout << "Successfully read " << src << std::endl;
+        //if (verbose_)  std::cout << "Successfully read " << src << std::endl;
     } else {
         TString msg = "Failed to read " + src;
         throw std::invalid_argument(msg.Data());
@@ -74,18 +74,6 @@ void PatternBankReader::init(TString src) {
     ttree_->SetBranchAddress("phi_sigma"     , &pb_phi_sigma);
     ttree_->SetBranchAddress("z0_mean"       , &pb_z0_mean);
     ttree_->SetBranchAddress("z0_sigma"      , &pb_z0_sigma);
-}
-
-void PatternBankReader::getPatternBankInfo(float& coverage, unsigned& count, unsigned& tower, unsigned& sector, std::string& superstrip, unsigned& superstrip_nx, unsigned& superstrip_nz) {
-    ttree2_->GetEntry(0);
-
-    coverage      = pb_coverage;
-    count         = pb_count;
-    tower         = pb_tower;
-    sector        = pb_sector;
-    superstrip    = (*pb_superstrip);
-    superstrip_nx = pb_superstrip_nx;
-    superstrip_nz = pb_superstrip_nz;
 }
 
 
@@ -126,11 +114,11 @@ void PatternBankWriter::init(TString out) {
         throw std::invalid_argument(msg.Data());
     }
 
-    if (verbose_)  std::cout << "Opening " << out << std::endl;
+    //if (verbose_)  std::cout << "Opening " << out << std::endl;
     tfile_ = TFile::Open(out, "RECREATE");
 
     if (tfile_) {
-        if (verbose_)  std::cout << "Successfully opened " << out << std::endl;
+        //if (verbose_)  std::cout << "Successfully opened " << out << std::endl;
     } else {
         TString msg = "Failed to open " + out;
         throw std::invalid_argument(msg.Data());

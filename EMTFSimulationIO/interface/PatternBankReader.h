@@ -14,20 +14,19 @@
 
 // _____________________________________________________________________________
 class PatternBankReader {
-  public:
+public:
     PatternBankReader(int verbose=1);
     ~PatternBankReader();
 
     void init(TString src);
-
-    void getPatternBankInfo(float& coverage, unsigned& count, unsigned& tower, unsigned& sector, std::string& superstrip,
-                            unsigned& superstrip_nx, unsigned& superstrip_nz);
 
     Int_t getEntry(Long64_t entry) { return ttree_->GetEntry(entry); }
 
     Long64_t getEntries() const { return ttree_->GetEntries(); }
 
     TTree * getTree() { return ttree_; }
+
+    TTree * getInfoTree() { ttree2_->GetEntry(0); return ttree2_; }
 
     // Pattern bank
     std::vector<superstrip_type> * pb_superstripIds;
@@ -50,7 +49,7 @@ class PatternBankReader {
     unsigned                       pb_superstrip_nx;
     unsigned                       pb_superstrip_nz;
 
-  protected:
+protected:
     TFile* tfile_;
     TTree* ttree_;   // for pattern bank
     TTree* ttree2_;  // for pattern bank info
@@ -60,7 +59,7 @@ class PatternBankReader {
 
 // _____________________________________________________________________________
 class PatternBankWriter {
-  public:
+public:
     PatternBankWriter(int verbose=1);
     ~PatternBankWriter();
 
@@ -84,7 +83,7 @@ class PatternBankWriter {
     std::unique_ptr<float>                         pb_z0_mean;
     std::unique_ptr<float>                         pb_z0_sigma;
 
-    // Pattern bank statistics
+    // Pattern bank info
     std::unique_ptr<float>                         pb_coverage;
     std::unique_ptr<unsigned>                      pb_count;
     std::unique_ptr<unsigned>                      pb_tower;
@@ -93,8 +92,7 @@ class PatternBankWriter {
     std::unique_ptr<unsigned>                      pb_superstrip_nx;
     std::unique_ptr<unsigned>                      pb_superstrip_nz;
 
-
-  protected:
+protected:
     TFile* tfile_;
     TTree* ttree_;   // for pattern bank
     TTree* ttree2_;  // for pattern bank info

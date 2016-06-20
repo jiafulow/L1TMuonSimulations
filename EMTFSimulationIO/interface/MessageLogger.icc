@@ -1,0 +1,25 @@
+#ifdef EMTFSimulationIO_MessageLogger_icc_
+
+template<class T>
+LogError & LogError::operator<< (T const& t) {
+    if (valid_) {
+        os_ << t;
+    }
+    return *this;
+}
+
+inline LogError & LogError::operator<< ( std::ostream&(*f)(std::ostream&) ) {
+    if (valid_) {
+        (f)(os_);
+    }
+    return *this;
+}
+
+inline LogError & LogError::operator<< ( std::ios_base&(*f)(std::ios_base&) ) {
+    if (valid_) {
+        (f)(os_);
+    }
+    return *this;
+}
+
+#endif

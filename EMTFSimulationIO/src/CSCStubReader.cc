@@ -49,12 +49,12 @@ void CSCStubReader::init(TString src) {
         throw std::invalid_argument(msg.Data());
     }
 
-    if (verbose_)  std::cout << "Opening " << src << std::endl;
+    //if (verbose_)  std::cout << "Opening " << src << std::endl;
     tchain_ = new TChain("ntupler/tree");
 
     if (src.EndsWith(".root")) {
         if (tchain_->Add(src) ) {
-            if (verbose_)  std::cout << "Successfully read " << src << std::endl;
+            //if (verbose_)  std::cout << "Successfully read " << src << std::endl;
         } else {
             TString msg = "Failed to read " + src;
             throw std::invalid_argument(msg.Data());
@@ -63,7 +63,7 @@ void CSCStubReader::init(TString src) {
     } else if (src.EndsWith(".txt")) {
         TFileCollection fc("fileinfolist", "", src);
         if (tchain_->AddFileInfoList((TCollection*) fc.GetList()) ) {
-            if (verbose_)  std::cout << "Successfully read " << src << std::endl;
+            //if (verbose_)  std::cout << "Successfully read " << src << std::endl;
         } else {
             TString msg = "Failed to read " + src;
             throw std::invalid_argument(msg.Data());
@@ -153,11 +153,11 @@ void CSCStubWriter::init(TTree* tree, TString out) {
         throw std::invalid_argument(msg.Data());
     }
 
-    if (verbose_)  std::cout << "Opening " << out << std::endl;
+    //if (verbose_)  std::cout << "Opening " << out << std::endl;
     tfile_ = TFile::Open(out, "RECREATE");
 
     if (tfile_) {
-        if (verbose_)  std::cout << "Successfully opened " << out << std::endl;
+        //if (verbose_)  std::cout << "Successfully opened " << out << std::endl;
     } else {
         TString msg = "Failed to open " + out;
         throw std::invalid_argument(msg.Data());

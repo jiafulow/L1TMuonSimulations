@@ -8,14 +8,13 @@
 #include "TString.h"
 #include "TTree.h"
 #include "TBranchElement.h"
-#include <cassert>
 #include <memory>
 #include <vector>
 
 
 // _____________________________________________________________________________
 class CSCStubReader {
-  public:
+public:
     CSCStubReader(int verbose=1);
     ~CSCStubReader();
 
@@ -62,7 +61,7 @@ class CSCStubReader {
     std::vector<uint16_t> *       vb_pattern;
     std::vector<uint16_t> *       vb_cscID;
 
-  protected:
+protected:
     TChain* tchain_;
     int treenumber_;
     const int verbose_;
@@ -71,7 +70,7 @@ class CSCStubReader {
 
 // _____________________________________________________________________________
 class CSCStubWriter {
-  public:
+public:
     CSCStubWriter(int verbose=1);
     ~CSCStubWriter();
 
@@ -83,7 +82,7 @@ class CSCStubWriter {
 
     Long64_t writeTree();
 
-  protected:
+protected:
     TFile* tfile_;
     TTree* ttree_;
     const int verbose_;
