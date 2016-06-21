@@ -34,6 +34,9 @@ NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& 
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
     //produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
+    //produces<std::vector<uint16_t> >          (prefix_ + "iendcap"         + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "istation"        + suffix_);
+    produces<std::vector<uint16_t> >          (prefix_ + "iring"           + suffix_);
     produces<std::vector<uint32_t> >          (prefix_ + "ichamber"        + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "isector"         + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "isubsector"      + suffix_);
@@ -125,6 +128,9 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
     //std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
+    //std::auto_ptr<std::vector<uint16_t> >          v_iendcap         (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_istation        (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint16_t> >          v_iring           (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<uint32_t> >          v_ichamber        (new std::vector<uint32_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_isector         (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_isubsector      (new std::vector<uint16_t>());
@@ -234,6 +240,9 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 // Fill the vectors
                 v_geoId           ->push_back(it->rawId().rawId());
                 //v_subsystem       ->push_back(it->subsystem());
+                //v_iendcap         ->push_back(cscDet.endcap());
+                v_istation        ->push_back(cscDet.station());
+                v_iring           ->push_back(cscDet.ring());
                 v_ichamber        ->push_back(ichamber);
                 v_isector         ->push_back(isector);
                 v_isubsector      ->push_back(isubsector);
@@ -281,6 +290,9 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     //__________________________________________________________________________
     iEvent.put(v_geoId           , prefix_ + "geoId"           + suffix_);
     //iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
+    //iEvent.put(v_iendcap         , prefix_ + "iendcap"         + suffix_);
+    iEvent.put(v_istation        , prefix_ + "istation"        + suffix_);
+    iEvent.put(v_iring           , prefix_ + "iring"           + suffix_);
     iEvent.put(v_ichamber        , prefix_ + "ichamber"        + suffix_);
     iEvent.put(v_isector         , prefix_ + "isector"         + suffix_);
     iEvent.put(v_isubsector      , prefix_ + "isubsector"      + suffix_);
