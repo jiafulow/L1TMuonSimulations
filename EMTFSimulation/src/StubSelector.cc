@@ -1,5 +1,6 @@
 #include "L1TMuonSimulations/EMTFSimulation/interface/StubSelector.h"
 
+#include "L1TMuonSimulations/EMTFSimulationIO/interface/MessageLogger.h"
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/CSCStubReader.h"
 
 static const unsigned MIN_NGOODSTUBS = 3;
@@ -44,21 +45,11 @@ void StubSelector::selectStubs(TString src, TString out) {
     // _________________________________________________________________________
     // For reading
     CSCStubReader reader(verbose_);
-    try {
-        reader.init(src);
-    } catch(const std::exception& e) {
-        std::cout << e.what() << '\n';
-        throw;
-    }
+    reader.init(src);
 
     // For writing
     CSCStubWriter writer(verbose_);
-    try {
-        writer.init(reader.getChain(), out);
-    } catch(const std::exception& e) {
-        std::cout << e.what() << '\n';
-        throw;
-    }
+    writer.init(reader.getChain(), out);
 
     // _________________________________________________________________________
     // Loop over all events
@@ -76,8 +67,11 @@ void StubSelector::selectStubs(TString src, TString out) {
         const unsigned nstubs = reader.vb_ichamber->size();
         const unsigned nparts = reader.vp_pt->size();
 
-        if (verbose_>1 && ievt%10000==0)  std::cout << Form("... Processing event: %7lld, keeping: %7ld", ievt, nKept1) << std::endl;
-        if (verbose_>2)  std::cout << "... evt: " << ievt << " # stubs: " << nstubs << " # particles: " << nparts << std::endl;
+        if (ievt%10000==0) {
+            LogInfo("StubSelector", verbose_) << Form("... Processing event: %7lld, keeping: %7ld", ievt, nKept1) << std::endl;
+        }
+
+        LogDebug("StubSelector", verbose_) << "... evt: " << ievt << " # stubs: " << nstubs << " # particles: " << nparts << std::endl;
 
         if (nstubs >= 999999) {
             throw std::runtime_error("Way too many stubs.");
@@ -121,7 +115,7 @@ void StubSelector::selectStubs(TString src, TString out) {
             if (!sim)
                 keep = false;
 
-            if (verbose_>2)  std::cout << "... evt: " << ievt << " simPt: " << simPt << " simEta: " << simEta << " simPhi: " << simPhi << " simVz: " << simVz << " simChargeOverPt: " << simChargeOverPt << " keep? " << keep << std::endl;
+            LogDebug("StubSelector", verbose_) << "... evt: " << ievt << " simPt: " << simPt << " simEta: " << simEta << " simPhi: " << simPhi << " simVz: " << simVz << " simChargeOverPt: " << simChargeOverPt << " keep? " << keep << std::endl;
 
             // _____________________________________________________________________
             // Remove multiple stubs in one layer
@@ -227,8 +221,8 @@ void StubSelector::selectStubs(TString src, TString out) {
         throw std::runtime_error("Failed to read any event.");
     }
 
-    if (verbose_)  std::cout << Form("Read event   : %7ld, kept: %7ld", nRead1, nKept1) << std::endl;
-    if (verbose_)  std::cout << Form("Read particle: %7ld, kept: %7ld", nRead2, nKept2) << std::endl;
+    LogInfo("StubSelector", verbose_) << Form("Read event   : %7ld, kept: %7ld", nRead1, nKept1) << std::endl;
+    LogInfo("StubSelector", verbose_) << Form("Read particle: %7ld, kept: %7ld", nRead2, nKept2) << std::endl;
 
     long long nentries = writer.writeTree();
     assert(nentries == nKept2);

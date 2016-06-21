@@ -24,7 +24,7 @@ class StubSelector {
     long long nEvents_;
     int verbose_;
 
-    // Operators
+    // Selector algo
     std::unique_ptr<StubSelectorAlgo> algo_;
 };
 

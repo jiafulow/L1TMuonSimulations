@@ -1,3 +1,4 @@
+#include "L1TMuonSimulations/EMTFSimulationIO/interface/MessageLogger.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/StubSelector.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/PatternGenerator.h"
 
@@ -9,7 +10,7 @@
 int main(int argc, char **argv) {
 
     // Log the input arguments
-    std::cout << "Command:" << std::endl;
+    std::cout << logTools().Color("lgreenb") << "Command:" << logTools().EndColor() << std::endl;
     std::cout << argv[0] << " ";
     for(int i = 1; i < argc-1; ++i) {
         std::cout << argv[i] << " ";
@@ -26,10 +27,11 @@ int main(int argc, char **argv) {
     namespace po = boost::program_options;
     po::options_description generic("Generic options");
     generic.add_options()
-        ("version"              , "Print version")
-        ("help,h"               , "Produce help message")
-        ("selectStubs,S"        , "Select one unique stub per layer")
-        ("generateBank,B"       , "Generate associative memory pattern bank")
+        ("version"             , "Print version")
+        ("help,h"              , "Produce help message")
+        ("selectStubs,S"       , "Select one unique stub per layer")
+        ("generateBank,B"      , "Generate associative memory pattern bank")
+        ("no-color"            , "Turn off colored text")
         ;
 
     // Declare a group of options that will be allowed both on command line
@@ -128,6 +130,10 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
+    if (vm.count("no-color")) {
+        logTools().UseColor(false);
+    }
+
     // Update options
     if (option.maxEvents < 0)
         option.maxEvents = std::numeric_limits<long long>::max();
@@ -149,7 +155,7 @@ int main(int argc, char **argv) {
         StubSelector selector(option);
         selector.init();
         selector.run();
-        std::cout << "DONE" << std::endl;
+        std::cout << logTools().Color("lgreenb") << "DONE" << logTools().EndColor() << std::endl;
 
     } else if (vm.count("generateBank")) {
         std::cout << "Start pattern bank generation..." << std::endl;
@@ -157,7 +163,7 @@ int main(int argc, char **argv) {
         PatternGenerator generator(option);
         generator.init();
         generator.run();
-        std::cout << "DONE" << std::endl;
+        std::cout << logTools().Color("lgreenb") << "DONE" << logTools().EndColor() << std::endl;
     }
 
     return EXIT_SUCCESS;
