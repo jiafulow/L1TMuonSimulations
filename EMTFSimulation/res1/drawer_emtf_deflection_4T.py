@@ -12,9 +12,9 @@ mcol = TColor.GetColor("#600000")
 #ecol = TColor.GetColor("#FFD600")
 ecol = TColor.GetColor("#322D8C")
 
-palette = map(lambda x: TColor.GetColor(x), ("#66DD66", "#3333FF", "#990099", "#FFBB44", "#EE4477"))
+palette = map(lambda x: TColor.GetColor(x), ("#66DD66", "#3333FF", "#990099", "#FFBB44", "#EE4477", "#454545"))
 
-pt_vec = [3,5,10,20,50]
+pt_vec = [3,5,10,20,50,100]
 st_vec = [11,12,14,21,22,31,32,41,42]  # excluded ME+1/3
 std_vec = [2010,2011,2012,2030,2040,3010,3011,3012,3040,4010,4011,4012]
 

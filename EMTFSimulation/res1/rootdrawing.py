@@ -31,7 +31,7 @@ class MyDrawer:
         gStyle.SetTitleOffset(1.1, "Y")
         gStyle.SetLabelSize(0.04, "XY")
         gStyle.SetLabelSize(0.04, "Z")
-        gStyle.SetNdivisions(505, "XY")
+        #gStyle.SetNdivisions(505, "XY")
 
         #gStyle.SetPalette(55)  # rainbow color map
         gStyle.SetPalette(kBird)  # new default color map
