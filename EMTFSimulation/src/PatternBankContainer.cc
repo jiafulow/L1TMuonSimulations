@@ -10,13 +10,21 @@ namespace {
     }
 }
 
+// _____________________________________________________________________________
+PatternBankContainer::PatternBankContainer()
+: patternBankMap_(), patternBankInfo_(), patternBank_(), frozen_(false)
+{
+    patternBankMap_.reserve(1<<20);
+    patternBank_.reserve(1<<20);
+}
+
 void PatternBankContainer::fill_statistics(const float x, const unsigned long n, float& mean, float& variance) {
     //++n;
     mean += (x - mean)/n;
     if (n > 1)  variance += (x - mean)*(x - mean)/(n-1) - (variance/n);
 }
 
-void PatternBankContainer::fill_attribute(const float invPt, const float cotTheta, const float phi, const float z0, pattern_attr& attr) {
+void PatternBankContainer::fill_attribute(const float invPt, const float cotTheta, const float phi, const float z0, attrib_t& attr) {
     ++ attr.n;
     fill_statistics(invPt, attr.n, attr.invPt_mean, attr.invPt_variance);
     fill_statistics(cotTheta, attr.n, attr.cotTheta_mean, attr.cotTheta_variance);
@@ -26,8 +34,8 @@ void PatternBankContainer::fill_attribute(const float invPt, const float cotThet
 
 void PatternBankContainer::fill(const pattern_pair& pair, float invPt, float cotTheta, float phi, float z0) {
     // Insert pattern into the map
-    typedef std::pair<std::map<pattern_type, pattern_attr>::iterator, bool> map_return_type;
-    map_return_type ins = patternBank_map_.insert(pair);
+    typedef std::pair<PatternBankMap::iterator, bool> patternBankMap_return_type;
+    patternBankMap_return_type ins = patternBankMap_.insert(pair);
 
     // Update the pattern attribute
     fill_attribute(invPt, cotTheta, phi, z0, ins.first->second);
@@ -35,22 +43,34 @@ void PatternBankContainer::fill(const pattern_pair& pair, float invPt, float cot
 
 void PatternBankContainer::freeze() {
     // Convert map to vector of pairs
-    const size_t origSize = patternBank_map_.size();
+    const size_t origSize = patternBankMap_.size();
 
-    for (std::map<pattern_type, pattern_attr>::const_iterator it = patternBank_map_.begin();
-         it != patternBank_map_.end(); ) {  // should not cause bad_alloc
-        patternBank_pairs_.push_back(*it);
-        it = patternBank_map_.erase(it);
+    for (PatternBankMap::const_iterator it = patternBankMap_.begin();
+         it != patternBankMap_.end(); ) {  // should not cause bad_alloc
+        patternBank_.push_back(*it);
+        it = patternBankMap_.erase(it);
     }
-    assert(patternBank_pairs_.size() == origSize);
+    assert(patternBank_.size() == origSize);
 
     // Clear map and release memory
-    std::map<pattern_type, pattern_attr> emptyMap;
-    patternBank_map_.clear();
-    patternBank_map_.swap(emptyMap);
+    patternBankMap_.clear();
+    PatternBankMap emptyMap;
+    emptyMap.swap(patternBankMap_);
 
     // Sort by popularity
-    std::stable_sort(patternBank_pairs_.begin(), patternBank_pairs_.end(), sortByPopularity);
+    std::stable_sort(patternBank_.begin(), patternBank_.end(), sortByPopularity);
 
     frozen_ = true;
+}
+
+void PatternBankContainer::clear() {
+    // Clear map and release memory
+    patternBankMap_.clear();
+    PatternBankMap emptyMap;
+    emptyMap.swap(patternBankMap_);
+
+    // Clear vector
+    patternBank_.clear();
+    PatternBank emptyVector;
+    emptyVector.swap(patternBank_);
 }

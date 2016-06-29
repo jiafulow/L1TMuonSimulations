@@ -2,6 +2,7 @@
 #define EMTFSimulationIO_PatternBankReader_h_
 
 #include "L1TMuonSimulations/EMTFSimulationDataFormats/interface/Pattern.h"
+#include "L1TMuonSimulations/EMTFSimulationDataFormats/interface/PatternBank.h"
 
 #include "TFile.h"
 #include "TROOT.h"
@@ -29,8 +30,8 @@ public:
     TTree * getInfoTree() { ttree2_->GetEntry(0); return ttree2_; }
 
     // Pattern bank
-    std::vector<superstrip_type> * pb_superstripIds;
-    ULong64_t                      pb_popularity;
+    std::vector<superstrip_t> *    pb_superstripIds;
+    unsigned                       pb_popularity;
     float                          pb_invPt_mean;
     float                          pb_invPt_sigma;
     float                          pb_cotTheta_mean;
@@ -42,7 +43,7 @@ public:
 
     // Pattern bank info
     float                          pb_coverage;
-    unsigned                       pb_count;
+    ULong64_t                      pb_count;
     unsigned                       pb_tower;
     unsigned                       pb_sector;
     std::string *                  pb_superstrip;
@@ -65,15 +66,15 @@ public:
 
     void init(TString out);
 
-    void fillPatternBankInfo();  // must be called before fillPatternBank()
+    void fillPatternBankInfo(const PatternBankInfo& bankInfo);
 
-    void fillPatternBank();
+    void fillPatternBank(const PatternBank& bank);
 
     Long64_t writeTree();
 
     // Pattern bank
-    std::unique_ptr<std::vector<superstrip_type> > pb_superstripIds;
-    std::unique_ptr<ULong64_t>                     pb_popularity;
+    std::unique_ptr<std::vector<superstrip_t> >    pb_superstripIds;
+    std::unique_ptr<unsigned>                      pb_popularity;
     std::unique_ptr<float>                         pb_invPt_mean;
     std::unique_ptr<float>                         pb_invPt_sigma;
     std::unique_ptr<float>                         pb_cotTheta_mean;
@@ -85,7 +86,7 @@ public:
 
     // Pattern bank info
     std::unique_ptr<float>                         pb_coverage;
-    std::unique_ptr<unsigned>                      pb_count;
+    std::unique_ptr<ULong64_t>                     pb_count;
     std::unique_ptr<unsigned>                      pb_tower;
     std::unique_ptr<unsigned>                      pb_sector;
     std::unique_ptr<std::string>                   pb_superstrip;

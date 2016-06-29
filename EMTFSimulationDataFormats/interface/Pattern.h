@@ -5,8 +5,8 @@
 #include <array>
 #include <iosfwd>
 
-typedef uint32_t superstrip_type;
-typedef std::array<superstrip_type,8> pattern_type;
+typedef uint32_t superstrip_t;
+typedef std::array<superstrip_t,8> pattern_t;
 
 struct PatternAttribute {
     unsigned long n;  // popularity
@@ -20,15 +20,29 @@ struct PatternAttribute {
     float z0_variance;
     //float d0_mean;
     //float d0_variance;
-};
-typedef PatternAttribute pattern_attr;
 
-typedef std::pair<pattern_type, pattern_attr> pattern_pair;
+    void reset() {
+        n                 = 0;
+        invPt_mean        = 0.;
+        invPt_variance    = 0.;
+        cotTheta_mean     = 0.;
+        cotTheta_variance = 0.;
+        phi_mean          = 0.;
+        phi_variance      = 0.;
+        z0_mean           = 0.;
+        z0_variance       = 0.;
+    }
+};
+typedef PatternAttribute attrib_t;
+
+typedef std::pair<pattern_t, attrib_t> pattern_pair;
 
 
 // _____________________________________________________________________________
 // Output streams
-std::ostream& operator<<(std::ostream& o, const pattern_type& patt);
+std::ostream& operator<<(std::ostream& o, const pattern_t& patt);
+std::ostream& operator<<(std::ostream& o, const attrib_t& attr);
+std::ostream& operator<<(std::ostream& o, const pattern_pair& pair);
 
 #endif
 

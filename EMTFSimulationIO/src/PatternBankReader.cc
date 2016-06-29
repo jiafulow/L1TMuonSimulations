@@ -64,8 +64,8 @@ void PatternBankReader::init(TString src) {
     ttree_ = (TTree*) tfile_->Get("patternBank");
     assert(ttree_ != 0);
 
-    ttree_->SetBranchAddress("popularity"    , &pb_popularity);
     ttree_->SetBranchAddress("superstripIds" , &pb_superstripIds);
+    ttree_->SetBranchAddress("popularity"    , &pb_popularity);
     ttree_->SetBranchAddress("invPt_mean"    , &pb_invPt_mean);
     ttree_->SetBranchAddress("invPt_sigma"   , &pb_invPt_sigma);
     ttree_->SetBranchAddress("cotTheta_mean" , &pb_cotTheta_mean);
@@ -79,8 +79,8 @@ void PatternBankReader::init(TString src) {
 
 // _____________________________________________________________________________
 PatternBankWriter::PatternBankWriter(int verbose)
-: pb_superstripIds  (new std::vector<superstrip_type>()),
-  pb_popularity     (new ULong64_t(0)),
+: pb_superstripIds  (new std::vector<superstrip_t>()),
+  pb_popularity     (new unsigned(0)),
   pb_invPt_mean     (new float(0.)),
   pb_invPt_sigma    (new float(0.)),
   pb_cotTheta_mean  (new float(0.)),
@@ -91,7 +91,7 @@ PatternBankWriter::PatternBankWriter(int verbose)
   pb_z0_sigma       (new float(0.)),
   //
   pb_coverage       (new float(0.)),
-  pb_count          (new unsigned(0)),
+  pb_count          (new ULong64_t(0)),
   pb_tower          (new unsigned(0)),
   pb_sector         (new unsigned(0)),
   pb_superstrip     (new std::string("")),
@@ -136,8 +136,8 @@ void PatternBankWriter::init(TString out) {
 
     // Pattern bank
     ttree_ = new TTree("patternBank", "");
-    ttree_->Branch("popularity"     , &(*pb_popularity));
     ttree_->Branch("superstripIds"  , &(*pb_superstripIds));
+    ttree_->Branch("popularity"     , &(*pb_popularity));
     ttree_->Branch("invPt_mean"     , &(*pb_invPt_mean));
     ttree_->Branch("invPt_sigma"    , &(*pb_invPt_sigma));
     ttree_->Branch("cotTheta_mean"  , &(*pb_cotTheta_mean));
@@ -148,13 +148,35 @@ void PatternBankWriter::init(TString out) {
     ttree_->Branch("z0_sigma"       , &(*pb_z0_sigma));
 }
 
-void PatternBankWriter::fillPatternBankInfo() {
+void PatternBankWriter::fillPatternBankInfo(const PatternBankInfo& bankInfo) {
+    *pb_coverage        = bankInfo.coverage;
+    *pb_count           = bankInfo.count;
+    *pb_tower           = bankInfo.tower;
+    *pb_sector          = bankInfo.sector;
+    *pb_superstrip      = bankInfo.superstrip;
+    *pb_superstrip_nx   = bankInfo.superstrip_nx;
+    *pb_superstrip_nz   = bankInfo.superstrip_nz;
     ttree2_->Fill();
-    assert(ttree2_->GetEntries() == 1);
 }
 
-void PatternBankWriter::fillPatternBank() {
-    ttree_->Fill();
+void PatternBankWriter::fillPatternBank(const PatternBank& bank) {
+    for (unsigned i=0; i<bank.size(); ++i) {
+        const pattern_pair& apair = bank.at(i);
+        const pattern_t& patt = apair.first;
+        const attrib_t&  attr = apair.second;
+
+        *pb_superstripIds  = std::vector<superstrip_t>(patt.begin(), patt.end());
+        *pb_popularity     = attr.n;
+        *pb_invPt_mean     = attr.invPt_mean;
+        *pb_invPt_sigma    = std::sqrt(attr.invPt_variance);
+        *pb_cotTheta_mean  = attr.cotTheta_mean;
+        *pb_cotTheta_sigma = std::sqrt(attr.cotTheta_variance);
+        *pb_phi_mean       = attr.phi_mean;
+        *pb_phi_sigma      = std::sqrt(attr.phi_variance);
+        *pb_z0_mean        = attr.z0_mean;
+        *pb_z0_sigma       = std::sqrt(attr.z0_variance);
+        ttree_->Fill();
+    }
 }
 
 Long64_t PatternBankWriter::writeTree() {

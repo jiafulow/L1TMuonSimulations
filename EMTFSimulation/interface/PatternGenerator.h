@@ -23,13 +23,15 @@ class PatternGenerator {
     // Write pattern bank
     void writePatterns(TString out);
 
+    // Analyze pattern bank
+    void analyzePatterns(TString bank);
+
     // Program options
     const ProgramOption po_;
     long long nEvents_;
     int verbose_;
 
-    // Pattern bank data
-    std::unique_ptr<PatternBankInfo>       bankInfo_;
+    // Pattern bank
     std::unique_ptr<PatternBankContainer>  bank_;
 
     // Superstrip operation

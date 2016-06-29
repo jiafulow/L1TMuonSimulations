@@ -11,8 +11,6 @@ PatternGenerator::PatternGenerator(const ProgramOption& po)
 {
     bank_.reset(new PatternBankContainer());
 
-    bankInfo_.reset(new PatternBankInfo());
-
     arbiter_.reset(new SuperstripArbiter());
 }
 
@@ -25,6 +23,7 @@ void PatternGenerator::init() {
 void PatternGenerator::run() {
     makePatterns(po_.input);
     writePatterns(po_.output);
+    analyzePatterns(po_.output);
 }
 
 
@@ -40,9 +39,8 @@ void PatternGenerator::makePatterns(TString src) {
     // _________________________________________________________________________
     // Loop over all events
 
-    pattern_type patt;
-    patt.fill(0);
-    pattern_attr attr;
+    pattern_t patt;
+    attrib_t attr;
 
     // Bookkeepers
     float coverage = 0.;
@@ -55,7 +53,7 @@ void PatternGenerator::makePatterns(TString src) {
 
         // Running estimate of coverage
         if (ievt%100000==0) {
-            bankSize = bank_->getMap().size();
+            bankSize = bank_->size();
             coverage = 1.0 - float(bankSize - bankSizeOld) / float(nKept - nKeptOld);
 
             LogInfo("PatternGenerator", verbose_) << Form("... Processing event: %7lld, keeping: %7ld, # patterns: %7ld, coverage: %7.5f", ievt, nKept, bankSize, coverage) << std::endl;
@@ -108,6 +106,7 @@ void PatternGenerator::makePatterns(TString src) {
         // Start generating patterns
 
         patt.fill(0);
+        attr.reset();
 
         // Loop over reconstructed stubs
         for (unsigned istub=0; istub<nstubs; ++istub) {
@@ -151,12 +150,13 @@ void PatternGenerator::makePatterns(TString src) {
                 strip >>= 10;
             }
 
-            if (station == 1 || cscID > 3) {  // 10 degree chambers
+            if (station == 1 || (cscID%10) > 3) {  // 10 degree chambers
                 strip >>= 1;
             }
 
             strip >>= 0;  //FIXME
 
+            // _________________________________________________________________
             // Find superstrip ID
             unsigned ssId = 0;
             if (!arbiter_ -> useGlobalCoord()) {  // local coordinates
@@ -184,24 +184,24 @@ void PatternGenerator::makePatterns(TString src) {
         throw std::runtime_error("Failed to read any event.");
     }
 
-    LogInfo("PatternGenerator", verbose_) << Form("Read: %7ld, kept: %7ld, # patterns: %7lu, coverage: %7.5f", nRead, nKept, bank_->getMap().size(), coverage) << std::endl;
+    LogInfo("PatternGenerator", verbose_) << Form("Read: %7ld, kept: %7ld, # patterns: %7lu, coverage: %7.5f", nRead, nKept, bank_->size(), coverage) << std::endl;
 
     // _________________________________________________________________________
     // Freeze the pattern bank
 
-    bank_ -> freeze();
+    bank_->freeze();
 
-    bankInfo_ -> coverage      = coverage;
-    bankInfo_ -> count         = nKept;
-    bankInfo_ -> tower         = po_.tower;
-    bankInfo_ -> sector        = po_.sector;
-    bankInfo_ -> superstrip    = po_.superstrip;
-    bankInfo_ -> superstrip_nx = arbiter_ -> nx();
-    bankInfo_ -> superstrip_nz = arbiter_ -> nz();
+    bank_->getBankInfo().coverage      = coverage;
+    bank_->getBankInfo().count         = nKept;
+    bank_->getBankInfo().tower         = po_.tower;
+    bank_->getBankInfo().sector        = po_.sector;
+    bank_->getBankInfo().superstrip    = po_.superstrip;
+    bank_->getBankInfo().superstrip_nx = arbiter_ -> nx();
+    bank_->getBankInfo().superstrip_nz = arbiter_ -> nz();
 
     if (verbose_>2) {
-        for (unsigned i=0; i<bank_->getPairs().size(); ++i) {
-            const pattern_pair& apair = bank_->getPairs().at(i);
+        for (unsigned i=0; i<bank_->getBank().size(); ++i) {
+            const pattern_pair& apair = bank_->getBank().at(i);
             LogDebug("PatternGenerator", verbose_) << "... patt: " << i << "  " << apair.first << " popularity: " << apair.second.n << std::endl;
         }
     }
@@ -217,72 +217,72 @@ void PatternGenerator::writePatterns(TString out) {
     writer.init(out);
 
     // _________________________________________________________________________
-    // Save pattern bank info
-    *(writer.pb_coverage)      = bankInfo_ -> coverage;
-    *(writer.pb_count)         = bankInfo_ -> count;
-    *(writer.pb_tower)         = bankInfo_ -> tower;
-    *(writer.pb_sector)        = bankInfo_ -> sector;
-    *(writer.pb_superstrip)    = bankInfo_ -> superstrip;
-    *(writer.pb_superstrip_nx) = bankInfo_ -> superstrip_nx;
-    *(writer.pb_superstrip_nz) = bankInfo_ -> superstrip_nz;
-    writer.fillPatternBankInfo();
+    writer.fillPatternBankInfo(bank_->getBankInfo());
+
+    writer.fillPatternBank(bank_->getBank());
+
+    long long nentries = writer.writeTree();
+    assert(nentries == (long long) bank_->size());
+
+    bank_->clear();  // deallocate memory
+}
+
+// _____________________________________________________________________________
+// Analyze pattern bank
+void PatternGenerator::analyzePatterns(TString bank) {
 
     // _________________________________________________________________________
-    // Save pattern bank
-    const long long npatterns = bank_->getPairs().size();
+    // For reading
+    PatternBankReader pbreader(verbose_);
+    pbreader.init(bank);
+
+    // _________________________________________________________________________
+    // Get pattern bank info
+    pbreader.getInfoTree();
+    float coverage = pbreader.pb_coverage;
+    unsigned long count = pbreader.pb_count;
+
+    // _________________________________________________________________________
+    // Get pattern bank
+
+    long long npatterns = pbreader.getEntries();
 
     // Bookkeepers
-    unsigned nKept = 0;
+    long int nKept = 0;
     unsigned pop = -1, oldPop = -1;
-    long n90=0, n95=0, n99=0;
+    long int n90 = 0, n95 = 0, n99 = 0;
+    long int pop90 = 0, pop95 = 0, pop99 = 0;
 
     for (long long ipatt=0; ipatt<npatterns; ++ipatt) {
-        if (ipatt%1000==0) {
-            float coverage = float(nKept) * (bankInfo_->coverage) / (bankInfo_->count);
-            if (coverage < 0.90 + 1e-5)
-                n90 = ipatt;
-            if (coverage < 0.95 + 1e-5)
-                n95 = ipatt;
-            if (coverage < 0.99 + 1e-5)
-                n99 = ipatt;
+        pbreader.getEntry(ipatt);
 
-            LogInfo("PatternGenerator", verbose_) << Form("... Writing event: %7lld, sorted coverage: %7.5f", ipatt, coverage) << std::endl;
+        if (ipatt%1000==0) {
+            float icov = float(nKept) * coverage / count;
+            if (icov < 0.90 + 1e-5) {
+                n90 = ipatt;
+                pop90 = pop;
+            }
+            if (icov < 0.95 + 1e-5) {
+                n95 = ipatt;
+                pop95 = pop;
+            }
+            if (icov < 0.99 + 1e-5) {
+                n99 = ipatt;
+                pop99 = pop;
+            }
+
+            LogInfo("PatternGenerator", verbose_) << Form("... Writing event: %7lld, sorted coverage: %7.5f", ipatt, icov) << std::endl;
         }
 
-        const pattern_type& patt = bank_->getPairs().at(ipatt).first;
-        const pattern_attr& attr = bank_->getPairs().at(ipatt).second;
-
         // Check whether patterns are indeed sorted by popularity
-        pop = attr.n;
+        pop = pbreader.pb_popularity;
         assert(oldPop >= pop);
         oldPop = pop;
         nKept += pop;
-
-        if (pop < (unsigned) po_.minPopularity)  // cut off
-            break;
-
-        writer.pb_superstripIds->clear();
-        for (unsigned i=0; i<4; ++i) {  // 4 endcap disks
-            writer.pb_superstripIds->push_back(patt.at(i));
-        }
-        *(writer.pb_popularity)     = attr.n;
-        *(writer.pb_invPt_mean)     = (attr.invPt_mean);
-        *(writer.pb_invPt_sigma)    = std::sqrt(attr.invPt_variance);
-        *(writer.pb_cotTheta_mean)  = (attr.cotTheta_mean);
-        *(writer.pb_cotTheta_sigma) = std::sqrt(attr.cotTheta_variance);
-        *(writer.pb_phi_mean)       = (attr.phi_mean);
-        *(writer.pb_phi_sigma)      = std::sqrt(attr.phi_variance);
-        *(writer.pb_z0_mean)        = (attr.z0_mean);
-        *(writer.pb_z0_sigma)       = std::sqrt(attr.z0_variance);
-        writer.fillPatternBank();
     }
 
-    long long nentries = writer.writeTree();
-    assert(npatterns == nentries);
-    assert(nKept == bankInfo_->count);
-
-    LogInfo("PatternGenerator", verbose_) << "After sorting by popularity, max coverage = " << bankInfo_->coverage << std::endl;
-    LogInfo("PatternGenerator", verbose_) << "  N(90% cov) = " << n90 << " popularity = " << bank_->getPairs().at(n90).second.n << std::endl;
-    LogInfo("PatternGenerator", verbose_) << "  N(95% cov) = " << n95 << " popularity = " << bank_->getPairs().at(n95).second.n << std::endl;
-    LogInfo("PatternGenerator", verbose_) << "  N(99% cov) = " << n99 << " popularity = " << bank_->getPairs().at(n99).second.n << std::endl;
+    LogInfo("PatternGenerator", verbose_) << "After sorting by popularity, max coverage = " << coverage << std::endl;
+    LogInfo("PatternGenerator", verbose_) << "  N(90% cov) = " << n90 << " popularity = " << pop90 << std::endl;
+    LogInfo("PatternGenerator", verbose_) << "  N(95% cov) = " << n95 << " popularity = " << pop95 << std::endl;
+    LogInfo("PatternGenerator", verbose_) << "  N(99% cov) = " << n99 << " popularity = " << pop99 << std::endl;
 }
