@@ -7,9 +7,6 @@
 
 #include "L1TMuonSimulations/MuonTools/interface/ModuleIdFunctor.h"
 
-#include "tmp/PrimitiveConverterTmp.h"
-using namespace TMP;
-
 
 NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& iConfig) :
   //wireTag_(iConfig.getParameter<edm::InputTag>("wireTag")),
@@ -227,7 +224,7 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 // Get ConvertedHit
                 std::vector<L1TMuon::TriggerPrimitive> tester;
                 tester.push_back(*it);
-                const std::vector<ConvertedHit>& convHits = PrimConv(tester, isector);
+                const std::vector<ConvertedHit>& convHits = primConv_.convert(tester, isector);
 
                 ConvertedHit convHit;
                 if (convHits.size()) {
