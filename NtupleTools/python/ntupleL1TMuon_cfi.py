@@ -8,6 +8,15 @@ ntupleCSCTriggerPrimitives = cms.EDProducer('NtupleCSCTriggerPrimitives',
     maxN = cms.uint32(999999)
 )
 
+ntupleCSCRegionalCandidates = cms.EDProducer('NtupleCSCRegionalCandidates',
+    corrlctTag = cms.InputTag('simCscTriggerPrimitiveDigis','MPCSORTED'),
+    trackTag = cms.InputTag("simEmtfDigis","EMTF"),
+    prefix = cms.string('CSCTracks@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
+
 ntupleRPCTriggerPrimitives = cms.EDProducer('NtupleRPCTriggerPrimitives',
     inputTag = cms.InputTag('simMuonRPCDigis'),
     prefix = cms.string('RPCStubs@'),
@@ -25,4 +34,4 @@ ntupleDTTriggerPrimitives = cms.EDProducer('NtupleDTTriggerPrimitives',
     maxN = cms.uint32(999999)
 )
 
-ntupleL1TMuon = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives)
+ntupleL1TMuon = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleCSCRegionalCandidates * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives)
