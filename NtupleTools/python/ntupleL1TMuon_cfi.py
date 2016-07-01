@@ -8,15 +8,6 @@ ntupleCSCTriggerPrimitives = cms.EDProducer('NtupleCSCTriggerPrimitives',
     maxN = cms.uint32(999999)
 )
 
-ntupleCSCRegionalCandidates = cms.EDProducer('NtupleCSCRegionalCandidates',
-    corrlctTag = cms.InputTag('simCscTriggerPrimitiveDigis','MPCSORTED'),
-    trackTag = cms.InputTag("simEmtfDigis","EMTF"),
-    prefix = cms.string('CSCTracks@'),
-    suffix = cms.string(''),
-    cut = cms.string(''),
-    maxN = cms.uint32(999999)
-)
-
 ntupleRPCTriggerPrimitives = cms.EDProducer('NtupleRPCTriggerPrimitives',
     inputTag = cms.InputTag('simMuonRPCDigis'),
     prefix = cms.string('RPCStubs@'),
@@ -34,4 +25,29 @@ ntupleDTTriggerPrimitives = cms.EDProducer('NtupleDTTriggerPrimitives',
     maxN = cms.uint32(999999)
 )
 
-ntupleL1TMuon = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleCSCRegionalCandidates * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives)
+ntupleEMTFTriggerPrimitives = cms.EDProducer('NtupleEMTFTriggerPrimitives',
+    stubTag = cms.InputTag('simEmtfDigis','EMTF'),
+    prefix = cms.string('EMTFStubs@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
+
+ntupleEMTFTriggerTracks = cms.EDProducer('NtupleEMTFTriggerTracks',
+    stubTag = cms.InputTag('simEmtfDigis','EMTF'),
+    trackTag = cms.InputTag('simEmtfDigis','EMTF'),
+    prefix = cms.string('EMTFTracks@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
+
+ntupleEMTFRegionalCandidates = cms.EDProducer('NtupleEMTFRegionalCandidates',
+    trackTag = cms.InputTag("simEmtfDigis","EMTF"),
+    prefix = cms.string('EMTFCands@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
+
+ntupleL1TMuon = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives * ntupleEMTFTriggerPrimitives * ntupleEMTFTriggerTracks * ntupleEMTFRegionalCandidates)

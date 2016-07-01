@@ -1,5 +1,5 @@
-#ifndef NtupleTools_NtupleCSCRegionalCandidates_h_
-#define NtupleTools_NtupleCSCRegionalCandidates_h_
+#ifndef NtupleTools_NtupleEMTFRegionalCandidates_h_
+#define NtupleTools_NtupleEMTFRegionalCandidates_h_
 
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleCommon.h"
 
@@ -14,24 +14,21 @@
 //#include "L1Trigger/L1TMuon/interface/deprecate/GeometryTranslator.h"      // why deprecate?
 
 
-class NtupleCSCRegionalCandidates : public edm::EDProducer {
+class NtupleEMTFRegionalCandidates : public edm::EDProducer {
   public:
-    explicit NtupleCSCRegionalCandidates(const edm::ParameterSet&);
-    ~NtupleCSCRegionalCandidates();
+    explicit NtupleEMTFRegionalCandidates(const edm::ParameterSet&);
+    ~NtupleEMTFRegionalCandidates();
 
   private:
     //virtual void beginJob();
     virtual void produce(edm::Event&, const edm::EventSetup&);
     //virtual void endJob();
-
-    const edm::InputTag corrlctTag_;
     const edm::InputTag trackTag_;
     const std::string   prefix_, suffix_;
 
     StringCutObjectSelector<l1t::RegionalMuonCandBxCollection> selector_;
     const unsigned maxN_;
 
-    edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection>    corrlctToken_;
     edm::EDGetTokenT<l1t::RegionalMuonCandBxCollection> trackToken_;
 };
 

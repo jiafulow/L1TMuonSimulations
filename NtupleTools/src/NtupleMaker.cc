@@ -57,6 +57,8 @@ void NtupleMaker::registerBranches() {
     leafmap[edm::TypeID(typeid(UShort_t)).friendlyClassName()] = USHORT_T;
     leafmap[edm::TypeID(typeid(Int_t)).friendlyClassName()] = INT_T;
     leafmap[edm::TypeID(typeid(UInt_t)).friendlyClassName()] = UINT_T;
+    leafmap[edm::TypeID(typeid(int64_t)).friendlyClassName()] = INT64_T;
+    leafmap[edm::TypeID(typeid(uint64_t)).friendlyClassName()] = UINT64_T;
     leafmap[edm::TypeID(typeid(Long64_t)).friendlyClassName()] = LONG64_T;
     leafmap[edm::TypeID(typeid(ULong64_t)).friendlyClassName()] = ULONG64_T;
     leafmap[edm::TypeID(typeid(Bool_t)).friendlyClassName()] = BOOL_T;
@@ -70,6 +72,8 @@ void NtupleMaker::registerBranches() {
     leafmap[edm::TypeID(typeid(std::vector<UShort_t>)).friendlyClassName()] = USHORT_V;
     leafmap[edm::TypeID(typeid(std::vector<Int_t>)).friendlyClassName()] = INT_V;
     leafmap[edm::TypeID(typeid(std::vector<UInt_t>)).friendlyClassName()] = UINT_V;
+    leafmap[edm::TypeID(typeid(std::vector<int64_t>)).friendlyClassName()] = INT64_V;
+    leafmap[edm::TypeID(typeid(std::vector<uint64_t>)).friendlyClassName()] = UINT64_V;
     leafmap[edm::TypeID(typeid(std::vector<Long64_t>)).friendlyClassName()] = LONG64_V;
     leafmap[edm::TypeID(typeid(std::vector<ULong64_t>)).friendlyClassName()] = ULONG64_V;
     leafmap[edm::TypeID(typeid(std::vector<Bool_t>)).friendlyClassName()] = BOOL_V;
@@ -83,6 +87,8 @@ void NtupleMaker::registerBranches() {
     leafmap[edm::TypeID(typeid(std::vector<std::vector<UShort_t> >)).friendlyClassName()] = USHORT_V_V;
     leafmap[edm::TypeID(typeid(std::vector<std::vector<Int_t> >)).friendlyClassName()] = INT_V_V;
     leafmap[edm::TypeID(typeid(std::vector<std::vector<UInt_t> >)).friendlyClassName()] = UINT_V_V;
+    leafmap[edm::TypeID(typeid(std::vector<std::vector<int64_t> >)).friendlyClassName()] = INT64_V_V;
+    leafmap[edm::TypeID(typeid(std::vector<std::vector<uint64_t> >)).friendlyClassName()] = UINT64_V_V;
     leafmap[edm::TypeID(typeid(std::vector<std::vector<Long64_t> >)).friendlyClassName()] = LONG64_V_V;
     leafmap[edm::TypeID(typeid(std::vector<std::vector<ULong64_t> >)).friendlyClassName()] = ULONG64_V_V;
     leafmap[edm::TypeID(typeid(std::vector<std::vector<Bool_t> >)).friendlyClassName()] = BOOL_V_V;
@@ -128,6 +134,8 @@ void NtupleMaker::registerBranches() {
                 case USHORT_T       : registerBranch<UShort_t>                               (selection, "s"); break;
                 case INT_T          : registerBranch<Int_t>                                  (selection, "I"); break;
                 case UINT_T         : registerBranch<UInt_t>                                 (selection, "i"); break;
+                case INT64_T        : registerBranch<int64_t>                                (selection, "L"); break;
+                case UINT64_T       : registerBranch<uint64_t>                               (selection, "l"); break;
                 case LONG64_T       : registerBranch<Long64_t>                               (selection, "L"); break;
                 case ULONG64_T      : registerBranch<ULong64_t>                              (selection, "l"); break;
                 case BOOL_T         : registerBranch<Bool_t>                                 (selection, "O"); break;
@@ -140,6 +148,8 @@ void NtupleMaker::registerBranches() {
                 case USHORT_V       : registerBranch<std::vector<UShort_t> >                 (selection,  ""); break;
                 case INT_V          : registerBranch<std::vector<Int_t> >                    (selection,  ""); break;
                 case UINT_V         : registerBranch<std::vector<UInt_t> >                   (selection,  ""); break;
+                case INT64_V        : registerBranch<std::vector<int64_t> >                  (selection,  ""); break;
+                case UINT64_V       : registerBranch<std::vector<uint64_t> >                 (selection,  ""); break;
                 case LONG64_V       : registerBranch<std::vector<Long64_t> >                 (selection,  ""); break;
                 case ULONG64_V      : registerBranch<std::vector<ULong64_t> >                (selection,  ""); break;
                 case BOOL_V         : registerBranch<std::vector<Bool_t> >                   (selection,  ""); break;
@@ -152,6 +162,8 @@ void NtupleMaker::registerBranches() {
                 case USHORT_V_V     : registerBranch<std::vector<std::vector<UShort_t> > >   (selection,  ""); break;
                 case INT_V_V        : registerBranch<std::vector<std::vector<Int_t> > >      (selection,  ""); break;
                 case UINT_V_V       : registerBranch<std::vector<std::vector<UInt_t> > >     (selection,  ""); break;
+                case INT64_V_V      : registerBranch<std::vector<std::vector<int64_t> > >    (selection,  ""); break;
+                case UINT64_V_V     : registerBranch<std::vector<std::vector<uint64_t> > >   (selection,  ""); break;
                 case LONG64_V_V     : registerBranch<std::vector<std::vector<Long64_t> > >   (selection,  ""); break;
                 case ULONG64_V_V    : registerBranch<std::vector<std::vector<ULong64_t> > >  (selection,  ""); break;
                 case BOOL_V_V       : registerBranch<std::vector<std::vector<Bool_t> > >     (selection,  ""); break;

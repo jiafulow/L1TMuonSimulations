@@ -32,11 +32,11 @@ class NtupleMaker : public edm::EDAnalyzer {
   public:
     // NOTE: STRING is not implemented
     enum LeafType {
-        CHAR_T=1, UCHAR_T  , SHORT_T   , USHORT_T  , INT_T  , UINT_T  , LONG64_T  , ULONG64_T  ,
+        CHAR_T=1, UCHAR_T  , SHORT_T   , USHORT_T  , INT_T  , UINT_T  , INT64_T  , UINT64_T  , LONG64_T  , ULONG64_T  ,
         BOOL_T  , FLOAT_T  , DOUBLE_T  , STRING_T  ,
-        CHAR_V  , UCHAR_V  , SHORT_V   , USHORT_V  , INT_V  , UINT_V  , LONG64_V  , ULONG64_V  ,
+        CHAR_V  , UCHAR_V  , SHORT_V   , USHORT_V  , INT_V  , UINT_V  , INT64_V  , UINT64_V  , LONG64_V  , ULONG64_V  ,
         BOOL_V  , FLOAT_V  , DOUBLE_V  , STRING_V  ,
-        CHAR_V_V, UCHAR_V_V, SHORT_V_V , USHORT_V_V, INT_V_V, UINT_V_V, LONG64_V_V, ULONG64_V_V,
+        CHAR_V_V, UCHAR_V_V, SHORT_V_V , USHORT_V_V, INT_V_V, UINT_V_V, INT64_V_V, UINT64_V_V, LONG64_V_V, ULONG64_V_V,
         BOOL_V_V, FLOAT_V_V, DOUBLE_V_V, STRING_V_V,
         STRING_INT_M, STRING_UINT_M, STRING_BOOL_M, STRING_FLOAT_M, STRING_DOUBLE_M, STRING_STRING_M,
         NumLeafTypes

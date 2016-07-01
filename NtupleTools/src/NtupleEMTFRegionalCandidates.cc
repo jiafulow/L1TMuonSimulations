@@ -1,18 +1,16 @@
-#include "L1TMuonSimulations/NtupleTools/interface/NtupleCSCRegionalCandidates.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleEMTFRegionalCandidates.h"
 
 #include "L1Trigger/L1TMuonEndCap/interface/PhiMemoryImage.h"
 #include "L1Trigger/L1TMuonEndCap/interface/EmulatorClasses.h"
 
 
-NtupleCSCRegionalCandidates::NtupleCSCRegionalCandidates(const edm::ParameterSet& iConfig) :
-  corrlctTag_(iConfig.getParameter<edm::InputTag>("corrlctTag")),
+NtupleEMTFRegionalCandidates::NtupleEMTFRegionalCandidates(const edm::ParameterSet& iConfig) :
   trackTag_(iConfig.getParameter<edm::InputTag>("trackTag")),
   prefix_  (iConfig.getParameter<std::string>("prefix")),
   suffix_  (iConfig.getParameter<std::string>("suffix")),
   selector_(iConfig.existsAs<std::string>("cut") ? iConfig.getParameter<std::string>("cut") : "", true),
   maxN_    (iConfig.getParameter<unsigned>("maxN")) {
 
-    corrlctToken_ = consumes<CSCCorrelatedLCTDigiCollection>(corrlctTag_);
     trackToken_ = consumes<l1t::RegionalMuonCandBxCollection>(trackTag_);
 
     produces<std::vector<int> >                (prefix_ + "hwPt"             + suffix_);
@@ -25,16 +23,15 @@ NtupleCSCRegionalCandidates::NtupleCSCRegionalCandidates(const edm::ParameterSet
     produces<std::vector<int> >                (prefix_ + "processor"        + suffix_);
     produces<std::vector<uint16_t> >           (prefix_ + "trackFinderType"  + suffix_);
     produces<std::vector<bool> >               (prefix_ + "hwHF"             + suffix_);
-    produces<std::vector<ULong64_t> >          (prefix_ + "dataword"         + suffix_);
-    //produces<std::vector<std::map<int,int> > > (prefix_ + "trackAddress"     + suffix_);
+    produces<std::vector<uint64_t> >           (prefix_ + "dataword"         + suffix_);
+    produces<std::vector<std::vector<int> > >  (prefix_ + "trackAddresses"   + suffix_);
     produces<unsigned>                         (prefix_ + "size"             + suffix_);
 }
 
-NtupleCSCRegionalCandidates::~NtupleCSCRegionalCandidates() {}
+NtupleEMTFRegionalCandidates::~NtupleEMTFRegionalCandidates() {}
 
-void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void NtupleEMTFRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
-    // regional muon candidates
     std::auto_ptr<std::vector<int> >                v_hwPt            (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                v_hwPhi           (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                v_hwEta           (new std::vector<int>());
@@ -45,8 +42,8 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
     std::auto_ptr<std::vector<int> >                v_processor       (new std::vector<int>());
     std::auto_ptr<std::vector<uint16_t> >           v_trackFinderType (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<bool> >               v_hwHF            (new std::vector<bool>());
-    std::auto_ptr<std::vector<ULong64_t> >          v_dataword        (new std::vector<ULong64_t>());
-    //std::auto_ptr<std::vector<std::map<int,int> > > v_trackAddress    (new std::vector<std::map<int,int> >());
+    std::auto_ptr<std::vector<uint64_t> >           v_dataword        (new std::vector<uint64_t>());
+    std::auto_ptr<std::vector<std::vector<int> > >  v_trackAddresses  (new std::vector<std::vector<int> >());
     std::auto_ptr<unsigned>                         v_size            (new unsigned(0));
 
     // _________________________________________________________________________
@@ -56,11 +53,18 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
         iEvent.getByToken(trackToken_, tracks);
 
     if (tracks.isValid()) {
-        //edm::LogInfo("NtupleCSCRegionalCandidates") << "Size: " << tracks->size();
-        edm::LogInfo("NtupleCSCRegionalCandidates") << "Size: ??";
+        //edm::LogInfo("NtupleEMTFRegionalCandidates") << "Size: " << tracks->size();
+        edm::LogInfo("NtupleEMTFRegionalCandidates") << "Size: ??";
 
         unsigned n = 0;
         for (l1t::RegionalMuonCandBxCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
+
+            std::vector<int> trackAddresses;
+            for (std::map<int, int>::const_iterator ita = it->trackAddress().begin(); ita != it->trackAddress().end(); ++ita) {
+                trackAddresses.push_back(ita->second);
+            }
+
+            // Fill the vectors
             v_hwPt           ->push_back(it->hwPt());
             v_hwPhi          ->push_back(it->hwPhi());
             v_hwEta          ->push_back(it->hwEta());
@@ -72,13 +76,14 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
             v_trackFinderType->push_back(it->trackFinderType());
             v_hwHF           ->push_back(it->hwHF());
             v_dataword       ->push_back(it->dataword());
+            v_trackAddresses ->push_back(trackAddresses);
 
             n++;
         }
         *v_size = v_hwPt->size();
 
     } else {
-        edm::LogError("NtupleCSCRegionalCandidates") << "Cannot get the product: " << trackTag_;
+        edm::LogError("NtupleEMTFRegionalCandidates") << "Cannot get the product: " << trackTag_;
     }
 
     //__________________________________________________________________________
@@ -93,6 +98,6 @@ void NtupleCSCRegionalCandidates::produce(edm::Event& iEvent, const edm::EventSe
     iEvent.put(v_trackFinderType , prefix_ + "trackFinderType"  + suffix_);
     iEvent.put(v_hwHF            , prefix_ + "hwHF"             + suffix_);
     iEvent.put(v_dataword        , prefix_ + "dataword"         + suffix_);
-    //iEvent.put(v_trackAddress    , prefix_ + "trackAddress"     + suffix_);
+    iEvent.put(v_trackAddresses  , prefix_ + "trackAddresses"   + suffix_);
     iEvent.put(v_size            , prefix_ + "size"             + suffix_);
 }
