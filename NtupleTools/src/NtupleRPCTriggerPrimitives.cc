@@ -15,14 +15,14 @@ NtupleRPCTriggerPrimitives::NtupleRPCTriggerPrimitives(const edm::ParameterSet& 
     token_ = consumes<RPCDigiCollection>(inputTag_);
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
-    //produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
-    produces<std::vector<int> >               (prefix_ + "iregion"         + suffix_);
-    produces<std::vector<int> >               (prefix_ + "iring"           + suffix_);
-    produces<std::vector<int> >               (prefix_ + "istation"        + suffix_);
-    produces<std::vector<int> >               (prefix_ + "isector"         + suffix_);
-    produces<std::vector<int> >               (prefix_ + "ilayer"          + suffix_);
-    produces<std::vector<int> >               (prefix_ + "isubsector"      + suffix_);
-    produces<std::vector<int> >               (prefix_ + "iroll"           + suffix_);
+    //produces<std::vector<int16_t> >          (prefix_ + "subsystem"       + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "iregion"         + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "iring"           + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "istation"        + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "isector"         + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "ilayer"          + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "isubsector"      + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "iroll"           + suffix_);
     produces<std::vector<unsigned> >          (prefix_ + "strip"           + suffix_);
     produces<std::vector<unsigned> >          (prefix_ + "layer"           + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "bx"              + suffix_);
@@ -45,14 +45,14 @@ void NtupleRPCTriggerPrimitives::beginRun(const edm::Run& iRun, const edm::Event
 void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
-    //std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<int> >               v_iregion         (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_iring           (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_istation        (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_isector         (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_ilayer          (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_isubsector      (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_iroll           (new std::vector<int>());
+    //std::auto_ptr<std::vector<int16_t> >           v_subsystem       (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_iregion         (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_iring           (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_istation        (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_isector         (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_ilayer          (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_isubsector      (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_iroll           (new std::vector<int16_t>());
     std::auto_ptr<std::vector<unsigned> >          v_strip           (new std::vector<unsigned>());
     std::auto_ptr<std::vector<unsigned> >          v_layer           (new std::vector<unsigned>());
     std::auto_ptr<std::vector<uint16_t> >          v_bx              (new std::vector<uint16_t>());

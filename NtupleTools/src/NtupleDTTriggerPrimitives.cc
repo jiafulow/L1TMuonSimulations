@@ -17,7 +17,7 @@ NtupleDTTriggerPrimitives::NtupleDTTriggerPrimitives(const edm::ParameterSet& iC
     chambThToken_ = consumes<L1MuDTChambThContainer>(chambThTag_);
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
-    //produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
+    //produces<std::vector<int16_t> >           (prefix_ + "subsystem"       + suffix_);
     produces<std::vector<float> >             (prefix_ + "globalPhi"       + suffix_);
     produces<std::vector<float> >             (prefix_ + "globalTheta"     + suffix_);
     produces<std::vector<float> >             (prefix_ + "globalEta"       + suffix_);
@@ -37,7 +37,7 @@ void NtupleDTTriggerPrimitives::beginRun(const edm::Run& iRun, const edm::EventS
 void NtupleDTTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
-    //std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
+    //std::auto_ptr<std::vector<int16_t> >           v_subsystem       (new std::vector<int16_t>());
     std::auto_ptr<std::vector<float> >             v_globalPhi       (new std::vector<float>());
     std::auto_ptr<std::vector<float> >             v_globalTheta     (new std::vector<float>());
     std::auto_ptr<std::vector<float> >             v_globalEta       (new std::vector<float>());

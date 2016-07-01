@@ -30,13 +30,14 @@ NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& 
     corrlctToken_ = consumes<CSCCorrelatedLCTDigiCollection>(corrlctTag_);
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
-    //produces<std::vector<uint16_t> >          (prefix_ + "subsystem"       + suffix_);
-    //produces<std::vector<uint16_t> >          (prefix_ + "iendcap"         + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "istation"        + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "iring"           + suffix_);
-    produces<std::vector<uint32_t> >          (prefix_ + "ichamber"        + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "isector"         + suffix_);
-    produces<std::vector<uint16_t> >          (prefix_ + "isubsector"      + suffix_);
+    produces<std::vector<uint32_t> >          (prefix_ + "moduleId"        + suffix_);
+    //produces<std::vector<int16_t> >           (prefix_ + "subsystem"       + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "iendcap"         + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "istation"        + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "iring"           + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "ichamber"        + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "isector"         + suffix_);
+    produces<std::vector<int16_t> >           (prefix_ + "isubsector"      + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "trknmb"          + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "valid"           + suffix_);
     produces<std::vector<uint16_t> >          (prefix_ + "quality"         + suffix_);
@@ -124,13 +125,14 @@ float getConvGlobalEta(unsigned int isector, int itheta) {
 void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
-    //std::auto_ptr<std::vector<uint16_t> >          v_subsystem       (new std::vector<uint16_t>());
-    //std::auto_ptr<std::vector<uint16_t> >          v_iendcap         (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_istation        (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_iring           (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint32_t> >          v_ichamber        (new std::vector<uint32_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_isector         (new std::vector<uint16_t>());
-    std::auto_ptr<std::vector<uint16_t> >          v_isubsector      (new std::vector<uint16_t>());
+    std::auto_ptr<std::vector<uint32_t> >          v_moduleId        (new std::vector<uint32_t>());
+    //std::auto_ptr<std::vector<int16_t> >           v_subsystem       (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_iendcap         (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_istation        (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_iring           (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_ichamber        (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_isector         (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<int16_t> >           v_isubsector      (new std::vector<int16_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_trknmb          (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_valid           (new std::vector<uint16_t>());
     std::auto_ptr<std::vector<uint16_t> >          v_quality         (new std::vector<uint16_t>());
@@ -206,9 +208,11 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 const CSCDetId cscDet = it->detId<CSCDetId>();
                 const L1TMuon::TriggerPrimitive::CSCData cscData = it->getCSCData();
 
-                const unsigned int ichamber = getModuleId(it->rawId());
-                const unsigned int isector = (cscDet.endcap()-1)*6 + (cscDet.triggerSector()-1);
-                const unsigned int isubsector = (cscDet.station() != 1) ? 0 : ((cscDet.chamber()%6 > 2) ? 1 : 2);
+                assert(cscDet.rawId() == it->rawId());
+                const unsigned int moduleId = getModuleId(cscDet);
+
+                const int isector = (cscDet.endcap()-1)*6 + (cscDet.triggerSector()-1);
+                const int isubsector = (cscDet.station() != 1) ? 0 : ((cscDet.chamber()%6 > 2) ? 1 : 2);
 
                 // Global coordinates
                 //const double globalPhi = theGeometryTranslator_->calculateGlobalPhi(*it);
@@ -233,14 +237,14 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                     convHit.SetNull();  // why fail?
                 }
 
-
                 // Fill the vectors
                 v_geoId           ->push_back(it->rawId().rawId());
+                v_moduleId        ->push_back(moduleId);
                 //v_subsystem       ->push_back(it->subsystem());
-                //v_iendcap         ->push_back(cscDet.endcap());
+                v_iendcap         ->push_back(cscDet.endcap());
                 v_istation        ->push_back(cscDet.station());
                 v_iring           ->push_back(cscDet.ring());
-                v_ichamber        ->push_back(ichamber);
+                v_ichamber        ->push_back(cscDet.chamber());
                 v_isector         ->push_back(isector);
                 v_isubsector      ->push_back(isubsector);
                 v_trknmb          ->push_back(cscData.trknmb);
@@ -286,8 +290,9 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
 
     //__________________________________________________________________________
     iEvent.put(v_geoId           , prefix_ + "geoId"           + suffix_);
+    iEvent.put(v_moduleId        , prefix_ + "moduleId"        + suffix_);
     //iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
-    //iEvent.put(v_iendcap         , prefix_ + "iendcap"         + suffix_);
+    iEvent.put(v_iendcap         , prefix_ + "iendcap"         + suffix_);
     iEvent.put(v_istation        , prefix_ + "istation"        + suffix_);
     iEvent.put(v_iring           , prefix_ + "iring"           + suffix_);
     iEvent.put(v_ichamber        , prefix_ + "ichamber"        + suffix_);
