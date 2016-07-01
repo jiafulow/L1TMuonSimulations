@@ -14,6 +14,7 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleTrackingParticles.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleTrackingVertices.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleMixedSimHits.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleRecoMuons.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleCSCTriggerPrimitives.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleCSCRegionalCandidates.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleRPCTriggerPrimitives.h"
@@ -33,6 +34,7 @@ DEFINE_FWK_MODULE(NtupleSimHits);
 DEFINE_FWK_MODULE(NtupleTrackingParticles);
 DEFINE_FWK_MODULE(NtupleTrackingVertices);
 DEFINE_FWK_MODULE(NtupleMixedSimHits);
+DEFINE_FWK_MODULE(NtupleRecoMuons);
 DEFINE_FWK_MODULE(NtupleCSCTriggerPrimitives);
 DEFINE_FWK_MODULE(NtupleCSCRegionalCandidates);
 DEFINE_FWK_MODULE(NtupleRPCTriggerPrimitives);
