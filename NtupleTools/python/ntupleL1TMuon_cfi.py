@@ -25,6 +25,15 @@ ntupleDTTriggerPrimitives = cms.EDProducer('NtupleDTTriggerPrimitives',
     maxN = cms.uint32(999999)
 )
 
+ntupleLegacyCSCTFTriggerTracks = cms.EDProducer('NtupleLegacyCSCTFTriggerTracks',
+    stubTag = cms.InputTag('csctfDigis'),
+    trackTag = cms.InputTag('csctfDigis'),
+    prefix = cms.string('LegCSCTFTracks@'),
+    suffix = cms.string(''),
+    cut = cms.string(''),
+    maxN = cms.uint32(999999)
+)
+
 ntupleEMTFTriggerPrimitives = cms.EDProducer('NtupleEMTFTriggerPrimitives',
     stubTag = cms.InputTag('simEmtfDigis','EMTF'),
     prefix = cms.string('EMTFStubs@'),
@@ -68,6 +77,6 @@ ntupleUnpackedEMTFTriggerTracks = cms.EDProducer('NtupleUnpackedEMTFTriggerTrack
 )
 
 
-ntupleL1TMuon = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives * ntupleEMTFTriggerPrimitives * ntupleEMTFTriggerTracks * ntupleEMTFRegionalCandidates)
+ntupleL1TMuon = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives * ntupleLegacyCSCTFTriggerTracks * ntupleEMTFTriggerPrimitives * ntupleEMTFTriggerTracks * ntupleEMTFRegionalCandidates)
 ntupleL1TMuonUnpacker = cms.Sequence(ntupleUnpackedEMTFTriggerPrimitives * ntupleUnpackedEMTFTriggerTracks)
 

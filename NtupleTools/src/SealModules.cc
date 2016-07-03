@@ -18,6 +18,7 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleCSCTriggerPrimitives.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleRPCTriggerPrimitives.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleDTTriggerPrimitives.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleLegacyCSCTFTriggerTracks.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleEMTFTriggerPrimitives.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleEMTFTriggerTracks.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleEMTFRegionalCandidates.h"
@@ -42,6 +43,7 @@ DEFINE_FWK_MODULE(NtupleRecoMuons);
 DEFINE_FWK_MODULE(NtupleCSCTriggerPrimitives);
 DEFINE_FWK_MODULE(NtupleRPCTriggerPrimitives);
 DEFINE_FWK_MODULE(NtupleDTTriggerPrimitives);
+DEFINE_FWK_MODULE(NtupleLegacyCSCTFTriggerTracks);
 DEFINE_FWK_MODULE(NtupleEMTFTriggerPrimitives);
 DEFINE_FWK_MODULE(NtupleEMTFTriggerTracks);
 DEFINE_FWK_MODULE(NtupleEMTFRegionalCandidates);
