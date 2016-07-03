@@ -1,9 +1,9 @@
-#include "L1TMuonSimulations/NtupleTools/interface/NtupleEMTFTriggerTracks.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleUnpackedEMTFTriggerTracks.h"
 
-#include "L1TMuonSimulations/NtupleTools/interface/MapEMTFTriggerPrimitives.h"
+#include "L1TMuonSimulations/NtupleTools/interface/MapUnpackedEMTFTriggerPrimitives.h"
 
 
-NtupleEMTFTriggerTracks::NtupleEMTFTriggerTracks(const edm::ParameterSet& iConfig) :
+NtupleUnpackedEMTFTriggerTracks::NtupleUnpackedEMTFTriggerTracks(const edm::ParameterSet& iConfig) :
   stubTag_ (iConfig.getParameter<edm::InputTag>("stubTag")),
   trackTag_(iConfig.getParameter<edm::InputTag>("trackTag")),
   prefix_  (iConfig.getParameter<std::string>("prefix")),
@@ -11,8 +11,8 @@ NtupleEMTFTriggerTracks::NtupleEMTFTriggerTracks(const edm::ParameterSet& iConfi
   selector_(iConfig.existsAs<std::string>("cut") ? iConfig.getParameter<std::string>("cut") : "", true),
   maxN_    (iConfig.getParameter<unsigned>("maxN")) {
 
-    stubToken_ = consumes<l1t::EMTFHitExtraCollection>(stubTag_);
-    trackToken_ = consumes<l1t::EMTFTrackExtraCollection>(trackTag_);
+    stubToken_ = consumes<l1t::EMTFHitCollection>(stubTag_);
+    trackToken_ = consumes<l1t::EMTFTrackCollection>(trackTag_);
 
     produces<std::vector<int16_t> >           (prefix_ + "iendcap"         + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "isector"         + suffix_);
@@ -61,28 +61,28 @@ NtupleEMTFTriggerTracks::NtupleEMTFTriggerTracks(const edm::ParameterSet& iConfi
     produces<std::vector<int16_t> >           (prefix_ + "hasNeighbor"     + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "allNeighbor"     + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "numHits"         + suffix_);
-    produces<std::vector<int16_t> >           (prefix_ + "firstBX"         + suffix_);
-    produces<std::vector<int16_t> >           (prefix_ + "secondBX"        + suffix_);
-    produces<std::vector<float> >             (prefix_ + "ptXML"           + suffix_);
-    produces<std::vector<int> >               (prefix_ + "thetaInt"        + suffix_);
-    produces<std::vector<float> >             (prefix_ + "thetaDeg"        + suffix_);
-    produces<std::vector<float> >             (prefix_ + "thetaRad"        + suffix_);
-    produces<std::vector<int16_t> >           (prefix_ + "type"            + suffix_);
-    produces<std::vector<int16_t> >           (prefix_ + "rank"            + suffix_);
-    produces<std::vector<int16_t> >           (prefix_ + "layer"           + suffix_);
-    produces<std::vector<int16_t> >           (prefix_ + "straightness"    + suffix_);
-    produces<std::vector<int> >               (prefix_ + "strip"           + suffix_);
-    produces<std::vector<bool> >              (prefix_ + "isGMT"           + suffix_);
-    produces<std::vector<int> >               (prefix_ + "numHitsExtra"    + suffix_);
+    //produces<std::vector<int16_t> >           (prefix_ + "firstBX"         + suffix_);
+    //produces<std::vector<int16_t> >           (prefix_ + "secondBX"        + suffix_);
+    //produces<std::vector<float> >             (prefix_ + "ptXML"           + suffix_);
+    //produces<std::vector<int> >               (prefix_ + "thetaInt"        + suffix_);
+    //produces<std::vector<float> >             (prefix_ + "thetaDeg"        + suffix_);
+    //produces<std::vector<float> >             (prefix_ + "thetaRad"        + suffix_);
+    //produces<std::vector<int16_t> >           (prefix_ + "type"            + suffix_);
+    //produces<std::vector<int16_t> >           (prefix_ + "rank"            + suffix_);
+    //produces<std::vector<int16_t> >           (prefix_ + "layer"           + suffix_);
+    //produces<std::vector<int16_t> >           (prefix_ + "straightness"    + suffix_);
+    //produces<std::vector<int> >               (prefix_ + "strip"           + suffix_);
+    //produces<std::vector<bool> >              (prefix_ + "isGMT"           + suffix_);
+    //produces<std::vector<int> >               (prefix_ + "numHitsExtra"    + suffix_);
     //produces<std::vector<std::vector<int> > > (prefix_ + "phis"            + suffix_);
     //produces<std::vector<std::vector<int> > > (prefix_ + "thetas"          + suffix_);
     produces<std::vector<std::vector<unsigned> > > (prefix_ + "stubRefs"        + suffix_);
     produces<unsigned>                        (prefix_ + "size"            + suffix_);
 }
 
-NtupleEMTFTriggerTracks::~NtupleEMTFTriggerTracks() {}
+NtupleUnpackedEMTFTriggerTracks::~NtupleUnpackedEMTFTriggerTracks() {}
 
-void NtupleEMTFTriggerTracks::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void NtupleUnpackedEMTFTriggerTracks::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<int16_t> >           v_iendcap         (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_isector         (new std::vector<int16_t>());
@@ -131,19 +131,19 @@ void NtupleEMTFTriggerTracks::produce(edm::Event& iEvent, const edm::EventSetup&
     std::auto_ptr<std::vector<int16_t> >           v_hasNeighbor     (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_allNeighbor     (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_numHits         (new std::vector<int16_t>());
-    std::auto_ptr<std::vector<int16_t> >           v_firstBX         (new std::vector<int16_t>());
-    std::auto_ptr<std::vector<int16_t> >           v_secondBX        (new std::vector<int16_t>());
-    std::auto_ptr<std::vector<float> >             v_ptXML           (new std::vector<float>());
-    std::auto_ptr<std::vector<int> >               v_thetaInt        (new std::vector<int>());
-    std::auto_ptr<std::vector<float> >             v_thetaDeg        (new std::vector<float>());
-    std::auto_ptr<std::vector<float> >             v_thetaRad        (new std::vector<float>());
-    std::auto_ptr<std::vector<int16_t> >           v_type            (new std::vector<int16_t>());
-    std::auto_ptr<std::vector<int16_t> >           v_rank            (new std::vector<int16_t>());
-    std::auto_ptr<std::vector<int16_t> >           v_layer           (new std::vector<int16_t>());
-    std::auto_ptr<std::vector<int16_t> >           v_straightness    (new std::vector<int16_t>());
-    std::auto_ptr<std::vector<int> >               v_strip           (new std::vector<int>());
-    std::auto_ptr<std::vector<bool> >              v_isGMT           (new std::vector<bool>());
-    std::auto_ptr<std::vector<int> >               v_numHitsExtra    (new std::vector<int>());
+    //std::auto_ptr<std::vector<int16_t> >           v_firstBX         (new std::vector<int16_t>());
+    //std::auto_ptr<std::vector<int16_t> >           v_secondBX        (new std::vector<int16_t>());
+    //std::auto_ptr<std::vector<float> >             v_ptXML           (new std::vector<float>());
+    //std::auto_ptr<std::vector<int> >               v_thetaInt        (new std::vector<int>());
+    //std::auto_ptr<std::vector<float> >             v_thetaDeg        (new std::vector<float>());
+    //std::auto_ptr<std::vector<float> >             v_thetaRad        (new std::vector<float>());
+    //std::auto_ptr<std::vector<int16_t> >           v_type            (new std::vector<int16_t>());
+    //std::auto_ptr<std::vector<int16_t> >           v_rank            (new std::vector<int16_t>());
+    //std::auto_ptr<std::vector<int16_t> >           v_layer           (new std::vector<int16_t>());
+    //std::auto_ptr<std::vector<int16_t> >           v_straightness    (new std::vector<int16_t>());
+    //std::auto_ptr<std::vector<int> >               v_strip           (new std::vector<int>());
+    //std::auto_ptr<std::vector<bool> >              v_isGMT           (new std::vector<bool>());
+    //std::auto_ptr<std::vector<int> >               v_numHitsExtra    (new std::vector<int>());
     //std::auto_ptr<std::vector<std::vector<int> > > v_phis            (new std::vector<std::vector<int> >());
     //std::auto_ptr<std::vector<std::vector<int> > > v_thetas          (new std::vector<std::vector<int> >());
     std::auto_ptr<std::vector<std::vector<unsigned> > > v_stubRefs        (new std::vector<std::vector<unsigned> >());
@@ -151,25 +151,25 @@ void NtupleEMTFTriggerTracks::produce(edm::Event& iEvent, const edm::EventSetup&
 
 
     //__________________________________________________________________________
-    edm::Handle<l1t::EMTFHitExtraCollection> stubs;
+    edm::Handle<l1t::EMTFHitCollection> stubs;
     //iEvent.getByLabel(stubTag_, stubs);
     if (!stubToken_.isUninitialized())
         iEvent.getByToken(stubToken_, stubs);
 
-    MapEMTFTriggerPrimitives stubMap;
+    MapUnpackedEMTFTriggerPrimitives stubMap;
     stubMap.setup(stubs);
 
     //__________________________________________________________________________
-    edm::Handle<l1t::EMTFTrackExtraCollection> tracks;
+    edm::Handle<l1t::EMTFTrackCollection> tracks;
     //iEvent.getByLabel(trackTag_, tracks);
     if (!trackToken_.isUninitialized())
         iEvent.getByToken(trackToken_, tracks);
 
     if (tracks.isValid()) {
-        edm::LogInfo("NtupleEMTFTriggerTracks") << "Size: " << tracks->size();
+        edm::LogInfo("NtupleUnpackedEMTFTriggerTracks") << "Size: " << tracks->size();
 
         unsigned n = 0;
-        for (l1t::EMTFTrackExtraCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
+        for (l1t::EMTFTrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
             if (n >= maxN_)
                 break;
             if (!selector_(*it))
@@ -177,10 +177,10 @@ void NtupleEMTFTriggerTracks::produce(edm::Event& iEvent, const edm::EventSetup&
 
             // Get stubRefs
             std::vector<unsigned> myStubRefs;
-            for (std::vector<unsigned>::const_iterator itb = it->PtrHitExtraIndices()->begin(); itb != it->PtrHitExtraIndices()->end(); ++itb) {
-                MapEMTFTriggerPrimitives::StubRef stubRef(stubs, *itb);
+            for (std::vector<unsigned>::const_iterator itb = it->PtrHitIndices()->begin(); itb != it->PtrHitIndices()->end(); ++itb) {
+                MapUnpackedEMTFTriggerPrimitives::StubRef stubRef(stubs, *itb);
                 unsigned myStubRef = stubMap.get(stubRef);
-                assert(myStubRef == *itb);  // at the moment, MapEMTFTriggerPrimitives doesn't do anything
+                assert(myStubRef == *itb);  // at the moment, MapUnpackedEMTFTriggerPrimitives doesn't do anything
 
                 myStubRefs.push_back(myStubRef);
             }
@@ -233,19 +233,19 @@ void NtupleEMTFTriggerTracks::produce(edm::Event& iEvent, const edm::EventSetup&
             v_hasNeighbor     ->push_back(it->Has_neighbor());
             v_allNeighbor     ->push_back(it->All_neighbor());
             v_numHits         ->push_back(it->NumHits());
-            v_firstBX         ->push_back(it->First_BX());
-            v_secondBX        ->push_back(it->Second_BX());
-            v_ptXML           ->push_back(it->Pt_XML());
-            v_thetaInt        ->push_back(it->Theta_int());
-            v_thetaDeg        ->push_back(it->Theta_deg());
-            v_thetaRad        ->push_back(it->Theta_rad());
-            v_type            ->push_back(it->Type());
-            v_rank            ->push_back(it->Rank());
-            v_layer           ->push_back(it->Layer());
-            v_straightness    ->push_back(it->Straightness());
-            v_strip           ->push_back(it->Strip());
-            v_isGMT           ->push_back(it->IsGMT());
-            v_numHitsExtra    ->push_back(it->NumHitsExtra());
+            //v_firstBX         ->push_back(it->First_BX());
+            //v_secondBX        ->push_back(it->Second_BX());
+            //v_ptXML           ->push_back(it->Pt_XML());
+            //v_thetaInt        ->push_back(it->Theta_int());
+            //v_thetaDeg        ->push_back(it->Theta_deg());
+            //v_thetaRad        ->push_back(it->Theta_rad());
+            //v_type            ->push_back(it->Type());
+            //v_rank            ->push_back(it->Rank());
+            //v_layer           ->push_back(it->Layer());
+            //v_straightness    ->push_back(it->Straightness());
+            //v_strip           ->push_back(it->Strip());
+            //v_isGMT           ->push_back(it->IsGMT());
+            //v_numHitsExtra    ->push_back(it->NumHitsExtra());
             //v_phis            ->push_back(it->Phis());
             //v_thetas          ->push_back(it->Thetas());
             v_stubRefs        ->push_back(myStubRefs);
@@ -253,7 +253,7 @@ void NtupleEMTFTriggerTracks::produce(edm::Event& iEvent, const edm::EventSetup&
         *v_size = v_iendcap->size();
 
     } else {
-        edm::LogError("NtupleEMTFTriggerTracks") << "Cannot get the product: " << trackTag_;
+        edm::LogError("NtupleUnpackedEMTFTriggerTracks") << "Cannot get the product: " << trackTag_;
     }
 
 
@@ -305,19 +305,19 @@ void NtupleEMTFTriggerTracks::produce(edm::Event& iEvent, const edm::EventSetup&
     iEvent.put(v_hasNeighbor     , prefix_ + "hasNeighbor"     + suffix_);
     iEvent.put(v_allNeighbor     , prefix_ + "allNeighbor"     + suffix_);
     iEvent.put(v_numHits         , prefix_ + "numHits"         + suffix_);
-    iEvent.put(v_firstBX         , prefix_ + "firstBX"         + suffix_);
-    iEvent.put(v_secondBX        , prefix_ + "secondBX"        + suffix_);
-    iEvent.put(v_ptXML           , prefix_ + "ptXML"           + suffix_);
-    iEvent.put(v_thetaInt        , prefix_ + "thetaInt"        + suffix_);
-    iEvent.put(v_thetaDeg        , prefix_ + "thetaDeg"        + suffix_);
-    iEvent.put(v_thetaRad        , prefix_ + "thetaRad"        + suffix_);
-    iEvent.put(v_type            , prefix_ + "type"            + suffix_);
-    iEvent.put(v_rank            , prefix_ + "rank"            + suffix_);
-    iEvent.put(v_layer           , prefix_ + "layer"           + suffix_);
-    iEvent.put(v_straightness    , prefix_ + "straightness"    + suffix_);
-    iEvent.put(v_strip           , prefix_ + "strip"           + suffix_);
-    iEvent.put(v_isGMT           , prefix_ + "isGMT"           + suffix_);
-    iEvent.put(v_numHitsExtra    , prefix_ + "numHitsExtra"    + suffix_);
+    //iEvent.put(v_firstBX         , prefix_ + "firstBX"         + suffix_);
+    //iEvent.put(v_secondBX        , prefix_ + "secondBX"        + suffix_);
+    //iEvent.put(v_ptXML           , prefix_ + "ptXML"           + suffix_);
+    //iEvent.put(v_thetaInt        , prefix_ + "thetaInt"        + suffix_);
+    //iEvent.put(v_thetaDeg        , prefix_ + "thetaDeg"        + suffix_);
+    //iEvent.put(v_thetaRad        , prefix_ + "thetaRad"        + suffix_);
+    //iEvent.put(v_type            , prefix_ + "type"            + suffix_);
+    //iEvent.put(v_rank            , prefix_ + "rank"            + suffix_);
+    //iEvent.put(v_layer           , prefix_ + "layer"           + suffix_);
+    //iEvent.put(v_straightness    , prefix_ + "straightness"    + suffix_);
+    //iEvent.put(v_strip           , prefix_ + "strip"           + suffix_);
+    //iEvent.put(v_isGMT           , prefix_ + "isGMT"           + suffix_);
+    //iEvent.put(v_numHitsExtra    , prefix_ + "numHitsExtra"    + suffix_);
     //iEvent.put(v_phis            , prefix_ + "phis"            + suffix_);
     //iEvent.put(v_thetas          , prefix_ + "thetas"          + suffix_);
     iEvent.put(v_stubRefs        , prefix_ + "stubRefs"        + suffix_);

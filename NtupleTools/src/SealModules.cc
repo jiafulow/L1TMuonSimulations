@@ -21,6 +21,8 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleEMTFTriggerPrimitives.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleEMTFTriggerTracks.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleEMTFRegionalCandidates.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleUnpackedEMTFTriggerPrimitives.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleUnpackedEMTFTriggerTracks.h"
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleMaker.h"
 
 DEFINE_FWK_MODULE(NtupleBeamSpot);
@@ -43,5 +45,7 @@ DEFINE_FWK_MODULE(NtupleDTTriggerPrimitives);
 DEFINE_FWK_MODULE(NtupleEMTFTriggerPrimitives);
 DEFINE_FWK_MODULE(NtupleEMTFTriggerTracks);
 DEFINE_FWK_MODULE(NtupleEMTFRegionalCandidates);
+DEFINE_FWK_MODULE(NtupleUnpackedEMTFTriggerPrimitives);
+DEFINE_FWK_MODULE(NtupleUnpackedEMTFTriggerTracks);
 DEFINE_FWK_MODULE(NtupleMaker);
 
