@@ -26,7 +26,7 @@ class NtupleEMTFRegionalCandidates : public edm::EDProducer {
     const edm::InputTag trackTag_;
     const std::string   prefix_, suffix_;
 
-    StringCutObjectSelector<l1t::RegionalMuonCandBxCollection> selector_;
+    StringCutObjectSelector<l1t::RegionalMuonCand> selector_;
     const unsigned maxN_;
 
     edm::EDGetTokenT<l1t::RegionalMuonCandBxCollection> trackToken_;

@@ -1,8 +1,5 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleEMTFRegionalCandidates.h"
 
-#include "L1Trigger/L1TMuonEndCap/interface/PhiMemoryImage.h"
-#include "L1Trigger/L1TMuonEndCap/interface/EmulatorClasses.h"
-
 
 NtupleEMTFRegionalCandidates::NtupleEMTFRegionalCandidates(const edm::ParameterSet& iConfig) :
   trackTag_(iConfig.getParameter<edm::InputTag>("trackTag")),
@@ -25,6 +22,7 @@ NtupleEMTFRegionalCandidates::NtupleEMTFRegionalCandidates(const edm::ParameterS
     produces<std::vector<bool> >               (prefix_ + "hwHF"             + suffix_);
     produces<std::vector<uint64_t> >           (prefix_ + "dataword"         + suffix_);
     produces<std::vector<std::vector<int> > >  (prefix_ + "trackAddresses"   + suffix_);
+    produces<std::vector<int> >                (prefix_ + "bx"               + suffix_);
     produces<unsigned>                         (prefix_ + "size"             + suffix_);
 }
 
@@ -44,6 +42,7 @@ void NtupleEMTFRegionalCandidates::produce(edm::Event& iEvent, const edm::EventS
     std::auto_ptr<std::vector<bool> >               v_hwHF            (new std::vector<bool>());
     std::auto_ptr<std::vector<uint64_t> >           v_dataword        (new std::vector<uint64_t>());
     std::auto_ptr<std::vector<std::vector<int> > >  v_trackAddresses  (new std::vector<std::vector<int> >());
+    std::auto_ptr<std::vector<int> >                v_bx              (new std::vector<int>());
     std::auto_ptr<unsigned>                         v_size            (new unsigned(0));
 
     // _________________________________________________________________________
@@ -57,28 +56,37 @@ void NtupleEMTFRegionalCandidates::produce(edm::Event& iEvent, const edm::EventS
         edm::LogInfo("NtupleEMTFRegionalCandidates") << "Size: ??";
 
         unsigned n = 0;
-        for (l1t::RegionalMuonCandBxCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
+        for (int ibx = tracks->getFirstBX(); ibx != tracks->getLastBX(); ++ibx) {
 
-            std::vector<int> trackAddresses;
-            for (std::map<int, int>::const_iterator ita = it->trackAddress().begin(); ita != it->trackAddress().end(); ++ita) {
-                trackAddresses.push_back(ita->second);
+            for (l1t::RegionalMuonCandBxCollection::const_iterator it = tracks->begin(ibx); it != tracks->end(ibx); ++it) {
+                if (n >= maxN_)
+                    break;
+                if (!selector_(*it))
+                    continue;
+
+                // Save track addresses
+                std::vector<int> trackAddresses;
+                for (std::map<int, int>::const_iterator ita = it->trackAddress().begin(); ita != it->trackAddress().end(); ++ita) {
+                    trackAddresses.push_back(ita->second);
+                }
+
+                // Fill the vectors
+                v_hwPt           ->push_back(it->hwPt());
+                v_hwPhi          ->push_back(it->hwPhi());
+                v_hwEta          ->push_back(it->hwEta());
+                v_hwSign         ->push_back(it->hwSign());
+                v_hwSignValid    ->push_back(it->hwSignValid());
+                v_hwQual         ->push_back(it->hwQual());
+                v_link           ->push_back(it->link());
+                v_processor      ->push_back(it->processor());
+                v_trackFinderType->push_back(it->trackFinderType());
+                v_hwHF           ->push_back(it->hwHF());
+                v_dataword       ->push_back(it->dataword());
+                v_trackAddresses ->push_back(trackAddresses);
+                v_bx             ->push_back(ibx);
+
+                n++;
             }
-
-            // Fill the vectors
-            v_hwPt           ->push_back(it->hwPt());
-            v_hwPhi          ->push_back(it->hwPhi());
-            v_hwEta          ->push_back(it->hwEta());
-            v_hwSign         ->push_back(it->hwSign());
-            v_hwSignValid    ->push_back(it->hwSignValid());
-            v_hwQual         ->push_back(it->hwQual());
-            v_link           ->push_back(it->link());
-            v_processor      ->push_back(it->processor());
-            v_trackFinderType->push_back(it->trackFinderType());
-            v_hwHF           ->push_back(it->hwHF());
-            v_dataword       ->push_back(it->dataword());
-            v_trackAddresses ->push_back(trackAddresses);
-
-            n++;
         }
         *v_size = v_hwPt->size();
 
@@ -99,5 +107,6 @@ void NtupleEMTFRegionalCandidates::produce(edm::Event& iEvent, const edm::EventS
     iEvent.put(v_hwHF            , prefix_ + "hwHF"             + suffix_);
     iEvent.put(v_dataword        , prefix_ + "dataword"         + suffix_);
     iEvent.put(v_trackAddresses  , prefix_ + "trackAddresses"   + suffix_);
+    iEvent.put(v_bx              , prefix_ + "bx"               + suffix_);
     iEvent.put(v_size            , prefix_ + "size"             + suffix_);
 }
