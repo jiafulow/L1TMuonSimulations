@@ -25,6 +25,10 @@ class NtupleRPCTriggerPrimitives : public edm::EDProducer {
     virtual void beginRun(const edm::Run&, const edm::EventSetup&);
     //virtual void endRun(const edm::Run&, const edm::EventSetup&);
 
+    // Process RPC digis
+    virtual void extractPrimitives(edm::Handle<RPCDigiCollection> rpcDigis,
+                                   L1TMuon::TriggerPrimitiveCollection& out) const;
+
     // Event setup
     std::unique_ptr<L1TMuon::GeometryTranslator2> theGeometryTranslator_;
 

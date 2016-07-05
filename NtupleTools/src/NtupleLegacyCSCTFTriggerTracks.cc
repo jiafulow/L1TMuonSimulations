@@ -153,10 +153,10 @@ void NtupleLegacyCSCTFTriggerTracks::produce(edm::Event& iEvent, const edm::Even
 
     //__________________________________________________________________________
     // Utilities
-    edm::ParameterSet pset_ptLUT;
-    pset_ptLUT.addParameter<bool>("ReadPtLUT", false);
-    pset_ptLUT.addParameter<bool>("isBinary",  false);
-    CSCTFPtLUT ptLUT(pset_ptLUT, scales_, ptScale_);
+    edm::ParameterSet ptLUTConfig;
+    ptLUTConfig.addParameter<bool>("ReadPtLUT", false);
+    ptLUTConfig.addParameter<bool>("isBinary",  false);
+    CSCTFPtLUT ptLUT(ptLUTConfig, scales_, ptScale_);
 
     // David Curry unconvered this from somewhere, sometime
     static const float ptscaleOld[31] =  { 0,

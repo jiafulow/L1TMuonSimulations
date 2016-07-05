@@ -17,8 +17,8 @@ ntupleRPCTriggerPrimitives = cms.EDProducer('NtupleRPCTriggerPrimitives',
 )
 
 ntupleDTTriggerPrimitives = cms.EDProducer('NtupleDTTriggerPrimitives',
-    chambPhTag = cms.InputTag('simDtTriggerPrimitiveDigis'),
-    chambThTag = cms.InputTag('simDtTriggerPrimitiveDigis'),
+    dtPhTag = cms.InputTag('simDtTriggerPrimitiveDigis'),
+    dtThTag = cms.InputTag('simDtTriggerPrimitiveDigis'),
     prefix = cms.string('DTStubs@'),
     suffix = cms.string(''),
     cut = cms.string(''),

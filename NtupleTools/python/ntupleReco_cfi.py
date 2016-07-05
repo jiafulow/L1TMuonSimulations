@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 goodVertices = cms.EDFilter('VertexSelector',
-    filter = cms.bool(True),
+    filter = cms.bool(False),
     src = cms.InputTag("offlinePrimaryVertices"),
     cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2")
 )
@@ -15,8 +15,8 @@ ntupleRecoTracks = cms.EDProducer('NtupleRecoTracks',
 )
 
 ntupleRecoVertices = cms.EDProducer('NtupleRecoVertices',
-    #inputTag = cms.InputTag('offlinePrimaryVertices'),
-    inputTag = cms.InputTag('goodVertices'),
+    inputTag = cms.InputTag('offlinePrimaryVertices'),
+    #inputTag = cms.InputTag('goodVertices'),
     prefix = cms.string('recoVertices@'),
     suffix = cms.string(''),
     cut = cms.string(''),
@@ -41,7 +41,8 @@ ntupleRecoPFMET = cms.EDProducer('NtupleRecoPFMET',
 
 ntupleRecoMuons = cms.EDProducer('NtupleRecoMuons',
     inputTag = cms.InputTag('muons'),
-    vertexTag = cms.InputTag('goodVertices'),
+    vertexTag = cms.InputTag('offlinePrimaryVertices'),
+    #vertexTag = cms.InputTag('goodVertices'),
     prefix = cms.string('recoMuons@'),
     suffix = cms.string(''),
     cut = cms.string(''),

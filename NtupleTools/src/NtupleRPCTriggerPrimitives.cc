@@ -1,6 +1,7 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleRPCTriggerPrimitives.h"
 
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
+//#include "DataFormats/RPCDigi/interface/RPCDigiL1Link.h"
 
 
 NtupleRPCTriggerPrimitives::NtupleRPCTriggerPrimitives(const edm::ParameterSet& iConfig) :
@@ -15,7 +16,9 @@ NtupleRPCTriggerPrimitives::NtupleRPCTriggerPrimitives(const edm::ParameterSet& 
     token_ = consumes<RPCDigiCollection>(inputTag_);
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
-    //produces<std::vector<int16_t> >          (prefix_ + "subsystem"       + suffix_);
+    //produces<std::vector<unsigned> >          (prefix_ + "subsystem"       + suffix_);
+    produces<std::vector<unsigned> >          (prefix_ + "globalSector"    + suffix_);
+    produces<std::vector<unsigned> >          (prefix_ + "globalSubSector" + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "iregion"         + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "iring"           + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "istation"        + suffix_);
@@ -42,10 +45,34 @@ void NtupleRPCTriggerPrimitives::beginRun(const edm::Run& iRun, const edm::Event
     theGeometryTranslator_->checkAndUpdateGeometry(iSetup);
 }
 
+// _____________________________________________________________________________
+using L1TMuon::TriggerPrimitive;
+using L1TMuon::TriggerPrimitiveCollection;
+
+void NtupleRPCTriggerPrimitives::extractPrimitives(edm::Handle<RPCDigiCollection> rpcDigis,
+        L1TMuon::TriggerPrimitiveCollection& out) const {
+
+  auto chamber = rpcDigis->begin();
+  auto chend  = rpcDigis->end();
+  for( ; chamber != chend; ++chamber ) {
+    auto digi = (*chamber).second.first;
+    auto dend = (*chamber).second.second;
+    for( ; digi != dend; ++digi ) {
+      out.push_back(TriggerPrimitive((*chamber).first,
+                                     digi->strip(),
+                                     (*chamber).first.layer(),
+                                     digi->bx()));
+    }
+  }
+}
+
+// _____________________________________________________________________________
 void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
-    //std::auto_ptr<std::vector<int16_t> >           v_subsystem       (new std::vector<int16_t>());
+    //std::auto_ptr<std::vector<unsigned> >          v_subsystem       (new std::vector<unsigned>());
+    std::auto_ptr<std::vector<unsigned> >          v_globalSector    (new std::vector<unsigned>());
+    std::auto_ptr<std::vector<unsigned> >          v_globalSubSector (new std::vector<unsigned>());
     std::auto_ptr<std::vector<int16_t> >           v_iregion         (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_iring           (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_istation        (new std::vector<int16_t>());
@@ -74,30 +101,18 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
         iEvent.getByToken(token_, rpcDigis);
 
     if (rpcDigis.isValid()) {
-        //edm::LogInfo("NtupleRPCTriggerPrimitives") << "Size: " << chambPhDigis->size();
+        //edm::LogInfo("NtupleRPCTriggerPrimitives") << "Size: " << rpcDigis->size();
         edm::LogInfo("NtupleRPCTriggerPrimitives") << "Size: ??";
 
 
         // Make trigger primitives
-
-        std::vector<L1TMuon::TriggerPrimitive> trigPrims;
-
-        // Loop over chambers
-        for (RPCDigiCollection::DigiRangeIterator itr = rpcDigis->begin(); itr != rpcDigis->end(); ++itr) {
-
-            // Loop over digis
-            for (RPCDigiCollection::const_iterator it = (*itr).second.first; it != (*itr).second.second; ++it) {
-                //if (!selector_(*it))
-                //    continue;
-
-                trigPrims.push_back(L1TMuon::TriggerPrimitive((*itr).first, (*it).strip(), (*itr).first.layer(), (*it).bx()));
-            }
-        }
+        L1TMuon::TriggerPrimitiveCollection trigPrims;
+        extractPrimitives(rpcDigis, trigPrims);
 
         unsigned n = 0;
 
         // Loop over trigger primitives
-        for (std::vector<L1TMuon::TriggerPrimitive>::const_iterator it = trigPrims.cbegin(); it != trigPrims.cend(); ++it) {
+        for (L1TMuon::TriggerPrimitiveCollection::const_iterator it = trigPrims.cbegin(); it != trigPrims.cend(); ++it) {
             if (n >= maxN_)
                 break;
 
@@ -111,8 +126,11 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 //const double globalEta = theGeometryTranslator_->calculateGlobalEta(*it);
                 const GlobalPoint& gp = theGeometryTranslator_->getGlobalPoint(*it);
 
+                // Fill the vectors
                 v_geoId           ->push_back(it->rawId().rawId());
                 //v_subsystem       ->push_back(it->subsystem());
+                v_globalSector    ->push_back(it->getGlobalSector());
+                v_globalSubSector ->push_back(it->getSubSector());
                 v_iregion         ->push_back(rpcDet.region());
                 v_iring           ->push_back(rpcDet.ring());
                 v_istation        ->push_back(rpcDet.station());
@@ -145,6 +163,8 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     //__________________________________________________________________________
     iEvent.put(v_geoId           , prefix_ + "geoId"           + suffix_);
     //iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
+    iEvent.put(v_globalSector    , prefix_ + "globalSector"    + suffix_);
+    iEvent.put(v_globalSubSector , prefix_ + "globalSubSector" + suffix_);
     iEvent.put(v_iregion         , prefix_ + "iregion"         + suffix_);
     iEvent.put(v_iring           , prefix_ + "iring"           + suffix_);
     iEvent.put(v_istation        , prefix_ + "istation"        + suffix_);
@@ -164,3 +184,4 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     iEvent.put(v_globalZ         , prefix_ + "globalZ"         + suffix_);
     iEvent.put(v_size            , prefix_ + "size"            + suffix_);
 }
+

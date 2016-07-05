@@ -43,6 +43,10 @@ class NtupleCSCTriggerPrimitives : public edm::EDProducer {
     virtual void beginRun(const edm::Run&, const edm::EventSetup&);
     //virtual void endRun(const edm::Run&, const edm::EventSetup&);
 
+    // Process CSC digis
+    virtual void extractPrimitives(edm::Handle<CSCCorrelatedLCTDigiCollection> cscDigis,
+                                   L1TMuon::TriggerPrimitiveCollection& out) const;
+
     // Event setup
     //const CSCGeometry * theCSCGeometry_;
     //const MagneticField * theMagneticField_;

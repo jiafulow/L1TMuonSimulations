@@ -11,6 +11,7 @@
 #include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitive.h"    // why deprecate?
 #include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitiveFwd.h" // why deprecate?
 //#include "L1Trigger/L1TMuon/interface/deprecate/GeometryTranslator.h"      // why deprecate?
+#include "L1Trigger/L1TMuon/interface/deprecate/DTBunchCrossingCleaner.h"  // why deprecate
 #include "L1TMuonSimulations/MuonTools/interface/GeometryTranslator2.h"
 
 
@@ -27,18 +28,35 @@ class NtupleDTTriggerPrimitives : public edm::EDProducer {
     virtual void beginRun(const edm::Run&, const edm::EventSetup&);
     //virtual void endRun(const edm::Run&, const edm::EventSetup&);
 
+    // Process DT digis
+    virtual void extractPrimitives(edm::Handle<L1MuDTChambPhContainer> phiDigis,
+                                   edm::Handle<L1MuDTChambThContainer> thetaDigis,
+                                   L1TMuon::TriggerPrimitiveCollection& out) const;
+    L1TMuon::TriggerPrimitive processDigis(const L1MuDTChambPhDigi&,
+                                           const int &segment_number) const;
+    L1TMuon::TriggerPrimitive processDigis(const L1MuDTChambThDigi&,
+                                           const int bti_group) const;
+    L1TMuon::TriggerPrimitive processDigis(const L1MuDTChambPhDigi&,
+                                           const L1MuDTChambThDigi&,
+                                           const int bti_group) const;
+    int findBTIGroupForThetaDigi(const L1MuDTChambThDigi&,
+                                 const int position) const;
+    const int bx_min, bx_max;
+    std::unique_ptr<L1TMuon::DTBunchCrossingCleaner> _bxc;
+
     // Event setup
     std::unique_ptr<L1TMuon::GeometryTranslator2> theGeometryTranslator_;
 
-    const edm::InputTag chambPhTag_;
-    const edm::InputTag chambThTag_;
+    const edm::InputTag dtPhTag_;
+    const edm::InputTag dtThTag_;
     const std::string   prefix_, suffix_;
 
-    StringCutObjectSelector<L1MuDTChambPhDigi> selector_;
+    StringCutObjectSelector<L1MuDTChambPhDigi> selectorPh_;
+    StringCutObjectSelector<L1MuDTChambThDigi> selectorTh_;
     const unsigned maxN_;
 
-    edm::EDGetTokenT<L1MuDTChambPhContainer> chambPhToken_;
-    edm::EDGetTokenT<L1MuDTChambThContainer> chambThToken_;
+    edm::EDGetTokenT<L1MuDTChambPhContainer> dtPhToken_;
+    edm::EDGetTokenT<L1MuDTChambThContainer> dtThToken_;
 };
 
 #endif

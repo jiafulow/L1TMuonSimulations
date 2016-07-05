@@ -31,7 +31,9 @@ NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& 
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
     produces<std::vector<uint32_t> >          (prefix_ + "moduleId"        + suffix_);
-    //produces<std::vector<int16_t> >           (prefix_ + "subsystem"       + suffix_);
+    //produces<std::vector<unsigned> >          (prefix_ + "subsystem"       + suffix_);
+    produces<std::vector<unsigned> >          (prefix_ + "globalSector"    + suffix_);
+    produces<std::vector<unsigned> >          (prefix_ + "globalSubSector" + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "iendcap"         + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "istation"        + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "iring"           + suffix_);
@@ -94,7 +96,26 @@ void NtupleCSCTriggerPrimitives::beginRun(const edm::Run& iRun, const edm::Event
     theGeometryTranslator_->checkAndUpdateGeometry(iSetup);
 }
 
+// _____________________________________________________________________________
+using L1TMuon::TriggerPrimitive;
+using L1TMuon::TriggerPrimitiveCollection;
 
+void NtupleCSCTriggerPrimitives::extractPrimitives(edm::Handle<CSCCorrelatedLCTDigiCollection> cscDigis,
+        L1TMuon::TriggerPrimitiveCollection& out) const {
+
+  auto chamber = cscDigis->begin();
+  auto chend  = cscDigis->end();
+  for( ; chamber != chend; ++chamber ) {
+    auto digi = (*chamber).second.first;
+    auto dend = (*chamber).second.second;
+    for( ; digi != dend; ++digi ) {
+      out.push_back(TriggerPrimitive((*chamber).first,*digi));
+    }
+  }
+}
+
+
+// _____________________________________________________________________________
 namespace {
 float getConvGlobalPhi(unsigned int isector, int iphi) {
     if (iphi == -999)  return -999.;
@@ -122,11 +143,14 @@ float getConvGlobalEta(unsigned int isector, int itheta) {
 //}
 }  // end anonymous namespace
 
+// _____________________________________________________________________________
 void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
     std::auto_ptr<std::vector<uint32_t> >          v_moduleId        (new std::vector<uint32_t>());
-    //std::auto_ptr<std::vector<int16_t> >           v_subsystem       (new std::vector<int16_t>());
+    //std::auto_ptr<std::vector<unsigned> >          v_subsystem       (new std::vector<unsigned>());
+    std::auto_ptr<std::vector<unsigned> >          v_globalSector    (new std::vector<unsigned>());
+    std::auto_ptr<std::vector<unsigned> >          v_globalSubSector (new std::vector<unsigned>());
     std::auto_ptr<std::vector<int16_t> >           v_iendcap         (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_istation        (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_iring           (new std::vector<int16_t>());
@@ -178,20 +202,8 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
 
 
         // Make trigger primitives
-
-        std::vector<L1TMuon::TriggerPrimitive> trigPrims;
-
-        // Loop over chambers
-        for (CSCCorrelatedLCTDigiCollection::DigiRangeIterator itr = corrlcts->begin(); itr != corrlcts->end(); ++itr) {
-
-            // Loop over digis
-            for (CSCCorrelatedLCTDigiCollection::const_iterator it = (*itr).second.first; it != (*itr).second.second; ++it) {
-                //if (!selector_(*it))
-                //    continue;
-
-                trigPrims.push_back(L1TMuon::TriggerPrimitive((*itr).first, *it));
-            }
-        }
+        L1TMuon::TriggerPrimitiveCollection trigPrims;
+        extractPrimitives(corrlcts, trigPrims);
 
         /// Prepare detId -> moduleId
         ModuleIdFunctor getModuleId;
@@ -199,7 +211,7 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
         unsigned n = 0;
 
         // Loop over trigger primitives
-        for (std::vector<L1TMuon::TriggerPrimitive>::const_iterator it = trigPrims.cbegin(); it != trigPrims.cend(); ++it) {
+        for (L1TMuon::TriggerPrimitiveCollection::const_iterator it = trigPrims.cbegin(); it != trigPrims.cend(); ++it) {
             if (n >= maxN_)
                 break;
 
@@ -226,7 +238,7 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 assert(cscData.cscID == cscDet.triggerCscId());
 
                 // Get ConvertedHit
-                std::vector<L1TMuon::TriggerPrimitive> tester;
+                L1TMuon::TriggerPrimitiveCollection tester;
                 tester.push_back(*it);
                 const std::vector<ConvertedHit>& convHits = primConv_.convert(tester, isector);
 
@@ -241,6 +253,8 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 v_geoId           ->push_back(it->rawId().rawId());
                 v_moduleId        ->push_back(moduleId);
                 //v_subsystem       ->push_back(it->subsystem());
+                v_globalSector    ->push_back(it->getGlobalSector());
+                v_globalSubSector ->push_back(it->getSubSector());
                 v_iendcap         ->push_back(cscDet.endcap());
                 v_istation        ->push_back(cscDet.station());
                 v_iring           ->push_back(cscDet.ring());
@@ -292,6 +306,8 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     iEvent.put(v_geoId           , prefix_ + "geoId"           + suffix_);
     iEvent.put(v_moduleId        , prefix_ + "moduleId"        + suffix_);
     //iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
+    iEvent.put(v_globalSector    , prefix_ + "globalSector"    + suffix_);
+    iEvent.put(v_globalSubSector , prefix_ + "globalSubSector" + suffix_);
     iEvent.put(v_iendcap         , prefix_ + "iendcap"         + suffix_);
     iEvent.put(v_istation        , prefix_ + "istation"        + suffix_);
     iEvent.put(v_iring           , prefix_ + "iring"           + suffix_);
