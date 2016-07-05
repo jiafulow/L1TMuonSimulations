@@ -3,8 +3,8 @@ import FWCore.ParameterSet.Config as cms
 # reference: https://github.com/cms-sw/genproductions/blob/master/python/EightTeV/SingleMuMinusFlatPt0p2To100_cff.py
 generator = cms.EDProducer("FlatRandomPtGunProducer2",
     PGunParameters = cms.PSet(
-        MaxPt = cms.double(5.0*1.001),
-        MinPt = cms.double(5.0),
+        MaxPt = cms.double(200.0*1.001),
+        MinPt = cms.double(200.0),
         PartID = cms.vint32(-13),
         MinEta = cms.double(1.0),
         MaxEta = cms.double(2.5),
@@ -14,7 +14,7 @@ generator = cms.EDProducer("FlatRandomPtGunProducer2",
         PtSpectrum = cms.string('flatPt'),
     ),
     Verbosity = cms.untracked.int32(0),
-    psethack = cms.string('single muon+/- pt 5 positive endcap'),
+    psethack = cms.string('single muon+/- pt 200 positive endcap'),
     AddAntiParticle = cms.bool(False),
     firstRun = cms.untracked.uint32(1)
 )
