@@ -144,8 +144,6 @@ void NtupleRecoMuons::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
 
     //__________________________________________________________________________
-
-
     edm::Handle<reco::MuonCollection> parts;
     //iEvent.getByLabel(inputTag_, parts);
     if (!token_.isUninitialized())
