@@ -211,14 +211,12 @@ void NtupleDTTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetu
         //edm::LogInfo("NtupleDTTriggerPrimitives") << "Size: " << dtPhDigis->size();
         edm::LogInfo("NtupleDTTriggerPrimitives") << "Size: ??";
 
-
         // Make trigger primitives
         L1TMuon::TriggerPrimitiveCollection trigPrims;
         extractPrimitives(dtPhDigis, dtThDigis, trigPrims);
 
-        unsigned n = 0;
-
         // Loop over trigger primitives
+        unsigned n = 0;
         for (L1TMuon::TriggerPrimitiveCollection::const_iterator it = trigPrims.cbegin(); it != trigPrims.cend(); ++it) {
             if (n >= maxN_)
                 break;

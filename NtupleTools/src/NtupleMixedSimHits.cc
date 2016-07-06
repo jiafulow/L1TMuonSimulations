@@ -1,6 +1,6 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleMixedSimHits.h"
 
-#include "L1TMuonSimulations/MuonTools/interface/ModuleIdFunctor.h"
+#include "L1TMuonSimulations/MuonTools/interface/ModuleIdHelper.h"
 #include "L1TMuonSimulations/NtupleTools/interface/MapTrackingParticles.h"
 
 
@@ -105,9 +105,6 @@ void NtupleMixedSimHits::produce(edm::Event& iEvent, const edm::EventSetup& iSet
         MapTrackingParticles trkToTPMap;
         trkToTPMap.setup(trackingParticleHandle);
 
-        /// Prepare detId -> moduleId
-        ModuleIdFunctor getModuleId;
-
         unsigned n = 0;
         for (unsigned ict=0; ict<simHitTags_.size(); ++ict) {
             const edm::InputTag collectionTag = simHitTags_.at(ict);
@@ -139,7 +136,7 @@ void NtupleMixedSimHits::produce(edm::Event& iEvent, const edm::EventSetup& iSet
                         continue;  // only CSC
 
                     /// Module ID
-                    unsigned moduleId = getModuleId(geoId);
+                    const uint32_t moduleId = ModuleIdHelper::getModuleId(geoId);
 
                     const CSCLayer* cscLayer = theCSCGeometry_->layer(geoId);
 

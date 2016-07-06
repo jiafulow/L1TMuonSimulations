@@ -1,6 +1,6 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleSimHits.h"
 
-#include "L1TMuonSimulations/MuonTools/interface/ModuleIdFunctor.h"
+#include "L1TMuonSimulations/MuonTools/interface/ModuleIdHelper.h"
 
 
 NtupleSimHits::NtupleSimHits(const edm::ParameterSet& iConfig) :
@@ -91,9 +91,6 @@ void NtupleSimHits::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     //__________________________________________________________________________
     if (!iEvent.isRealData()) {
 
-        /// Prepare detId -> moduleId
-        ModuleIdFunctor getModuleId;
-
         unsigned n = 0;
         for (unsigned ict=0; ict<simHitTags_.size(); ++ict) {
             const edm::InputTag collectionTag = simHitTags_.at(ict);
@@ -124,7 +121,7 @@ void NtupleSimHits::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                         continue;  // only CSC
 
                     /// Module ID
-                    unsigned moduleId = getModuleId(geoId);
+                    const uint32_t moduleId = ModuleIdHelper::getModuleId(geoId);
 
                     const CSCLayer* cscLayer = theCSCGeometry_->layer(geoId);
 

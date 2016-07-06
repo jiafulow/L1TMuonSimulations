@@ -17,7 +17,7 @@
 #include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 
-#include "L1TMuonSimulations/MuonTools/interface/ModuleIdFunctor.h"
+#include "L1TMuonSimulations/MuonTools/interface/ModuleIdHelper.h"
 
 #include <iostream>
 #include <iomanip>
@@ -106,7 +106,7 @@ void AnalyzerCSCGeometry::beginRun(const edm::Run& iRun, const edm::EventSetup& 
 
             if (ilayer == CSCConstants::KEY_ALCT_LAYER) {  // should it be CSCConstants::KEY_CLCT_LAYER?
                 // Get moduleId
-                uint32_t moduleId = ModuleIdHelper::moduleId(cscDet);
+                uint32_t moduleId = ModuleIdHelper::getModuleId(cscDet);
                 bool evenBit      = ModuleIdHelper::isEven(cscDet);
                 bool frBit        = ModuleIdHelper::isFront(cscDet);
                 bool ccwBit       = ModuleIdHelper::isCounterClockwise(cscDet);
@@ -153,15 +153,15 @@ void AnalyzerCSCGeometry::beginRun(const edm::Run& iRun, const edm::EventSetup& 
                 bool isCounterClockwise = reco::deltaPhi(centerOfStrip0.barePhi(), centerOfStripN.barePhi()) < 0.;
                 bool isFront = false;
                 if (cscDet.station() == 1 && (cscDet.ring() == 1 || cscDet.ring() == 4)) {
-                    if (std::abs(centerOfStrip0.z()) < 602.3)  isFront = true;
+                    if (std::abs(centerOfStrip0.z()) < 602.332)  isFront = true;
                 } else if (cscDet.station() == 1 && (cscDet.ring() == 2)) {
-                    if (std::abs(centerOfStrip0.z()) < 698.9)  isFront = true;
+                    if (std::abs(centerOfStrip0.z()) < 698.693)  isFront = true;
                 } else if (cscDet.station() == 2) {
-                    if (std::abs(centerOfStrip0.z()) < 828.5)  isFront = true;
+                    if (std::abs(centerOfStrip0.z()) < 828.392)  isFront = true;
                 } else if (cscDet.station() == 3) {
-                    if (std::abs(centerOfStrip0.z()) < 935.5)  isFront = true;
+                    if (std::abs(centerOfStrip0.z()) < 935.437)  isFront = true;
                 } else if (cscDet.station() == 4) {
-                    if (std::abs(centerOfStrip0.z()) < 1024.5)  isFront = true;
+                    if (std::abs(centerOfStrip0.z()) < 1025.17)  isFront = true;
                 }
                 bool isEven = (cscDet.chamber() % 2 == 0);
 

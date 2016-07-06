@@ -1,6 +1,6 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleUnpackedEMTFTriggerPrimitives.h"
 
-#include "L1TMuonSimulations/MuonTools/interface/ModuleIdFunctor.h"
+#include "L1TMuonSimulations/MuonTools/interface/ModuleIdHelper.h"
 
 
 NtupleUnpackedEMTFTriggerPrimitives::NtupleUnpackedEMTFTriggerPrimitives(const edm::ParameterSet& iConfig) :
@@ -14,7 +14,9 @@ NtupleUnpackedEMTFTriggerPrimitives::NtupleUnpackedEMTFTriggerPrimitives(const e
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
     produces<std::vector<uint32_t> >          (prefix_ + "moduleId"        + suffix_);
-    //produces<std::vector<int16_t> >           (prefix_ + "subsystem"       + suffix_);
+    produces<std::vector<bool> >              (prefix_ + "evenBit"         + suffix_);
+    produces<std::vector<bool> >              (prefix_ + "frBit"           + suffix_);
+    produces<std::vector<bool> >              (prefix_ + "ccwBit"          + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "iendcap"         + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "istation"        + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "iring"           + suffix_);
@@ -64,7 +66,9 @@ void NtupleUnpackedEMTFTriggerPrimitives::produce(edm::Event& iEvent, const edm:
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
     std::auto_ptr<std::vector<uint32_t> >          v_moduleId        (new std::vector<uint32_t>());
-    //std::auto_ptr<std::vector<int16_t> >           v_subsystem       (new std::vector<int16_t>());
+    std::auto_ptr<std::vector<bool> >              v_evenBit         (new std::vector<bool>());
+    std::auto_ptr<std::vector<bool> >              v_frBit           (new std::vector<bool>());
+    std::auto_ptr<std::vector<bool> >              v_ccwBit          (new std::vector<bool>());
     std::auto_ptr<std::vector<int16_t> >           v_iendcap         (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_istation        (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_iring           (new std::vector<int16_t>());
@@ -117,9 +121,6 @@ void NtupleUnpackedEMTFTriggerPrimitives::produce(edm::Event& iEvent, const edm:
     if (stubs.isValid()) {
         edm::LogInfo("NtupleUnpackedEMTFTriggerPrimitives") << "Size: " << stubs->size();
 
-        /// Prepare detId -> moduleId
-        ModuleIdFunctor getModuleId;
-
         unsigned n = 0;
         for (l1t::EMTFHitCollection::const_iterator it = stubs->begin(); it != stubs->end(); ++it) {
             if (n >= maxN_)
@@ -130,12 +131,17 @@ void NtupleUnpackedEMTFTriggerPrimitives::produce(edm::Event& iEvent, const edm:
             //if (it->Neighbor() != 0)  continue;
 
             const CSCDetId cscDet = it->CSC_DetId();
-            const unsigned int moduleId = getModuleId(cscDet);
+            const uint32_t moduleId = ModuleIdHelper::getModuleId(cscDet);
+            const bool evenBit      = ModuleIdHelper::isEven(cscDet);
+            const bool frBit        = ModuleIdHelper::isFront(cscDet);
+            const bool ccwBit       = ModuleIdHelper::isCounterClockwise(cscDet);
 
             // Fill the vectors
             v_geoId           ->push_back(cscDet.rawId());
             v_moduleId        ->push_back(moduleId);
-            //v_subsystem       ->push_back(0);
+            v_evenBit         ->push_back(evenBit);
+            v_frBit           ->push_back(frBit);
+            v_ccwBit          ->push_back(ccwBit);
             v_iendcap         ->push_back(it->Endcap());
             v_istation        ->push_back(it->Station());
             v_iring           ->push_back(it->Ring());
@@ -188,7 +194,9 @@ void NtupleUnpackedEMTFTriggerPrimitives::produce(edm::Event& iEvent, const edm:
     //__________________________________________________________________________
     iEvent.put(v_geoId           , prefix_ + "geoId"           + suffix_);
     iEvent.put(v_moduleId        , prefix_ + "moduleId"        + suffix_);
-    //iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
+    iEvent.put(v_evenBit         , prefix_ + "evenBit"         + suffix_);
+    iEvent.put(v_frBit           , prefix_ + "frBit"           + suffix_);
+    iEvent.put(v_ccwBit          , prefix_ + "ccwBit"          + suffix_);
     iEvent.put(v_iendcap         , prefix_ + "iendcap"         + suffix_);
     iEvent.put(v_istation        , prefix_ + "istation"        + suffix_);
     iEvent.put(v_iring           , prefix_ + "iring"           + suffix_);

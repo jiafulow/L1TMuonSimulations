@@ -104,14 +104,12 @@ void NtupleRPCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
         //edm::LogInfo("NtupleRPCTriggerPrimitives") << "Size: " << rpcDigis->size();
         edm::LogInfo("NtupleRPCTriggerPrimitives") << "Size: ??";
 
-
         // Make trigger primitives
         L1TMuon::TriggerPrimitiveCollection trigPrims;
         extractPrimitives(rpcDigis, trigPrims);
 
-        unsigned n = 0;
-
         // Loop over trigger primitives
+        unsigned n = 0;
         for (L1TMuon::TriggerPrimitiveCollection::const_iterator it = trigPrims.cbegin(); it != trigPrims.cend(); ++it) {
             if (n >= maxN_)
                 break;

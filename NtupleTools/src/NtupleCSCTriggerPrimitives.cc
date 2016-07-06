@@ -5,7 +5,7 @@
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 //#include "L1Trigger/CSCCommonTrigger/interface/CSCPatternLUT.h"
 
-#include "L1TMuonSimulations/MuonTools/interface/ModuleIdFunctor.h"
+#include "L1TMuonSimulations/MuonTools/interface/ModuleIdHelper.h"
 
 
 NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& iConfig) :
@@ -30,8 +30,11 @@ NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& 
     corrlctToken_ = consumes<CSCCorrelatedLCTDigiCollection>(corrlctTag_);
 
     produces<std::vector<uint32_t> >          (prefix_ + "geoId"           + suffix_);
-    produces<std::vector<uint32_t> >          (prefix_ + "moduleId"        + suffix_);
     //produces<std::vector<unsigned> >          (prefix_ + "subsystem"       + suffix_);
+    produces<std::vector<uint32_t> >          (prefix_ + "moduleId"        + suffix_);
+    produces<std::vector<bool> >              (prefix_ + "evenBit"         + suffix_);
+    produces<std::vector<bool> >              (prefix_ + "frBit"           + suffix_);
+    produces<std::vector<bool> >              (prefix_ + "ccwBit"          + suffix_);
     produces<std::vector<unsigned> >          (prefix_ + "globalSector"    + suffix_);
     produces<std::vector<unsigned> >          (prefix_ + "globalSubSector" + suffix_);
     produces<std::vector<int16_t> >           (prefix_ + "iendcap"         + suffix_);
@@ -147,10 +150,13 @@ float getConvGlobalEta(unsigned int isector, int itheta) {
 void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     std::auto_ptr<std::vector<uint32_t> >          v_geoId           (new std::vector<uint32_t>());
-    std::auto_ptr<std::vector<uint32_t> >          v_moduleId        (new std::vector<uint32_t>());
     //std::auto_ptr<std::vector<unsigned> >          v_subsystem       (new std::vector<unsigned>());
     std::auto_ptr<std::vector<unsigned> >          v_globalSector    (new std::vector<unsigned>());
     std::auto_ptr<std::vector<unsigned> >          v_globalSubSector (new std::vector<unsigned>());
+    std::auto_ptr<std::vector<uint32_t> >          v_moduleId        (new std::vector<uint32_t>());
+    std::auto_ptr<std::vector<bool> >              v_evenBit         (new std::vector<bool>());
+    std::auto_ptr<std::vector<bool> >              v_frBit           (new std::vector<bool>());
+    std::auto_ptr<std::vector<bool> >              v_ccwBit          (new std::vector<bool>());
     std::auto_ptr<std::vector<int16_t> >           v_iendcap         (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_istation        (new std::vector<int16_t>());
     std::auto_ptr<std::vector<int16_t> >           v_iring           (new std::vector<int16_t>());
@@ -200,17 +206,12 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
         //edm::LogInfo("NtupleCSCTriggerPrimitives") << "Size: " << corrlcts->size();
         edm::LogInfo("NtupleCSCTriggerPrimitives") << "Size: ??";
 
-
         // Make trigger primitives
         L1TMuon::TriggerPrimitiveCollection trigPrims;
         extractPrimitives(corrlcts, trigPrims);
 
-        /// Prepare detId -> moduleId
-        ModuleIdFunctor getModuleId;
-
-        unsigned n = 0;
-
         // Loop over trigger primitives
+        unsigned n = 0;
         for (L1TMuon::TriggerPrimitiveCollection::const_iterator it = trigPrims.cbegin(); it != trigPrims.cend(); ++it) {
             if (n >= maxN_)
                 break;
@@ -221,7 +222,10 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 const L1TMuon::TriggerPrimitive::CSCData cscData = it->getCSCData();
 
                 assert(cscDet.rawId() == it->rawId());
-                const unsigned int moduleId = getModuleId(cscDet);
+                const uint32_t moduleId = ModuleIdHelper::getModuleId(cscDet);
+                const bool evenBit      = ModuleIdHelper::isEven(cscDet);
+                const bool frBit        = ModuleIdHelper::isFront(cscDet);
+                const bool ccwBit       = ModuleIdHelper::isCounterClockwise(cscDet);
 
                 const int isector = (cscDet.endcap()-1)*6 + (cscDet.triggerSector()-1);
                 const int isubsector = (cscDet.station() != 1) ? 0 : ((cscDet.chamber()%6 > 2) ? 1 : 2);
@@ -251,10 +255,13 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
 
                 // Fill the vectors
                 v_geoId           ->push_back(it->rawId().rawId());
-                v_moduleId        ->push_back(moduleId);
                 //v_subsystem       ->push_back(it->subsystem());
                 v_globalSector    ->push_back(it->getGlobalSector());
                 v_globalSubSector ->push_back(it->getSubSector());
+                v_moduleId        ->push_back(moduleId);
+                v_evenBit         ->push_back(evenBit);
+                v_frBit           ->push_back(frBit);
+                v_ccwBit          ->push_back(ccwBit);
                 v_iendcap         ->push_back(cscDet.endcap());
                 v_istation        ->push_back(cscDet.station());
                 v_iring           ->push_back(cscDet.ring());
@@ -304,10 +311,13 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
 
     //__________________________________________________________________________
     iEvent.put(v_geoId           , prefix_ + "geoId"           + suffix_);
-    iEvent.put(v_moduleId        , prefix_ + "moduleId"        + suffix_);
     //iEvent.put(v_subsystem       , prefix_ + "subsystem"       + suffix_);
     iEvent.put(v_globalSector    , prefix_ + "globalSector"    + suffix_);
     iEvent.put(v_globalSubSector , prefix_ + "globalSubSector" + suffix_);
+    iEvent.put(v_moduleId        , prefix_ + "moduleId"        + suffix_);
+    iEvent.put(v_evenBit         , prefix_ + "evenBit"         + suffix_);
+    iEvent.put(v_frBit           , prefix_ + "frBit"           + suffix_);
+    iEvent.put(v_ccwBit          , prefix_ + "ccwBit"          + suffix_);
     iEvent.put(v_iendcap         , prefix_ + "iendcap"         + suffix_);
     iEvent.put(v_istation        , prefix_ + "istation"        + suffix_);
     iEvent.put(v_iring           , prefix_ + "iring"           + suffix_);
