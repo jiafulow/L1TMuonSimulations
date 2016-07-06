@@ -8,8 +8,9 @@ cmsDriver.py ntupleMC \
   --mc --no_output \
   --era Run2_2016 \
   --conditions 80X_mcRun2_asymptotic_v14 \
-  --geometry=Extended2016,Extended2016Reco \
+  --geometry Extended2016,Extended2016Reco \
   --customise L1TMuonSimulations/NtupleTools/customiseNtuple.cust_all \
   --filein file:SingleMuon_PositiveEndCap.root \
   --fileout file:SingleMuon_PositiveEndCap_ntuple.root \
-  --no_exec -n 10
+  --no_exec -n 100
+
