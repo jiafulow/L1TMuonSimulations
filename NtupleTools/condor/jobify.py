@@ -3,6 +3,12 @@
 """
 A condor job submitter. This script prepares the input source file, the job
 config, and the executable.
+
+It accepts 6 input arguments:
+[analyzer] [dataset] [datasetgroup] [selection] [period] [njobs]
+
+e.g.
+  python jobify.py NoAnalyzer SingleMuon_PositiveEndCap_foo singlemu emtf 2016 10
 """
 
 import os
@@ -117,6 +123,7 @@ class CondorJobType(object):
 rm -rf {JOBPATH}/*
 mkdir {JOBPATH}/{JOBNAME}/ {JOBPATH}/{LOGNAME}/
 ln -s {STORAGE2} {JOBPATH}/{OUTNAME}
+rm -rf {JOBPATH}/{OUTNAME}/*.root >& /dev/null
 cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
 '''.format(**self.config)
         self.execute_commands(commands)
@@ -148,7 +155,7 @@ Error                   = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).stderr
 Log                     = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).out
 Requirements            = (OpSys == "LINUX") && (Arch != "DUMMY")
 request_disk            = 1000000
-request_memory          = 1600
+request_memory          = 2000
 #notify_user             = NOBODY@FNAL.GOV
 use_x509userproxy       = TRUE
 x509userproxy           = $ENV(X509_USER_PROXY)
@@ -335,7 +342,7 @@ echo "Job finished on host `hostname` on `date`"
 
     def add_check(self):
         commands = \
-'''echo {JOBPATH} {NJOBS} `wc -l < {SOURCEFILE}` >> {CHECKFILE}
+'''echo {JOBPATH} {DATASETGROUP} {SELECTION} {PERIOD} {NJOBS} `wc -l < {SOURCEFILE}` >> {CHECKFILE}
 '''.format(**self.config)
         self.execute_commands(commands)
         return

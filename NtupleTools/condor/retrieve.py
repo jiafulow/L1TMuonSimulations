@@ -3,17 +3,22 @@
 import glob
 import os
 import re
+import sys
 import subprocess
+
+def get_dataset_name(jobpath):
+    return jobpath.split('/')[-1]
 
 class Retriever(object):
 
-    def __init__(self, chk='.checkfile.txt', logname='res', outname='out'):
+    def __init__(self, chk='.checkfile.txt', logname='res', outname='out', force=False):
 
         self.chk = chk
         self.logname = logname
         self.outname = outname
+        self.force = force
         self.datasets = []
-        self.target = ''
+        self.datasetgroups = {}
 
     def run(self):
 
@@ -25,50 +30,69 @@ class Retriever(object):
         if not os.path.exists(self.chk):
             raise Exception('Cannot find check file %s?!' % self.chk)
 
+        # Prepare datasets and datasetgroups
         with open(self.chk) as f:
             for line in f.readlines():
-                jobpath, njobs, nfiles = line.rstrip('\n').split(' ')
-                self.datasets.append((jobpath, int(njobs), int(nfiles)))
+                jobpath, datasetgroup, selection, period, njobs, nfiles = line.rstrip('\n').split(' ')
+                njobs = int(njobs)
+                nfiles = int(nfiles)
+                print('[INFO   ] Found jobpath %s with njobs %i' % (jobpath, njobs))
 
-        # Safety check
-        for dataset in self.datasets:
-            logdir = os.path.join(dataset[0], self.logname)
-            out = subprocess.check_output('cd %s && grep "Exit status is 0" *.stdout | wc -l' % (logdir), shell=True)
-            out = int(out)
-            if out != dataset[1]:
-                raise Exception('Expect %i jobs be completed, found %i' % (dataset[1], out))
+                self.datasets.append((jobpath, datasetgroup, selection, period, njobs, nfiles))
 
-            out = subprocess.check_output('cd %s && grep "Successfully opened file .*\.root" *.stderr | wc -l' % (logdir), shell=True)
-            out = int(out)
-            if out != dataset[2]:
-                raise Exception('Expect %i input files be processed, found %i' % (dataset[2], out))
+                if datasetgroup not in self.datasetgroups:
+                    self.datasetgroups[datasetgroup] = []
+                self.datasetgroups[datasetgroup].append(jobpath)
+
+        # Check if jobs return successfully
+        if not self.force:
+            for dataset in self.datasets:
+                jobpath = dataset[0]
+                njobs = dataset[4]
+                nfiles = dataset[5]
+
+                logdir = os.path.join(jobpath, self.logname)
+                out = subprocess.check_output('cd %s && grep "Exit status is 0" *.stdout | wc -l' % (logdir), shell=True)
+                out = int(out)
+                if out != njobs:
+                    raise Exception('Expect %s %i jobs be completed, found %i' % (get_dataset_name(jobpath), njobs, out))
+
+                out = subprocess.check_output('cd %s && grep "Successfully opened file .*\.root" *.stderr | wc -l' % (logdir), shell=True)
+                out = int(out)
+                if out != nfiles:
+                    raise Exception('Expect %s %i input files be processed, found %i' % (get_dataset_name(jobpath), nfiles, out))
+        return
 
     def hadd(self):
 
-        files = []
-        for dataset in self.datasets:
-            files.append('%s/%s/*.root' % (dataset[0], self.outname))
+        for datasetgroup, jobpaths in sorted(self.datasetgroups.iteritems()):
+            print('[INFO   ] Found datasetgroup %s with datasets [%s]' % (datasetgroup, ','.join([get_dataset_name(x) for x in jobpaths])))
 
-        if not files:
-            raise Exception('No files to be added.')
+            files = []
+            files_glob = []
+            for jobpath in jobpaths:
+                files.append('%s/%s/*.root' % (jobpath, self.outname))
+                files_glob += glob.glob(files[-1])
 
-        # Decide target file name using the first source file name
-        files_tmp = []
-        for f in files:
-            files_tmp += glob.glob(f)
+            if not self.force:
+                if not files or not files_glob:
+                    continue
 
-        if not files_tmp:
-            raise Exception('No files to be added.')
+            if not files or not files_glob:
+                raise Exception('No files to be added.')
 
-        m = re.match('(.*?)_.*\.root', os.path.basename(files_tmp[0]))
-        if not m:
-            raise Exception('Cannot parse source file name such as this: %s' % (os.path.basename(files_tmp[0])))
+            # Decide target file name using the first source file name
+            m = re.match('(.*?)_.*\.root', os.path.basename(files_glob[0]))
+            if not m:
+                raise Exception('Cannot parse source file name such as this: %s' % (os.path.basename(files_glob[0])))
 
-        self.target = "%s.root" % (m.group(1))
+            target = "%s_%s.root" % (m.group(1), datasetgroup)
 
-        print('[INFO   ] Calling the following')
-        print('hadd -f %s %s' % (self.target, ' '.join(files)))
-        subprocess.call('hadd -f %s %s' % (self.target, ' '.join(files)), shell=True)
+            print('[INFO   ] Calling hadd')
+            print('  hadd -f %s %s' % (target, ' '.join(files)))
+            subprocess.call('hadd -f %s %s' % (target, ' '.join(files)), shell=True)
+            print('[INFO   ] %s%s is created (%iM).%s' % ('\033[92m', target, os.stat(target).st_size >> 20, '\033[0m'))
+        return
 
 
 # ______________________________________________________________________________
@@ -76,10 +100,13 @@ def main():
 
     print('[INFO   ] Retrieving condor jobs ...')
 
-    ret = Retriever()
+    force = False
+    if "--force" in sys.argv[1:]:
+        force = True  # do not raise exception
+
+    ret = Retriever(force=force)
     ret.run()
 
-    print('[INFO   ] %s%s is created (%iM).%s' % ('\033[92m', ret.target, os.stat(ret.target).st_size >> 20, '\033[0m'))
 
 # ______________________________________________________________________________
 if __name__ == '__main__':
