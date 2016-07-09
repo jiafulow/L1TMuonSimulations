@@ -291,12 +291,9 @@ def drawer_draw(histos, options):
 
                 h.gr.Draw("p")
                 gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
-                gPad.SetGridx(True); gPad.SetGridy(True)
                 CMS_label()
                 h.additional = [h.GetCopyPassedHisto(), h.GetCopyTotalHisto(), h.gr]
                 save(options.outdir, hname)
-
-                gPad.SetGridx(False); gPad.SetGridy(False)
 
     drawer_draw_more(histos, options)
     return
@@ -360,7 +357,6 @@ def drawer_draw_more(histos, options):
             tlatex.DrawLatex(0.72, 0.38, "gen p_{T} > 20")
 
         gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
-        gPad.SetGridx(True); gPad.SetGridy(True)
         CMS_label()
         save(options.outdir, hname[:hname.find("_l1pt")]+"_l1pt")
 
@@ -405,7 +401,6 @@ def drawer_draw_more(histos, options):
             tlatex.DrawLatex(0.72, 0.38, "gen p_{T} > 20")
 
         gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
-        gPad.SetGridx(True); gPad.SetGridy(True)
         CMS_label()
         save(options.outdir, hname[:hname.find("_pu")]+"_pu")
 
@@ -432,6 +427,8 @@ def main(options):
 
     # Init
     drawer = MyDrawer()
+    gStyle.SetPadGridX(True)
+    gStyle.SetPadGridY(True)
     tchain = TChain("ntupler/tree", "")
     tchain.AddFileInfoList(options.tfilecoll.GetList())
 
