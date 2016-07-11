@@ -5,7 +5,12 @@ def read_pileup_input(filename):
     dirname = os.environ["CMSSW_BASE"] + "/src/L1TMuonSimulations/Configuration/data/"
     readFiles = cms.untracked.vstring()
     with open(dirname + filename) as f:
-         readFiles.extend([line.strip() for line in f])
+        lines = []
+        for line in f:
+            line = line.strip()
+            if not line.startswith('#'):
+                lines.append(line)
+        readFiles.extend(lines)
     print "Using pileup input: %s with %i files." % (filename, len(readFiles))
     return readFiles
 

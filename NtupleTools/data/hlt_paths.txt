@@ -1,0 +1,13 @@
+HLT_IsoMu20_v*
+HLT_IsoMu22_v*
+HLT_IsoMu22_eta2p1_v*
+HLT_IsoTkMu20_v*
+HLT_IsoTkMu22_v*
+HLT_IsoTkMu22_eta2p1_v*
+HLT_L1SingleMu16_v*
+HLT_L1SingleMuOpen_v*
+HLT_Mu50_v*
+HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
+HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*
+HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
+HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*

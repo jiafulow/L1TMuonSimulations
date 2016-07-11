@@ -10,6 +10,7 @@
 <use name="DataFormats/MuonReco"/>
 <use name="DataFormats/TrackReco"/>
 <use name="DataFormats/VertexReco"/>
+<use name="DataFormats/L1TGlobal"/>
 <use name="SimDataFormats/Track"/>
 <use name="SimDataFormats/Vertex"/>
 <use name="SimDataFormats/TrackingAnalysis"/>
