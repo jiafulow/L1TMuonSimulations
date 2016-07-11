@@ -84,6 +84,10 @@ class CondorJobType(object):
         #delfile_cmd = "lcg-del --connect-timeout 180 -b -l -D srmv2 "
         #deldir_cmd = "lcg-del -d --connect-timeout 180 -b -l -D srmv2 "
 
+        #cp_cmd = "gfal-copy -f -p -v -t 180 "
+        #delfile_cmd = "gfal-rm -v -t 180 "
+        #deldir_cmd = "gfal-rm -r -v -t 180 "
+
     def safety_check(self):
         if not os.path.exists('{SRCDIR}/{DATASET}.txt'.format(**self.config)):
             raise Exception('Cannot find source file: {SRCDIR}/{DATASET}.txt'.format(**job.configurations))
@@ -122,8 +126,9 @@ class CondorJobType(object):
 '''mkdir -p {JOBPATH}/
 rm -rf {JOBPATH}/*
 mkdir {JOBPATH}/{JOBNAME}/ {JOBPATH}/{LOGNAME}/
+gfal-rm -r -v -t 180 {STORAGE} >& /dev/null
+gfal-mkdir -p {STORAGE}
 ln -s {STORAGE2} {JOBPATH}/{OUTNAME}
-rm -rf {JOBPATH}/{OUTNAME}/*.root >& /dev/null
 cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
 '''.format(**self.config)
         self.execute_commands(commands)
@@ -246,7 +251,7 @@ SOFTWARE_DIR=`pwd`
 echo ">>> SOFTWARE_DIR=$SOFTWARE_DIR"
 
 # Download tarball
-lcg-cp -v -b -D srmv2 --connect-timeout 180 "{TARBALL2}" "../{TARBALL}" >& /dev/null
+gfal-copy -f -p -v -t 180 "{TARBALL2}" file:///$PWD/"../{TARBALL}" >& /dev/null
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then echo "transfer tarball exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
@@ -312,7 +317,7 @@ ls -Al $RUNTIME_AREA
 
 # Transfer output file
 ROOTFILE=`ls *_*.root`
-lcg-cp -v -b -D srmv2 --connect-timeout 180 "$ROOTFILE" "{STORAGE}/$ROOTFILE" >& /dev/null
+gfal-copy -f -p -v -t 180 file:///$PWD/"$ROOTFILE" "{STORAGE}/$ROOTFILE" >& /dev/null
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then echo "transfer output exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
@@ -335,7 +340,7 @@ echo "Job finished on host `hostname` on `date`"
 
         print "[INFO   ] Uploading tarball ..."
         commands = \
-'''lcg-cp -v -b -D srmv2 --connect-timeout 180 "{TARBALL}" "{TARBALL2}" >& /dev/null
+'''gfal-copy -f -p -v -t 180 file:///$PWD/"{TARBALL}" "{TARBALL2}" >& /dev/null
 '''.format(**self.config)
         self.execute_commands(commands)
         return
@@ -348,6 +353,7 @@ echo "Job finished on host `hostname` on `date`"
         return
 
     def submit_jobs(self):
+        print "[INFO   ] Submitting job(s) ..."
         commands = \
 '''mv {EXECUTABLE} {SOURCEFILE} {JOBAD} {JOBPATH}/{JOBNAME}/
 cd {JOBPATH}/ && condor_submit {JOBNAME}/{JOBAD}
