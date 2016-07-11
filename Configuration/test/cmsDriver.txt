@@ -386,6 +386,20 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/HCA-RunIISummer15GS-00002-f
   --fileout file:SingleNeutrino_PU50.root \
   --no_exec -n 10
 
+# pset_SingleNeutrino_PU8to42.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/HCA-RunIISummer15GS-00002-fragment.py \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:GRun,RAW2DIGI,L1Reco,RECO \
+  --mc --eventcontent RAWSIM --datatier GEN-SIM-RAW --processName RAWSIM \
+  --era Run2_2016 \
+  --conditions 80X_mcRun2_asymptotic_v14 \
+  --customise L1TMuonSimulations/Configuration/customise.cust_pileup \
+  --customise_commands "process.mix.input.nbPileupEvents.probValue = cms.vdouble(0,0,0,0,0,0,0,0,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0,0,0,0,0,0,0)" \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename pset_SingleNeutrino_PU8to42.py \
+  --fileout file:SingleNeutrino_PU8to42.root \
+  --no_exec -n 10
+
 # pset_SingleMuon_PositiveEndCap_PU10.py
 cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To7000_PositiveEndCap_cfi.py \
   --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:GRun,RAW2DIGI,L1Reco,RECO \
@@ -468,5 +482,19 @@ cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To7
   --magField 38T_PostLS1 \
   --python_filename pset_SingleMuon_PositiveEndCap_PU50.py \
   --fileout file:SingleMuon_PositiveEndCap_PU50.root \
+  --no_exec -n 10
+
+# pset_SingleMuon_PositiveEndCap_PU8to42.py
+cmsDriver.py L1TMuonSimulations/Configuration/python/SingleMuonFlatOneOverPt2To7000_PositiveEndCap_cfi.py \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,HLT:GRun,RAW2DIGI,L1Reco,RECO \
+  --mc --eventcontent RAWSIM --datatier GEN-SIM-RAW --processName RAWSIM \
+  --era Run2_2016 \
+  --conditions 80X_mcRun2_asymptotic_v14 \
+  --customise L1TMuonSimulations/Configuration/customise.cust_pileup \
+  --customise_commands "process.mix.input.nbPileupEvents.probValue = cms.vdouble(0,0,0,0,0,0,0,0,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0.028571,0,0,0,0,0,0,0)" \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename pset_SingleMuon_PositiveEndCap_PU8to42.py \
+  --fileout file:SingleMuon_PositiveEndCap_PU8to42.root \
   --no_exec -n 10
 
