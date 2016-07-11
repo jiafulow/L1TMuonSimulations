@@ -229,6 +229,12 @@ def save(imgdir, imgname, redraw_axis=True, dot_pdf=True, dot_root=False, dot_c=
     if dot_c:
         gPad.Print(imgdir+imgname+".C")
 
+def save_histos(imgdir, histos):
+    tfile = TFile.Open(imgdir+"histos.root", "RECREATE")
+    for k, v in histos.iteritems():
+        v.Write()
+    tfile.Close()
+
 # ______________________________________________________________________________
 # Useful functions
 

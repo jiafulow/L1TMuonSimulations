@@ -14,7 +14,7 @@ l1t_mode_vec = [0, 1, 2]  # 3-station, 4-station, 3-or-4-station
 l1t_mode_values = ((11,13,14), (15,), (11,13,14,15))
 l1t_eta_vec = [0, 1, 2]  # 2 eta bins + 1 inclusive eta bin
 l1t_eta_bounds = (1.2, 1.6, 2.4)
-l1t_pu_vec = [0, 1, 2, 3]  # 5 pu bins
+l1t_pu_vec = [0, 1, 2, 3]  # 4 pu bins
 l1t_pu_values = (10, 20, 30, 40)
 
 
@@ -82,10 +82,15 @@ def drawer_book(options):
         for modebin in l1t_mode_vec:
             for etabin in l1t_eta_vec:
                 hname = "ptcut_in_eta%i_mode%i_pu%i" % (etabin, modebin, pubin)
-                histos[hname] = TH1F(hname, "; cutoff p_{T} [GeV]; entries", 100, 0, 200)
+                histos[hname] = TH1F(hname, "; cutoff p_{T} [GeV]; arb. unit", 100, 0, 200)
                 histos[hname].etabin = etabin
                 histos[hname].modebin = modebin
                 histos[hname].pubin = pubin
+
+    hname = "eta"
+    histos[hname] = TH1F(hname, "; #eta; entries", 50, -2.5, 2.5)
+    hname = "phi"
+    histos[hname] = TH1F(hname, "; #phi; entries", 64, -3.2, 3.2)
 
     # Style
     for hname, h in histos.iteritems():
@@ -122,8 +127,15 @@ def drawer_project(tree, histos, options):
         h.SetEntries(h.GetEntries() - nbinsx)
         return
 
+    def normalize_by_entries(h, entries):
+        if entries > 0:
+            h.Scale(1.0/entries)
+
     # __________________________________________________________________________
     # Loop over events
+
+    entries_in_pubin = [0 for pubin in l1t_pu_vec]
+
     for ievt, evt in enumerate(tree):
         if (ievt == options.nentries):  break
         if (ievt % 1000 == 0):  print "Processing event: %i" % ievt
@@ -134,10 +146,10 @@ def drawer_project(tree, histos, options):
             print ".. %i # PU: %i ntracks: %i" % (ievt, gen_trueNPV, len(evt.EMTFTracks_pt))
 
         # Loop over tracks
-        for (itrack, mode, trig_pt, trig_phi, trig_eta) in izip(count(), evt.EMTFTracks_mode, evt.EMTFTracks_pt, evt.EMTFTracks_phiGlbRad, evt.EMTFTracks_eta):
+        for (itrack, mode, bx, trig_pt, trig_phi, trig_eta) in izip(count(), evt.EMTFTracks_mode, evt.EMTFTracks_bx, evt.EMTFTracks_pt, evt.EMTFTracks_phiGlbRad, evt.EMTFTracks_eta):
 
             if options.verbose:
-                print ".... %i l1t pt: %f phi: %f eta: %f mode: %i" % (itrack, trig_pt, trig_phi, trig_eta, mode)
+                print ".... %i l1t pt: %f phi: %f eta: %f mode: %i bx: %i" % (itrack, trig_pt, trig_phi, trig_eta, mode, int(bx))
 
             # Select only endcap
             is_endcap = 1.24 < abs(trig_eta) < 2.4
@@ -145,26 +157,34 @@ def drawer_project(tree, histos, options):
             if trig_pt > 0 and is_endcap:
                 for modebin in l1t_mode_vec:
                     for etabin in l1t_eta_vec:
-                        select = (mode in l1t_mode_values[modebin]) and ((etabin == l1t_eta_vec[-1]) or (etabin == get_l1t_eta_bin(trig_eta)))
+                        select = (mode in l1t_mode_values[modebin]) and ((etabin == l1t_eta_vec[-1]) or (etabin == get_l1t_eta_bin(trig_eta))) and (int(bx) == 0)
                         if select:
                             hname = "pt_in_eta%i_mode%i_all" % (etabin, modebin)
                             histos[hname].Fill(trig_pt)
 
                             hname = "ptcut_in_eta%i_mode%i_all" % (etabin, modebin)
                             histos[hname].Fill(trig_pt)
+
+                        if (etabin == l1t_eta_vec[-1]) and (modebin == l1t_mode_vec[-1]):
+                            hname = "eta"
+                            histos[hname].Fill(trig_eta)
+                            hname = "phi"
+                            histos[hname].Fill(trig_phi)
                         continue
                     continue
 
                 for pubin in l1t_pu_vec:
                     for modebin in l1t_mode_vec:
                         for etabin in l1t_eta_vec:
-                            select = (mode in l1t_mode_values[modebin]) and ((etabin == l1t_eta_vec[-1]) or (etabin == get_l1t_eta_bin(trig_eta))) and (pubin == get_l1t_pu_bin(gen_trueNPV))
+                            select = (mode in l1t_mode_values[modebin]) and ((etabin == l1t_eta_vec[-1]) or (etabin == get_l1t_eta_bin(trig_eta))) and (int(bx) == 0) and (pubin == get_l1t_pu_bin(gen_trueNPV))
                             if select:
                                 hname = "ptcut_in_eta%i_mode%i_pu%i" % (etabin, modebin, pubin)
                                 histos[hname].Fill(trig_pt)
                             continue
                         continue
                     continue
+
+        entries_in_pubin[get_l1t_pu_bin(gen_trueNPV)] += 1
 
     # __________________________________________________________________________
     # Modify ptcut histograms
@@ -178,6 +198,14 @@ def drawer_project(tree, histos, options):
             for etabin in l1t_eta_vec:
                 hname = "ptcut_in_eta%i_mode%i_pu%i" % (etabin, modebin, pubin)
                 modify_ptcut(histos[hname])
+
+    # __________________________________________________________________________
+    # Normalize histograms by entries in pubin
+    for pubin in l1t_pu_vec:
+        for modebin in l1t_mode_vec:
+            for etabin in l1t_eta_vec:
+                hname = "ptcut_in_eta%i_mode%i_pu%i" % (etabin, modebin, pubin)
+                normalize_by_entries(histos[hname], entries_in_pubin[pubin])
     return
 
 # ______________________________________________________________________________
@@ -194,7 +222,7 @@ def drawer_draw(histos, options):
                     h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
                     h.SetLineColor(col); h.SetMarkerColor(col);
                 if h.logy:
-                    h.SetMaximum(h.GetMaximum() * 14); h.SetMinimum(0.5)
+                    h.SetMaximum(h.GetMaximum() * 14); #h.SetMinimum(0.5)
                 else:
                     h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
                 h.Draw("hist")
@@ -229,6 +257,10 @@ def drawer_draw(histos, options):
                 h1.SetMinimum(0); h1.SetMaximum(ymax)
                 h1.SetStats(0); h1.Draw()
 
+                xmin, xmax = h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax()
+                tline2 = TLine(); tline.SetLineColor(1)
+                tline2.DrawLine(xmin, 1.0, xmax, 1.0)
+
                 h.gr = h.CreateGraph()
                 h.gr.SetMarkerStyle(20); h.gr.SetMarkerSize(0.7)
 
@@ -239,6 +271,7 @@ def drawer_draw(histos, options):
                 save(options.outdir, hname)
 
     drawer_draw_more(histos, options)
+    save_histos(options.outdir, histos)
     return
 
 # ______________________________________________________________________________
@@ -300,7 +333,7 @@ def drawer_draw_more(histos, options):
         statistics_ = statistics[k]
 
         hname = special_hname + "_l1pt"
-        h = TH1F(hname, "; # PU; entries", 55, 0, 55)
+        h = TH1F(hname, "; # PU; arb. unit", 55, 0, 55)
         h.etabin = int(hname[:hname.find("ptcut_in_eta")+len("ptcut_in_eta")+1][-1])
         ymax = max([y for yy in statistics_ for y in yy])
         h.SetMaximum(ymax * 1.4); h.SetMinimum(0.)
@@ -335,6 +368,7 @@ def drawer_sitrep(histos, options):
                 hname = "ptcut_in_eta%i_mode%i_pu%i" % (etabin, modebin, pubin)
                 h = histos[hname]
                 print hname, h.GetEntries()
+    return
 
 
 # ______________________________________________________________________________

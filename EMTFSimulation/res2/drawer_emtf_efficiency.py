@@ -175,27 +175,28 @@ def drawer_project(tree, histos, options):
             trigger_decisions = [[False for modebin in l1t_mode_vec] for l1ptbin in l1t_l1pt_vec]
 
             # Loop over tracks
-            for (itrack, mode, trig_pt, trig_phi, trig_eta) in izip(count(), evt.EMTFTracks_mode, evt.EMTFTracks_pt, evt.EMTFTracks_phiGlbRad, evt.EMTFTracks_eta):
+            for (itrack, mode, bx, trig_pt, trig_phi, trig_eta) in izip(count(), evt.EMTFTracks_mode, evt.EMTFTracks_bx, evt.EMTFTracks_pt, evt.EMTFTracks_phiGlbRad, evt.EMTFTracks_eta):
 
                 if options.verbose:
                     print ".... %i gen pt: %f phi: %f eta: %f" % (itrack, part_pt, part_phi, part_eta)
-                    print ".... %i l1t pt: %f phi: %f eta: %f" % (itrack, trig_pt, trig_phi, trig_eta)
+                    print ".... %i l1t pt: %f phi: %f eta: %f mode: %i bx: %i" % (itrack, trig_pt, trig_phi, trig_eta, mode, int(bx))
 
                 dR = deltaR(trig_eta, trig_phi, part_globalEtaME2, part_globalPhiME2)
 
                 # Get trigger decisions
                 for l1ptbin in l1t_l1pt_vec:
                     for modebin in l1t_mode_vec:
-                        if (trig_pt > l1t_l1pt_thresholds[l1ptbin]) and (mode in l1t_mode_values[modebin]) and (dR < 0.3):
+                        if (trig_pt > l1t_l1pt_thresholds[l1ptbin]) and (mode in l1t_mode_values[modebin]) and (dR < 0.3) and (int(bx) == 0):
                             trigger_decisions[l1ptbin][modebin] = True
 
                 # Get best match
-                if (best_mode < mode):
-                    best_mode, best_dR = mode, dR
-                    best_trig_pt, best_trig_phi, best_trig_eta = trig_pt, trig_phi, trig_eta
-                elif (best_mode == mode and best_dR > dR):
-                    best_mode, best_dR = mode, dR
-                    best_trig_pt, best_trig_phi, best_trig_eta = trig_pt, trig_phi, trig_eta
+                if (int(bx) == 0):
+                    if (best_mode < mode):
+                        best_mode, best_dR = mode, dR
+                        best_trig_pt, best_trig_phi, best_trig_eta = trig_pt, trig_phi, trig_eta
+                    elif (best_mode == mode and best_dR > dR):
+                        best_mode, best_dR = mode, dR
+                        best_trig_pt, best_trig_phi, best_trig_eta = trig_pt, trig_phi, trig_eta
                 continue
 
             l1ptbins = get_l1t_l1pt_bins()
@@ -263,7 +264,7 @@ def drawer_draw(histos, options):
                     h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
                     h.SetLineColor(col); h.SetMarkerColor(col);
                 if h.logy:
-                    h.SetMaximum(h.GetMaximum() * 14); h.SetMinimum(0.5)
+                    h.SetMaximum(h.GetMaximum() * 14); #h.SetMinimum(0.5)
                 else:
                     h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
 
@@ -286,6 +287,10 @@ def drawer_draw(histos, options):
                 h1.SetMinimum(0); h1.SetMaximum(ymax)
                 h1.SetStats(0); h1.Draw()
 
+                xmin, xmax = h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax()
+                tline2 = TLine(); tline.SetLineColor(1)
+                tline2.DrawLine(xmin, 1.0, xmax, 1.0)
+
                 h.gr = h.CreateGraph()
                 h.gr.SetMarkerStyle(20); h.gr.SetMarkerSize(0.7)
 
@@ -296,6 +301,7 @@ def drawer_draw(histos, options):
                 save(options.outdir, hname)
 
     drawer_draw_more(histos, options)
+    save_histos(options.outdir, histos)
     return
 
 # ______________________________________________________________________________
@@ -339,6 +345,10 @@ def drawer_draw_more(histos, options):
         h1 = h.GetCopyTotalHisto().Clone(hname+"_frame"); h1.Reset()
         h1.SetMinimum(0); h1.SetMaximum(ymax)
         h1.SetStats(0); h1.Draw()
+
+        xmin, xmax = h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax()
+        tline2 = TLine(); tline.SetLineColor(1)
+        tline2.DrawLine(xmin, 1.0, xmax, 1.0)
 
         moveLegend(tlegend,0.66,0.20,0.90,0.32); tlegend.Clear()
         for i, l1ptbin in enumerate(l1t_l1pt_vec):
@@ -384,6 +394,10 @@ def drawer_draw_more(histos, options):
         h1.SetMinimum(0); h1.SetMaximum(ymax)
         h1.SetStats(0); h1.Draw()
 
+        xmin, xmax = h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax()
+        tline2 = TLine(); tline.SetLineColor(1)
+        tline2.DrawLine(xmin, 1.0, xmax, 1.0)
+
         moveLegend(tlegend,0.66,0.16,0.90,0.32); tlegend.Clear()
         for i, pubin in enumerate(l1t_pu_vec):
             suffix = "_pu%i" % (pubin)
@@ -419,6 +433,7 @@ def drawer_sitrep(histos, options):
                 hname = "efficiency_of_pt_in_eta%i_mode%i_l1pt%i" % (etabin, modebin, l1ptbin)
                 h = histos[hname]
                 print hname, h.GetCopyTotalHisto().GetEntries()
+    return
 
 
 # ______________________________________________________________________________

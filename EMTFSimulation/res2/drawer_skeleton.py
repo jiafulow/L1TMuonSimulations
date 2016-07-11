@@ -53,12 +53,14 @@ def drawer_draw(histos, options):
             gPad.SetLogy(h.logy)
             CMS_label()
             save(options.outdir, hname)
+    save_histos(options.outdir, histos)
     return
 
 # ______________________________________________________________________________
 def drawer_sitrep(histos, options):
     print "--- SITREP --------------------------------------------------------"
     print
+    return
 
 
 # ______________________________________________________________________________
