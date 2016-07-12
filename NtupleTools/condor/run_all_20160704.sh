@@ -31,8 +31,10 @@ python jobify.py NoAnalyzer SingleMuon_PositiveEndCap_0T_200GeV singlemu_0T_gev 
 python jobify.py NoAnalyzer SingleMuon_PositiveEndCap_0T_1000GeV singlemu_0T_gev emtf 2016 10
 
 python jobify.py NoAnalyzer SingleNeutrino_PUSpring16 singlenu emtf 2016 80
-python jobify.py NoAnalyzer SingleNeutrino_PU8to42 singlenu_flatPU emtf 2016 40
-python jobify.py NoAnalyzer SingleMuon_PositieEndCap_PU8to42 singlemu_flatPU emtf 2016 40
+#python jobify.py NoAnalyzer SingleNeutrino_PU8to42 singlenu_flatPU8to42 emtf 2016 40
+python jobify.py NoAnalyzer SingleNeutrino_PU0to50 singlenu_flatPU emtf 2016 40
+#python jobify.py NoAnalyzer SingleMuon_PositieEndCap_PU8to42 singlemu_flatPU8to42 emtf 2016 40
+python jobify.py NoAnalyzer SingleMuon_PositiveEndCap_PU0to50 singlemu_flatPU emtf 2016 40
 
 python jobify.py NoAnalyzer SingleNeutrino_PU10 singlenu_pu emtf 2016 40
 python jobify.py NoAnalyzer SingleNeutrino_PU20 singlenu_pu emtf 2016 40
@@ -46,6 +48,8 @@ python jobify.py NoAnalyzer SingleMuon_PositiveEndCap_PU30 singlemu_pu emtf 2016
 python jobify.py NoAnalyzer SingleMuon_PositiveEndCap_PU40 singlemu_pu emtf 2016 40
 python jobify.py NoAnalyzer SingleMuon_PositiveEndCap_PU45 singlemu_pu emtf 2016 40
 python jobify.py NoAnalyzer SingleMuon_PositiveEndCap_PU50 singlemu_pu emtf 2016 40
+
+#python jobify.py NoAnalyzer SingleMuon_PositiveBarrel singlemu emtf 2016 40
 
 # When the condor jobs are done, do this:
 #python retrieve.py
