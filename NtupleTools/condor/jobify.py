@@ -69,6 +69,9 @@ class CondorJobType(object):
         elif hostname.endswith('ufl.edu'):
             machine = 'ufl.edu'
             storage = 'srm://srm.ihepa.ufl.edu:8443/srm/v2/server?SFN=/cms/data/store/user/jiafulow/L1MuonTrigger/'
+        elif hostname.endswith('uscms.org'):
+            machine = 'uscms.org'
+            storage = 'srm://srm.ihepa.ufl.edu:8443/srm/v2/server?SFN=/cms/data/store/user/jiafulow/L1MuonTrigger/'
         else:
             machine = 'unknown'
             storage = 'srm://unknown/'
@@ -126,7 +129,7 @@ class CondorJobType(object):
 '''mkdir -p {JOBPATH}/
 rm -rf {JOBPATH}/*
 mkdir {JOBPATH}/{JOBNAME}/ {JOBPATH}/{LOGNAME}/
-gfal-rm -r -v -t 180 {STORAGE} >& /dev/null
+gfal-rm -r -v -t 180 {STORAGE} >/dev/null 2>&1
 gfal-mkdir -p {STORAGE}
 ln -s {STORAGE2} {JOBPATH}/{OUTNAME}
 cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
@@ -136,32 +139,44 @@ cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
 
     def write_jdl(self):
 
+        # Prepare GRID proxy
         if 'X509_USER_PROXY' not in os.environ:
-            myproxy = '/tmp/x509up_u%s' % (subprocess.check_output(['id', '-u']).rstrip('\n'))
+            #myproxy = '%s' % (subprocess.check_output(['voms-proxy-info', '-path']).rstrip('\n'))
+            #myproxy = '/tmp/x509up_u%s' % (subprocess.check_output(['id', '-u']).rstrip('\n'))
+            myproxy = '/tmp/x509up_u' + str(os.getuid())
             os.environ['X509_USER_PROXY'] = myproxy
 
-        # NOTE:
-        # on fnal.gov, uncomment 'Universe = vanilla', comment out 'Universe = grid' and 'grid_resource = ...'.
+        if not os.path.isfile(os.environ.get('X509_USER_PROXY')):
+            subprocess.check_call(["voms-proxy-init", "-voms", "cms", "-valid", "192:00"])
+
+        try:
+            a = subprocess.check_output(['voms-proxy-info'])
+        except subprocess.CalledProcessError:
+            print "[ERROR  ] %sWhere is your GRID proxy?%s" % ('\033[91m', '\033[0m')
+            raise
+
+        # Some warnings
         machine = self.config['MACHINE']
-        if machine == "fnal.gov":
-            print "[NOTE   ] Make sure to uncomment 'Universe = vanilla', comment out 'Universe = grid' and 'grid_resource = ...'."
+        if machine == "ufl.edu":
+            print "[WARNING] %sMake sure to uncomment 'Universe = grid' and 'grid_resource = ...', comment out 'Universe = vanilla'.%s" % ('\033[93m', '\033[0m')
+        elif machine == "uscms.org":
+            print "[WARNING] %sMake sure to check whether the modified version of 'condor_submit' is still valid.%s" % ('\033[93m', '\033[0m')
 
         writeme = \
-'''#Universe                = vanilla
-Universe                = grid
-grid_resource           = condor cms.rc.ufl.edu cms.rc.ufl.edu:9619
+'''Universe                = vanilla
+#Universe                = grid
+#grid_resource           = condor cms.rc.ufl.edu cms.rc.ufl.edu:9619
 #grid_resource           = condor red-gw1.unl.edu red-gw1.unl.edu:9619
 Notification            = Error
 Executable              = {JOBNAME}/{EXECUTABLE}
 Arguments               = {SOURCEFILE} {MAXEVENTS} {DATASET} {DATASETGROUP} {SELECTION} {PERIOD} {JOBID}
-Transfer_Input_Files    = {JOBNAME}/{EXECUTABLE},{JOBNAME}/{SOURCEFILE}
+Transfer_Input_Files    = {JOBNAME}/{SOURCEFILE}
 Output                  = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).stdout
 Error                   = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).stderr
 Log                     = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).out
 Requirements            = (OpSys == "LINUX") && (Arch != "DUMMY")
 request_disk            = 1000000
 request_memory          = 2000
-#notify_user             = NOBODY@FNAL.GOV
 use_x509userproxy       = TRUE
 x509userproxy           = $ENV(X509_USER_PROXY)
 should_transfer_files   = YES
@@ -197,6 +212,7 @@ echo ">>> arguments: $@"
 
 MACHINE={MACHINE}
 echo ">>> MACHINE=$MACHINE"
+echo ">>> OSG_HOSTNAME=$OSG_HOSTNAME"
 
 if [ $MACHINE == "ufl.edu" ] && [ ! -z $OSG_WN_TMP ]; then
     REMOTE_INITIAL_DIR=$(pwd)
@@ -238,6 +254,8 @@ if [ $MACHINE == "fnal.gov" ]; then
     echo ""
 elif [ $MACHINE == "ufl.edu" ]; then
     echo ""
+elif [ $MACHINE == "uscms.org" ]; then
+    echo ""
 fi
 
 # Setup CMSSW environment
@@ -250,8 +268,18 @@ if [ $EXIT_STATUS -ne 0 ]; then echo "scram runtime exited with status=$EXIT_STA
 SOFTWARE_DIR=`pwd`
 echo ">>> SOFTWARE_DIR=$SOFTWARE_DIR"
 
+# Copy using lcg-cp or gfal-copy?
+if command -v gfal-copy >/dev/null 2>&1; then
+    export BLTCP='gfal-copy -f -p -v -t 180 '
+elif command -v lcg-cp >/dev/null 2>&1; then
+    export BLTCP='lcg-cp -v -b -D srmv2 --connect-timeout 180 '
+else
+    EXIT_STATUS=1
+fi
+if [ $EXIT_STATUS -ne 0 ]; then echo "getting copy command exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
+
 # Download tarball
-gfal-copy -f -p -v -t 180 "{TARBALL2}" file:///$PWD/"../{TARBALL}" >& /dev/null
+$BLTCP "{TARBALL2}" file:///$PWD/"../{TARBALL}" >/dev/null
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then echo "transfer tarball exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
@@ -317,7 +345,7 @@ ls -Al $RUNTIME_AREA
 
 # Transfer output file
 ROOTFILE=`ls *_*.root`
-gfal-copy -f -p -v -t 180 file:///$PWD/"$ROOTFILE" "{STORAGE}/$ROOTFILE" >& /dev/null
+$BLTCP file:///$PWD/"$ROOTFILE" "{STORAGE}/$ROOTFILE" >/dev/null
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then echo "transfer output exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
@@ -340,7 +368,7 @@ echo "Job finished on host `hostname` on `date`"
 
         print "[INFO   ] Uploading tarball ..."
         commands = \
-'''gfal-copy -f -p -v -t 180 file:///$PWD/"{TARBALL}" "{TARBALL2}" >& /dev/null
+'''gfal-copy -f -p -v -t 180 file:///$PWD/"{TARBALL}" "{TARBALL2}" >/dev/null 2>&1
 '''.format(**self.config)
         self.execute_commands(commands)
         return
@@ -358,6 +386,15 @@ echo "Job finished on host `hostname` on `date`"
 '''mv {EXECUTABLE} {SOURCEFILE} {JOBAD} {JOBPATH}/{JOBNAME}/
 cd {JOBPATH}/ && condor_submit {JOBNAME}/{JOBAD}
 '''.format(**self.config)
+
+        # EXECUTABLE got modified by cms connect
+        machine = self.config['MACHINE']
+        if machine == "uscms.org":
+            commands = \
+'''mv {EXECUTABLE} {SOURCEFILE} {JOBAD} {JOBPATH}/{JOBNAME}/
+cd {JOBPATH}/ && ~/condor_submit {JOBNAME}/{JOBAD}
+'''.format(**self.config)
+
         self.execute_commands(commands)
         return
 
@@ -367,13 +404,6 @@ def main():
 
     if len(sys.argv) < 7:
         raise Exception('Expect 6 command line arguments, received %i' % (len(sys.argv)-1))
-
-    # Check GRID proxy
-    try:
-        a = subprocess.check_output(['voms-proxy-info'])
-    except subprocess.CalledProcessError:
-        print('%sPlease make sure you have a valid GRID proxy!%s' % ('\033[91m', '\033[0m'))
-        raise
 
     print('[INFO   ] Creating condor jobs ...')
     print('[INFO   ] Command line arguments: %s' % (' '.join(sys.argv[1:])))

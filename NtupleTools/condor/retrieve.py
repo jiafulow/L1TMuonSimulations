@@ -11,19 +11,21 @@ def get_dataset_name(jobpath):
 
 class Retriever(object):
 
-    def __init__(self, chk='.checkfile.txt', logname='res', outname='out', force=False):
+    def __init__(self, chk='.checkfile.txt', logname='res', outname='out', force=False, do_hadd=False):
 
         self.chk = chk
         self.logname = logname
         self.outname = outname
         self.force = force
+        self.do_hadd = do_hadd
         self.datasets = []
         self.datasetgroups = {}
 
     def run(self):
 
         self.setup()
-        self.hadd()
+        if self.do_hadd:
+            self.hadd()
 
     def setup(self):
 
@@ -101,10 +103,15 @@ def main():
     print('[INFO   ] Retrieving condor jobs ...')
 
     force = False
-    if "--force" in sys.argv[1:]:
-        force = True  # do not raise exception
+    hadd = False
 
-    ret = Retriever(force=force)
+    for arg in sys.argv[1:]:
+        if arg == "--force" :
+            force = True  # do not raise exception
+        if arg == "--hadd":
+            hadd = True  # do hadd
+
+    ret = Retriever(force=force, do_hadd=hadd)
     ret.run()
 
 
