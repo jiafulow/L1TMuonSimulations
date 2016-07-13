@@ -1,0 +1,3 @@
+python drawer_emtf_efficiency.py ntuple_singlemu.root -b
+
+python drawer_emtf_rates.py ntuple_singlenu.root -b

@@ -5,9 +5,7 @@ from rootdrawing import *
 
 # ______________________________________________________________________________
 # Drawer
-def drawer_book(options):
-    histos = {}
-
+def drawer_book(histos, options):
     nbinsx, xmin, xmax = 50, -1, 1
     hname = "h"
     histos[hname] = TH1F(hname, "; x", nbinsx, xmin, xmax)
@@ -15,13 +13,13 @@ def drawer_book(options):
     # Style
     for hname, h in histos.iteritems():
         h.style = 0; h.logx = options.logx; h.logy = options.logy
-    donotdelete.append(histos)
-    return histos
+    return
 
 # ______________________________________________________________________________
 def drawer_project(tree, histos, options):
     #tree.SetBranchStatus("*", 0)
 
+    # __________________________________________________________________________
     # Loop over events
     for ievt, evt in enumerate(tree):
         if (ievt == options.nentries):  break
@@ -29,6 +27,7 @@ def drawer_project(tree, histos, options):
 
         #hname = "h"
         #histos[hname].Fill(1)
+        continue
 
     #tree.SetBranchStatus("*", 1)
     return
@@ -45,38 +44,44 @@ def drawer_draw(histos, options):
                 h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
                 h.SetLineColor(col); h.SetMarkerColor(col);
             if h.logy:
-                h.SetMaximum(h.GetMaximum() * 14); h.SetMinimum(0.5)
+                h.SetMaximum(h.GetMaximum() * 14); #h.SetMinimum(0.5)
             else:
                 h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
-
             h.Draw("hist")
-            gPad.SetLogy(h.logy)
+            gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
             CMS_label()
             save(options.outdir, hname)
-    save_histos(options.outdir, histos)
     return
 
 # ______________________________________________________________________________
 def drawer_sitrep(histos, options):
     print "--- SITREP --------------------------------------------------------"
     print
+
+    pack_histos(options.outdir, histos, options)
     return
 
 
 # ______________________________________________________________________________
 # Main function
-def main(options):
-
+def main(histos, options):
     # Init
     drawer = MyDrawer()
     tchain = TChain("ntupler/tree", "")
     tchain.AddFileInfoList(options.tfilecoll.GetList())
 
     # Process
-    histos = drawer_book(options)
-    drawer_project(tchain, histos, options)
-    drawer_draw(histos, options)
-    drawer_sitrep(histos, options)
+    if not options.pronto:
+        drawer_book(histos, options)
+        drawer_project(tchain, histos, options)
+        drawer_draw(histos, options)
+        drawer_sitrep(histos, options)
+
+    import subprocess
+    prog = sys.argv[0]
+    prog = prog.replace(".py", "_pronto.py")
+    if os.path.isfile(prog):
+        subprocess.check_call(["python", prog, options.outdir])
 
 # ______________________________________________________________________________
 if __name__ == '__main__':
@@ -84,6 +89,7 @@ if __name__ == '__main__':
     # Setup argument parser
     parser = MyParser()
     options = parser.parse_args()
+    histos = {}
 
     # Call the main function
-    main(options)
+    main(histos, options)

@@ -3,19 +3,21 @@ tmpargv = sys.argv[:]  # [:] for a copy, not reference
 sys.argv = []
 
 import ROOT
-from ROOT import TH1, TH1F, TH2F, TF1, TProfile, TProfile2D, TFile, TFileCollection, TChain, TCanvas, TPad, TLegend, TLatex, TLine, TPolyLine, TBox, TGraph, TGraphErrors, TGraphAsymmErrors, TEfficiency, gROOT, gSystem, gStyle, gPad
+from ROOT import TH1, TH1F, TH2F, TF1, TProfile, TProfile2D, TFile, TFileCollection, \
+    TChain, TCanvas, TPad, TLegend, TPaveText, TLatex, TLine, TPolyLine, TBox, TGraph, \
+    TGraphErrors, TGraphAsymmErrors, TEfficiency, gROOT, gSystem, gStyle, gPad
 from rootcolors import *
 sys.argv = tmpargv
 
 import re
 import os
 from math import sqrt, pi, ceil, floor
-from random import randint
 from itertools import izip, count
 from array import array
 import argparse
 import tempfile
 import json
+import cPickle as pickle
 
 # ______________________________________________________________________________
 # Classes
@@ -54,6 +56,7 @@ class MyParser:
         self.parser.add_argument("--logx", action="store_true", help="draw plots with log x scale (default: %(default)s)")
         self.parser.add_argument("--logy", action="store_true", help="draw plots with log y scale (default: %(default)s)")
         self.parser.add_argument("-n", "--nentries", type=int, default=-1, help="number of entries (default: %(default)s)")
+        self.parser.add_argument("-p", "--pronto", action="store_true", help="skip processing events, use existing histograms")
         self.parser.add_argument("-b", "--batch", action="store_true", help="batch mode without graphics (default: %(default)s)")
         self.parser.add_argument("-v", "--verbose", action="count", default=0, help="verbosity (default: %(default)s)")
 
@@ -105,15 +108,21 @@ tlegend.SetLineColor(0)
 tlegend.SetShadowColor(0)
 tlegend.SetBorderSize(0)
 
+tpavetext = TPaveText(0.70,0.74,0.96,0.94, "NDC")
+tpavetext.SetFillStyle(0)
+tpavetext.SetLineColor(0)
+tpavetext.SetShadowColor(0)
+tpavetext.SetBorderSize(0)
+tpavetext.SetTextAlign(tlatex.GetTextAlign())
+tpavetext.SetTextFont(tlatex.GetTextFont())
+tpavetext.SetTextSize(tlatex.GetTextSize())
+
 tline = TLine()
 tline.SetLineColor(kGray+2)
 tline.SetLineStyle(2)
 
 col = kBlack
 fcol = kRed
-
-donotdelete = []  # persist in memory
-
 
 # ______________________________________________________________________________
 # Math
@@ -149,6 +158,9 @@ def moveLegend(tlegend, x1, y1, x2, y2):
     # Thanks ROOT!
     tlegend.SetX1(x1); tlegend.SetY1(y1); tlegend.SetX2(x2); tlegend.SetY2(y2)
     tlegend.SetX1NDC(x1); tlegend.SetY1NDC(y1); tlegend.SetX2NDC(x2); tlegend.SetY2NDC(y2)
+
+def movePaveText(tpavetext, x1, y1, x2, y2):
+    moveLegend(tpavetext, x1, y1, x2, y2)
 
 def movePalette(h, x1=0.88, y1=0.13, x2=0.92, y2=0.95):
     paletteObj = h.FindObject("palette")
@@ -229,11 +241,36 @@ def save(imgdir, imgname, redraw_axis=True, dot_pdf=True, dot_root=False, dot_c=
     if dot_c:
         gPad.Print(imgdir+imgname+".C")
 
-def save_histos(imgdir, histos):
-    tfile = TFile.Open(imgdir+"histos.root", "RECREATE")
+def pack_histos(imgdir, histos, options):
+    # Save histos.root
+    tfile = TFile.Open(imgdir+'histos.root', 'RECREATE')
     for k, v in histos.iteritems():
         v.Write()
     tfile.Close()
+
+    # Save histos.pkl and options.pkl
+    with open(imgdir+'histos.pkl', 'wb') as f:
+        #pickle.dump(histos, f, protocol=pickle.HIGHEST_PROTOCOL)
+        histos2 = {}
+        for k, v in histos.iteritems():
+            histos2[k] = (v, v.__dict__)
+        pickle.dump(histos2, f, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(imgdir+'options.pkl', 'wb') as f:
+        pickle.dump(options, f, protocol=pickle.HIGHEST_PROTOCOL)
+    return
+
+def unpack_histos(imgdir):
+    # Load histos.pkl and options.pkl
+    with open(imgdir+'histos.pkl', 'rb') as f:
+        #histos = pickle.load(f)
+        histos2 = pickle.load(f)
+        histos = {}
+        for k, v in histos2.iteritems():
+            v[0].__dict__.update(v[1])
+            histos[k] = v[0]
+    with open(imgdir+'options.pkl', 'rb') as f:
+        options = pickle.load(f)
+    return (histos, options)
 
 # ______________________________________________________________________________
 # Useful functions

@@ -8,116 +8,145 @@ from math import sinh, atan2
 col  = TColor.GetColor("#1f78b4")  # mu0
 fcol = TColor.GetColor("#a6cee3")  # mu0
 
-l1t_l1pt_vec = [0, 1, 2]  # 3 trigger pt bins
-l1t_l1pt_thresholds = (10, 16, 20)
-l1t_mode_vec = [0, 1, 2]  # 3-station, 4-station, 3-or-4-station
-l1t_mode_values = ((11,13,14), (15,), (11,13,14,15))
-l1t_eta_vec = [0, 1, 2]  # 2 eta bins + 1 inclusive eta bin
-l1t_eta_bounds = (1.2, 1.6, 2.4)
-l1t_pu_vec = [0, 1, 2, 3]  # 4 pu bins
-l1t_pu_values = (0, 20, 30, 50)
+l1t_l1pt_vec = (0, 1, 2)  # 3 l1pt bins
+l1t_l1pt_thresholds = (0, 12, 18)
+l1t_mode_vec = (0, 1, 2, 3)  # MuOpen, DoubleMu, SingleMu, Mode15
+l1t_mode_integers = ((3,5,6,7,9,10,11,12,13,14,15), (7,10,11,12,13,14,15), (11,13,14,15), (15,))
+l1t_bx_vec = (0, 1)  # BX=any, BX=0
+l1t_bx_integers = (range(-12,3), (0,))
+l1t_eta_vec = (0, 1, 2)  # 2 eta bins + inclusive
+l1t_eta_floats = ((1.2,1.6), (1.6, 2.4), (-99999999.,99999999.))
+l1t_genpt_vec = (0, 1, 2)  # 2 genpt bins + inclusive
+l1t_genpt_floats = ((20.,80.), (150.,2000.), (-99999999.,99999999.))
+l1t_pu_vec = (0, 1, 2, 3)  # 4 pu bins
+l1t_pu_floats = ((-0.1,0.1), (20.-1,20.+2), (30.-1,30.+2), (45.-1,45.+2))
+l1t_pu_labeling = (0, 20, 30, 45)
 
 
 # ______________________________________________________________________________
 # Helper
-def get_l1t_l1pt_bins():
-    bins = l1t_l1pt_vec
-    return bins
+def in_l1t_l1pt_bin(b, l1pt):
+    a = (l1pt >= l1t_l1pt_thresholds[b])
+    return a
 
-def get_l1t_l1pt_label(l1ptbin):
-    label = "L1T p_{T} > %i" % l1t_l1pt_thresholds[l1ptbin]
+def get_l1t_l1pt_label(b):
+    label = "L1T p_{T} #geq %i" % l1t_l1pt_thresholds[b]
     return label
 
-def get_l1t_mode_bins():
-    bins = l1t_mode_vec
-    return bins
+def in_l1t_mode_bin(b, mode):
+    a = (mode in l1t_mode_integers[b])
+    return a
 
-def get_l1t_mode_label(modebin):
-    myrepr = lambda xx: '['+(','.join([str(x) for x in xx]))+']'
-    label = "mode #in [%s]" % (myrepr(l1t_mode_values[modebin]))
+def get_l1t_mode_label(b):
+    if b == 0:
+        label = "quality #geq 4"
+    elif b == 1:
+        label = "quality #geq 8"
+    elif b == 2:
+        label = "quality = 12"
+    elif b == 3:
+        label = "mode = 15"
+    else:
+        label = "ERROR"
     return label
 
-def get_l1t_eta_bin(eta):
-    eta = abs(eta)
-    for i in xrange(len(l1t_eta_bounds)-1):
-        if l1t_eta_bounds[i] <= abs(eta) < l1t_eta_bounds[i+1]:
-            return i
-    return -1
+def in_l1t_bx_bin(b, bx):
+    a = (bx in l1t_bx_integers[b])
+    return a
 
-def get_l1t_eta_label(etabin):
-    if etabin == len(l1t_eta_bounds)-1:  # inclusive
+def get_l1t_bx_label(b):
+    if b == l1t_bx_vec[-1]:
+        label = ""
+    elif b == 0:
+        label = "any BX"
+    else:
+        label = "ERROR"
+    return label
+
+def in_l1t_eta_bin(b, eta):
+    a = (l1t_eta_floats[b][0] <= abs(eta) < l1t_eta_floats[b][1])
+    return a
+
+def get_l1t_eta_label(b):
+    if b == l1t_eta_vec[-1]:
         label = ""
     else:
-        label = "%.1f #leq |#eta| < %.1f" % (l1t_eta_bounds[etabin], l1t_eta_bounds[etabin+1])
+        label = "%.1f #leq |#eta| < %.1f" % (l1t_eta_floats[b][0], l1t_eta_floats[b][1])
     return label
 
-def get_l1t_pu_bin(pu):
-    for i in xrange(len(l1t_pu_values)):
-        if (l1t_pu_values[i]-1) <= pu < (l1t_pu_values[i]+2):
-            return i
+def in_l1t_genpt_bin(b, genpt):
+    a = (l1t_genpt_floats[b][0] <= genpt < l1t_genpt_floats[b][1])
+    return a
+
+def get_l1t_genpt_label(b):
+    if b == l1t_genpt_vec[-1]:
+        label = ""
+    else:
+        label = "%.0f #leq gen p_{T} < %.0f" % (l1t_genpt_floats[b][0], l1t_genpt_floats[b][1])
+    return label
+
+def in_l1t_pu_bin(b, pu):
+    a = (l1t_pu_floats[b][0] <= pu < l1t_pu_floats[b][1])
     return -1
 
-def get_l1t_pu_label(pubin):
-    label = "# PU = %.0f" % (l1t_pu_values[pubin])
+def get_l1t_pu_label(b):
+    label = "# PU = %.0f" % (l1t_pu_labeling[b])
     return label
 
 # ______________________________________________________________________________
 # Drawer
-def drawer_book(options):
-    histos = {}
-
+def drawer_book(histos, options):
     ##mybins = [200.0]+[100.0/x for x in xrange(1,100)]
     #mybins = [200.0]+[100.0/x for x in xrange(1,80)]
     #mybins = list(reversed(mybins))
 
     # Bins from Benjamin (Seoul National University) but modified
     #mybins = [0.0, 50.0, 53.0, 55.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0, 550.0, 600.0, 650.0, 700.0, 800.0, 1000.0]
-    mybins = [0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0, 550.0, 600.0, 650.0, 700.0, 800.0, 1000.0, 2000.0]
+    mybins = [0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0, 70.0, 80.0, 100.0, 125.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0, 550.0, 600.0, 650.0, 700.0, 800.0, 1000.0, 2000.0]
 
     # Efficiency
     for l1ptbin in l1t_l1pt_vec:
         for modebin in l1t_mode_vec:
-            for etabin in l1t_eta_vec:
-                hname = "efficiency_of_pt_in_eta%i_mode%i_l1pt%i" % (etabin, modebin, l1ptbin)
-                histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
-                histos[hname].etabin = etabin
-                histos[hname].modebin = modebin
-                histos[hname].l1ptbin = l1ptbin
-                hname = "efficiency_of_pu_in_eta%i_mode%i_l1pt%i" % (etabin, modebin, l1ptbin)
-                histos[hname] = TEfficiency(hname, "; gen # PU; #varepsilon", 65, 0, 65)
-                histos[hname].etabin = etabin
-                histos[hname].modebin = modebin
-                histos[hname].l1ptbin = l1ptbin
-            hname = "efficiency_of_eta_mode%i_l1pt%i" % (modebin, l1ptbin)
-            histos[hname] = TEfficiency(hname, "; gen #eta; #varepsilon", 50, -2.5, 2.5)
-            histos[hname].modebin = modebin
-            histos[hname].l1ptbin = l1ptbin
-            hname = "efficiency_of_phi_mode%i_l1pt%i" % (modebin, l1ptbin)
-            histos[hname] = TEfficiency(hname, "; gen #phi; #varepsilon", 64, -3.2, 3.2)
-            histos[hname].modebin = modebin
-            histos[hname].l1ptbin = l1ptbin
+            for bxbin in l1t_bx_vec:
+                for etabin in l1t_eta_vec:
+                    hname = "efficiency_of_pt_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
+                    histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
+                    histos[hname].indices = (etabin, bxbin, modebin, l1ptbin)
+                    hname = "efficiency_of_pu_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
+                    histos[hname] = TEfficiency(hname, "; gen # PU; #varepsilon", 52, 0, 52)
+                    histos[hname].indices = (etabin, bxbin, modebin, l1ptbin)
+
+                for genptbin in l1t_genpt_vec:
+                    hname = "efficiency_of_eta_in_genpt%i_bx%i_mode%i_l1pt%i" % (genptbin, bxbin, modebin, l1ptbin)
+                    #histos[hname] = TEfficiency(hname, "; gen #eta; #varepsilon", 50, -2.5, 2.5)
+                    histos[hname] = TEfficiency(hname, "; gen |#eta|; #varepsilon", 52, 1.2, 2.5)
+                    histos[hname].indices = (genptbin, bxbin, modebin, l1ptbin)
+                    hname = "efficiency_of_phi_in_genpt%i_bx%i_mode%i_l1pt%i" % (genptbin, bxbin, modebin, l1ptbin)
+                    histos[hname] = TEfficiency(hname, "; gen #phi; #varepsilon", 50, -3.2, 3.2)
+                    histos[hname].indices = (genptbin, bxbin, modebin, l1ptbin)
 
     for pubin in l1t_pu_vec:
-        for etabin in l1t_eta_vec:
-            hname = "efficiency_of_pt_in_eta%i_pu%i" % (etabin, pubin)
-            histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
-            histos[hname].etabin = etabin
-            histos[hname].pubin = pubin
-        hname = "efficiency_of_eta_pu%i" % (pubin)
-        histos[hname] = TEfficiency(hname, "; gen #eta; #varepsilon", 50, -2.5, 2.5)
-        histos[hname].pubin = pubin
-        hname = "efficiency_of_phi_pu%i" % (pubin)
-        histos[hname] = TEfficiency(hname, "; gen #phi; #varepsilon", 64, -3.2, 3.2)
-        histos[hname].pubin = pubin
+        for modebin in l1t_mode_vec:
+            for bxbin in l1t_bx_vec:
+                for etabin in l1t_eta_vec:
+                    hname = "efficiency_of_pt_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
+                    histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
+                    histos[hname].indices = (etabin, bxbin, modebin, pubin)
+
+                for genptbin in l1t_genpt_vec:
+                    hname = "efficiency_of_eta_in_genpt%i_bx%i_mode%i_pu%i" % (genptbin, bxbin, modebin, pubin)
+                    #histos[hname] = TEfficiency(hname, "; gen #eta; #varepsilon", 50, -2.5, 2.5)
+                    histos[hname] = TEfficiency(hname, "; gen |#eta|; #varepsilon", 52, 1.2, 2.5)
+                    histos[hname].indices = (genptbin, bxbin, modebin, pubin)
 
     # Resolution (2D)
     for etabin in l1t_eta_vec:
         hname = "l1invPt_vs_invPt_in_eta%i" % (etabin)
         histos[hname] = TH2F(hname, "; gen q/p_{T} [1/GeV]; L1T 1/p_{T} [1/GeV]", 100, -0.5, 0.5, 50, 0, 0.5)
-        histos[hname].etabin = etabin
+        histos[hname].indices = (etabin,)
         hname = "dR_vs_invPt_in_eta%i" % (etabin)
         histos[hname] = TH2F(hname, "; gen q/p_{T} [1/GeV]; L1T #DeltaR @ME2", 100, -0.5, 0.5, 50, 0, 0.3)
-        histos[hname].etabin = etabin
+        histos[hname].indices = (etabin,)
 
     # Style
     for hname, h in histos.iteritems():
@@ -132,8 +161,7 @@ def drawer_book(options):
             h.SetConfidenceLevel(0.682689492137)  # 1-sigma
             h.SetStatisticOption(0)  # kFCP
             #h.SetStatisticOption(6)  # kBUniform
-    donotdelete.append(histos)
-    return histos
+    return
 
 # ______________________________________________________________________________
 def drawer_project(tree, histos, options):
@@ -148,7 +176,7 @@ def drawer_project(tree, histos, options):
         if (ievt == options.nentries):  break
         if (ievt % 1000 == 0):  print "Processing event: %i" % ievt
 
-        gen_trueNPV = evt.gen_trueNPV
+        trueNPV = evt.gen_trueNPV
 
         part_pt = evt.genParts_pt[0]
         part_phi = evt.genParts_phi[0]
@@ -163,16 +191,17 @@ def drawer_project(tree, histos, options):
         part_globalThetaME2 = evt.genParts_globalThetaME[0][2]
 
         # Select only endcap
-        is_endcap = 1.24 < abs(part_eta) < 2.4
+        is_endcap = 1.25 < abs(part_eta) < 2.4
 
         if options.verbose:
-            print ".. %i # PU: %i ntracks: %i is_endcap: %i" % (ievt, gen_trueNPV, len(evt.EMTFTracks_pt), is_endcap)
+            print ".. %i # PU: %i ntracks: %i is_endcap: %i" % (ievt, trueNPV, len(evt.EMTFTracks_pt), is_endcap)
 
         if part_pt > 0 and is_endcap:
             best_mode, best_dR = 0, 0.
             best_trig_pt, best_trig_phi, best_trig_eta = 0., 0., 0.
 
-            trigger_decisions = [[False for modebin in l1t_mode_vec] for l1ptbin in l1t_l1pt_vec]
+            # This is a 3D array: trigger_decisions[l1ptbin][modebin][bxbin]
+            trigger_decisions = [[[False for bxbin in l1t_bx_vec] for modebin in l1t_mode_vec] for l1ptbin in l1t_l1pt_vec]
 
             # Loop over tracks
             for (itrack, mode, bx, trig_pt, trig_phi, trig_eta) in izip(count(), evt.EMTFTracks_mode, evt.EMTFTracks_bx, evt.EMTFTracks_pt, evt.EMTFTracks_phiGlbRad, evt.EMTFTracks_eta):
@@ -186,8 +215,12 @@ def drawer_project(tree, histos, options):
                 # Get trigger decisions
                 for l1ptbin in l1t_l1pt_vec:
                     for modebin in l1t_mode_vec:
-                        if (trig_pt > l1t_l1pt_thresholds[l1ptbin]) and (mode in l1t_mode_values[modebin]) and (dR < 0.3) and (int(bx) == 0):
-                            trigger_decisions[l1ptbin][modebin] = True
+                        for bxbin in l1t_bx_vec:
+
+                            trigger_mc = (dR < 0.3)
+                            trigger = trigger_mc and (in_l1t_l1pt_bin(l1ptbin, trig_pt)) and (in_l1t_mode_bin(modebin, mode)) and (in_l1t_bx_bin(bxbin, bx))
+                            if trigger:
+                                trigger_decisions[l1ptbin][modebin][bxbin] = True
 
                 # Get best match
                 if (int(bx) == 0):
@@ -199,55 +232,55 @@ def drawer_project(tree, histos, options):
                         best_trig_pt, best_trig_phi, best_trig_eta = trig_pt, trig_phi, trig_eta
                 continue
 
-            l1ptbins = get_l1t_l1pt_bins()
-            modebins = get_l1t_mode_bins()
-            etabin = get_l1t_eta_bin(part_eta)
-            pubin = get_l1t_pu_bin(gen_trueNPV)
+            this_l1t_eta_vec = filter(lambda x: in_l1t_eta_bin(x, part_eta), l1t_eta_vec)
+            this_l1t_genpt_vec = filter(lambda x: in_l1t_genpt_bin(x, part_pt), l1t_genpt_vec)
+            this_l1t_pu_vec = filter(lambda x: in_l1t_pu_bin(x, trueNPV), l1t_pu_vec)
 
             # Efficiency
-            for l1ptbin in l1ptbins:
-                for modebin in modebins:
-                    trigger = trigger_decisions[l1ptbin][modebin]
+            for l1ptbin in l1t_l1pt_vec:
+                for modebin in l1t_mode_vec:
+                    for bxbin in l1t_bx_vec:
+                        trigger = trigger_decisions[l1ptbin][modebin][bxbin]
 
-                    hname = "efficiency_of_pt_in_eta%i_mode%i_l1pt%i" % (etabin, modebin, l1ptbin)
-                    histos[hname].Fill(trigger, part_pt)
-                    hname = "efficiency_of_pt_in_eta%i_mode%i_l1pt%i" % (l1t_eta_vec[-1], modebin, l1ptbin)  # inclusive eta
-                    histos[hname].Fill(trigger, part_pt)
-                    if part_pt > 20.0:  # cut on denominator
-                        hname = "efficiency_of_pu_in_eta%i_mode%i_l1pt%i" % (etabin, modebin, l1ptbin)
-                        histos[hname].Fill(trigger, gen_trueNPV)
-                        hname = "efficiency_of_pu_in_eta%i_mode%i_l1pt%i" % (l1t_eta_vec[-1], modebin, l1ptbin)  # inclusive eta
-                        histos[hname].Fill(trigger, gen_trueNPV)
-                        hname = "efficiency_of_eta_mode%i_l1pt%i" % (modebin, l1ptbin)
-                        histos[hname].Fill(trigger, part_eta)
-                        hname = "efficiency_of_phi_mode%i_l1pt%i" % (modebin, l1ptbin)
-                        histos[hname].Fill(trigger, part_phi)
-                    continue
-                continue
+                        for etabin in this_l1t_eta_vec:
+                            hname = "efficiency_of_pt_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
+                            histos[hname].Fill(trigger, part_pt)
 
-            trigger = trigger_decisions[-1][-1]  # last l1ptbin, last modebin
+                        if part_pt > 20.0:  # cut on denominator
+                            for etabin in this_l1t_eta_vec:
+                                hname = "efficiency_of_pu_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
+                                histos[hname].Fill(trigger, trueNPV)
 
-            if pubin != -1:
-                hname = "efficiency_of_pt_in_eta%i_pu%i" % (etabin, pubin)
-                histos[hname].Fill(trigger, part_pt)
-                hname = "efficiency_of_pt_in_eta%i_pu%i" % (l1t_eta_vec[-1], pubin)  # inclusive eta
-                histos[hname].Fill(trigger, part_pt)
-                if part_pt > 20.0:  # cut on denominator
-                    hname = "efficiency_of_eta_pu%i" % (pubin)
-                    histos[hname].Fill(trigger, part_eta)
-                    hname = "efficiency_of_phi_pu%i" % (pubin)
-                    histos[hname].Fill(trigger, part_phi)
+                            for genptbin in this_l1t_genpt_vec:
+                                hname = "efficiency_of_eta_in_genpt%i_bx%i_mode%i_l1pt%i" % (genptbin, bxbin, modebin, l1ptbin)
+                                #histos[hname].Fill(trigger, part_eta)
+                                histos[hname].Fill(trigger, abs(part_eta))
+                                hname = "efficiency_of_phi_in_genpt%i_bx%i_mode%i_l1pt%i" % (genptbin, bxbin, modebin, l1ptbin)
+                                histos[hname].Fill(trigger, part_phi)
+
+            for pubin in this_l1t_pu_vec:
+                for modebin in l1t_mode_vec:
+                    for bxbin in l1t_bx_vec:
+                        trigger = trigger_decisions[-1][modebin][bxbin]
+
+                        for etabin in this_l1t_eta_vec:
+                            hname = "efficiency_of_pt_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
+                            histos[hname].Fill(trigger, part_pt)
+
+                        if part_pt > 20.0:  # cut on denominator
+                            for genptbin in this_l1t_genpt_vec:
+                                hname = "efficiency_of_eta_in_genpt%i_bx%i_mode%i_pu%i" % (genptbin, bxbin, modebin, pubin)
+                                #histos[hname].Fill(trigger, part_eta)
+                                histos[hname].Fill(trigger, abs(part_eta))
 
             # Resolution (2D)
             if best_trig_pt > 0:
-                hname = "l1invPt_vs_invPt_in_eta%i" % (etabin)
-                histos[hname].Fill(part_charge/part_pt, 1.0/best_trig_pt)
-                hname = "l1invPt_vs_invPt_in_eta%i" % (l1t_eta_vec[-1])  # inclusive eta
-                histos[hname].Fill(part_charge/part_pt, 1.0/best_trig_pt)
-                hname = "dR_vs_invPt_in_eta%i" % (etabin)
-                histos[hname].Fill(part_charge/part_pt, best_dR)
-                hname = "dR_vs_invPt_in_eta%i" % (l1t_eta_vec[-1])  # inclusive eta
-                histos[hname].Fill(part_charge/part_pt, best_dR)
+                for etabin in this_l1t_eta_vec:
+                    hname = "l1invPt_vs_invPt_in_eta%i" % (etabin)
+                    histos[hname].Fill(part_charge/part_pt, 1.0/best_trig_pt)
+                    hname = "dR_vs_invPt_in_eta%i" % (etabin)
+                    histos[hname].Fill(part_charge/part_pt, best_dR)
+        continue
     return
 
 # ______________________________________________________________________________
@@ -267,7 +300,6 @@ def drawer_draw(histos, options):
                     h.SetMaximum(h.GetMaximum() * 14); #h.SetMinimum(0.5)
                 else:
                     h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
-
                 h.Draw("hist")
                 gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
                 CMS_label()
@@ -282,164 +314,36 @@ def drawer_draw(histos, options):
 
         elif h.ClassName() == "TEfficiency":
             if True:
-                ymax = 1.2
+                ymax = 1.1
                 h1 = h.GetCopyTotalHisto().Clone(hname+"_frame"); h1.Reset()
                 h1.SetMinimum(0); h1.SetMaximum(ymax)
                 h1.SetStats(0); h1.Draw()
 
                 xmin, xmax = h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax()
-                tline2 = TLine(); tline.SetLineColor(1)
+                tline2 = TLine(); tline2.SetLineColor(1)
                 tline2.DrawLine(xmin, 1.0, xmax, 1.0)
 
                 h.gr = h.CreateGraph()
-                h.gr.SetMarkerStyle(20); h.gr.SetMarkerSize(0.7)
-
+                h.gr.SetMarkerStyle(20); h.gr.SetMarkerSize(0.8)
                 h.gr.Draw("p")
                 gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
                 CMS_label()
                 h.additional = [h.GetCopyPassedHisto(), h.GetCopyTotalHisto(), h.gr]
                 save(options.outdir, hname)
-
-    drawer_draw_more(histos, options)
-    save_histos(options.outdir, histos)
-    return
-
-# ______________________________________________________________________________
-def drawer_draw_more(histos, options):
-
-    # __________________________________________________________________________
-    # Specialized: overlay different pt
-    special_hnames = [
-        "efficiency_of_pt_in_eta0_mode0",
-        "efficiency_of_pt_in_eta0_mode1",
-        "efficiency_of_pt_in_eta0_mode2",
-        "efficiency_of_pt_in_eta1_mode0",
-        "efficiency_of_pt_in_eta1_mode1",
-        "efficiency_of_pt_in_eta1_mode2",
-        "efficiency_of_pt_in_eta2_mode0",
-        "efficiency_of_pt_in_eta2_mode1",
-        "efficiency_of_pt_in_eta2_mode2",
-        "efficiency_of_pu_in_eta0_mode0",
-        "efficiency_of_pu_in_eta0_mode1",
-        "efficiency_of_pu_in_eta0_mode2",
-        "efficiency_of_pu_in_eta1_mode0",
-        "efficiency_of_pu_in_eta1_mode1",
-        "efficiency_of_pu_in_eta1_mode2",
-        "efficiency_of_pu_in_eta2_mode0",
-        "efficiency_of_pu_in_eta2_mode1",
-        "efficiency_of_pu_in_eta2_mode2",
-        "efficiency_of_eta_mode0",
-        "efficiency_of_eta_mode1",
-        "efficiency_of_eta_mode2",
-        "efficiency_of_phi_mode0",
-        "efficiency_of_phi_mode1",
-        "efficiency_of_phi_mode2",
-    ]
-
-    for special_hname in special_hnames:
-        suffix = "_l1pt%i" % (l1t_l1pt_vec[0])
-        hname = special_hname + suffix
-        h = histos[hname]
-
-        ymax = 1.2
-        h1 = h.GetCopyTotalHisto().Clone(hname+"_frame"); h1.Reset()
-        h1.SetMinimum(0); h1.SetMaximum(ymax)
-        h1.SetStats(0); h1.Draw()
-
-        xmin, xmax = h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax()
-        tline2 = TLine(); tline.SetLineColor(1)
-        tline2.DrawLine(xmin, 1.0, xmax, 1.0)
-
-        moveLegend(tlegend,0.66,0.20,0.90,0.32); tlegend.Clear()
-        for i, l1ptbin in enumerate(l1t_l1pt_vec):
-            suffix = "_l1pt%i" % (l1ptbin)
-            hname = special_hname + suffix
-            h = histos[hname]
-
-            assert(hasattr(h, "gr"))
-            h.gr.SetMarkerColor(ctapalette[i]); h.gr.SetLineColor(ctapalette[i])
-            h.gr.Draw("p")
-            tlegend.AddEntry(h.gr, get_l1t_l1pt_label(h.l1ptbin), "p")
-        tlegend.Draw()
-        if hasattr(h, "etabin"):
-            tlatex.DrawLatex(0.72, 0.34, get_l1t_eta_label(h.etabin))
-        if not "efficiency_of_pt" in special_hname:  # cut on denominator
-            tlatex.DrawLatex(0.72, 0.38, "gen p_{T} > 20")
-
-        gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
-        CMS_label()
-        save(options.outdir, hname[:hname.find("_l1pt")]+"_l1pt")
-
-        if "efficiency_of_pt" in special_hname:
-            h1.GetXaxis().SetRangeUser(0, 200)
-            save(options.outdir, hname[:hname.find("_l1pt")]+"_l1pt_zoom")
-
-    # __________________________________________________________________________
-    # Specialized: overlay different pu
-    special_hnames = [
-        "efficiency_of_pt_in_eta0",
-        "efficiency_of_pt_in_eta1",
-        "efficiency_of_pt_in_eta2",
-        "efficiency_of_eta",
-        "efficiency_of_phi",
-    ]
-
-    for special_hname in special_hnames:
-        suffix = "_pu%i" % (l1t_pu_vec[0])
-        hname = special_hname + suffix
-        h = histos[hname]
-
-        ymax = 1.2
-        h1 = h.GetCopyTotalHisto().Clone(hname+"_frame"); h1.Reset()
-        h1.SetMinimum(0); h1.SetMaximum(ymax)
-        h1.SetStats(0); h1.Draw()
-
-        xmin, xmax = h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax()
-        tline2 = TLine(); tline.SetLineColor(1)
-        tline2.DrawLine(xmin, 1.0, xmax, 1.0)
-
-        moveLegend(tlegend,0.66,0.16,0.90,0.32); tlegend.Clear()
-        for i, pubin in enumerate(l1t_pu_vec):
-            suffix = "_pu%i" % (pubin)
-            hname = special_hname + suffix
-            h = histos[hname]
-
-            assert(hasattr(h, "gr"))
-            h.gr.SetMarkerColor(ctapalette[i]); h.gr.SetLineColor(ctapalette[i])
-            h.gr.Draw("p")
-            tlegend.AddEntry(h.gr, get_l1t_pu_label(h.pubin), "p")
-        tlegend.Draw()
-        if hasattr(h, "etabin"):
-            tlatex.DrawLatex(0.72, 0.34, get_l1t_eta_label(h.etabin))
-        if not "efficiency_of_pt" in special_hname:  # cut on denominator
-            tlatex.DrawLatex(0.72, 0.38, "gen p_{T} > 20")
-
-        gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
-        CMS_label()
-        save(options.outdir, hname[:hname.find("_pu")]+"_pu")
-
-        if "efficiency_of_pt" in special_hname:
-            h1.GetXaxis().SetRangeUser(0, 200)
-            save(options.outdir, hname[:hname.find("_pu")]+"_pu_zoom")
     return
 
 # ______________________________________________________________________________
 def drawer_sitrep(histos, options):
     print "--- SITREP --------------------------------------------------------"
+    print
 
-    for l1ptbin in l1t_l1pt_vec:
-        for modebin in l1t_mode_vec:
-            for etabin in l1t_eta_vec:
-                hname = "efficiency_of_pt_in_eta%i_mode%i_l1pt%i" % (etabin, modebin, l1ptbin)
-                h = histos[hname]
-                print hname, h.GetCopyTotalHisto().GetEntries()
+    pack_histos(options.outdir, histos, options)
     return
 
 
 # ______________________________________________________________________________
 # Main function
-def main(options):
-
+def main(histos, options):
     # Init
     drawer = MyDrawer()
     gStyle.SetPadGridX(True)
@@ -448,10 +352,17 @@ def main(options):
     tchain.AddFileInfoList(options.tfilecoll.GetList())
 
     # Process
-    histos = drawer_book(options)
-    drawer_project(tchain, histos, options)
-    drawer_draw(histos, options)
-    drawer_sitrep(histos, options)
+    if not options.pronto:
+        drawer_book(histos, options)
+        drawer_project(tchain, histos, options)
+        drawer_draw(histos, options)
+        drawer_sitrep(histos, options)
+
+    import subprocess
+    prog = sys.argv[0]
+    prog = prog.replace(".py", "_pronto.py")
+    if os.path.isfile(prog):
+        subprocess.check_call(["python", prog, options.outdir])
 
 # ______________________________________________________________________________
 if __name__ == '__main__':
@@ -459,6 +370,7 @@ if __name__ == '__main__':
     # Setup argument parser
     parser = MyParser()
     options = parser.parse_args()
+    histos = {}
 
     # Call the main function
-    main(options)
+    main(histos, options)
