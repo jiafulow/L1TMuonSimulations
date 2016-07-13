@@ -85,6 +85,6 @@ ntupleL1TMuons = cms.EDProducer('NtupleL1TMuons',
 )
 
 
-ntupleL1TMuon = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives * ntupleLegacyCSCTFTriggerTracks * ntupleEMTFTriggerPrimitives * ntupleEMTFTriggerTracks * ntupleEMTFRegionalCandidates * ntupleL1TMuons)
-ntupleL1TMuonUnpacker = cms.Sequence(ntupleUnpackedEMTFTriggerPrimitives * ntupleUnpackedEMTFTriggerTracks)
+ntupleL1T = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives * ntupleLegacyCSCTFTriggerTracks * ntupleEMTFTriggerPrimitives * ntupleEMTFTriggerTracks * ntupleEMTFRegionalCandidates * ntupleL1TMuons)
+ntupleL1TUnpacker = cms.Sequence(ntupleUnpackedEMTFTriggerPrimitives * ntupleUnpackedEMTFTriggerTracks)
 

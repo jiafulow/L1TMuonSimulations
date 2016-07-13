@@ -52,11 +52,10 @@ void NtupleEMTFRegionalCandidates::produce(edm::Event& iEvent, const edm::EventS
         iEvent.getByToken(trackToken_, tracks);
 
     if (tracks.isValid()) {
-        //edm::LogInfo("NtupleEMTFRegionalCandidates") << "Size: " << tracks->size();
-        edm::LogInfo("NtupleEMTFRegionalCandidates") << "Size: ??";
+        edm::LogInfo("NtupleEMTFRegionalCandidates") << "Size: " << tracks->size();
 
         unsigned n = 0;
-        for (int ibx = tracks->getFirstBX(); ibx != tracks->getLastBX(); ++ibx) {
+        for (int ibx = tracks->getFirstBX(); ibx != tracks->getLastBX()+1; ++ibx) {
 
             for (l1t::RegionalMuonCandBxCollection::const_iterator it = tracks->begin(ibx); it != tracks->end(ibx); ++it) {
                 if (n >= maxN_)

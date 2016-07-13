@@ -10,9 +10,9 @@ NtupleL1TMuons::NtupleL1TMuons(const edm::ParameterSet& iConfig) :
 
     trackToken_ = consumes<l1t::MuonBxCollection>(trackTag_);
 
-    produces<std::vector<float> >              (prefix_ + "pt"             + suffix_);
-    produces<std::vector<float> >              (prefix_ + "eta"            + suffix_);
-    produces<std::vector<float> >              (prefix_ + "phi"            + suffix_);
+    produces<std::vector<float> >              (prefix_ + "pt"               + suffix_);
+    produces<std::vector<float> >              (prefix_ + "eta"              + suffix_);
+    produces<std::vector<float> >              (prefix_ + "phi"              + suffix_);
     produces<std::vector<int> >                (prefix_ + "hwPt"             + suffix_);
     produces<std::vector<int> >                (prefix_ + "hwEta"            + suffix_);
     produces<std::vector<int> >                (prefix_ + "hwPhi"            + suffix_);
@@ -62,11 +62,10 @@ void NtupleL1TMuons::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
         iEvent.getByToken(trackToken_, tracks);
 
     if (tracks.isValid()) {
-        //edm::LogInfo("NtupleL1TMuons") << "Size: " << tracks->size();
-        edm::LogInfo("NtupleL1TMuons") << "Size: ??";
+        edm::LogInfo("NtupleL1TMuons") << "Size: " << tracks->size();
 
         unsigned n = 0;
-        for (int ibx = tracks->getFirstBX(); ibx != tracks->getLastBX(); ++ibx) {
+        for (int ibx = tracks->getFirstBX(); ibx != tracks->getLastBX()+1; ++ibx) {
 
             for (l1t::MuonBxCollection::const_iterator it = tracks->begin(ibx); it != tracks->end(ibx); ++it) {
 
@@ -106,9 +105,9 @@ void NtupleL1TMuons::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     }
 
     //__________________________________________________________________________
-    iEvent.put(v_pt              , prefix_ + "pt"             + suffix_);
-    iEvent.put(v_eta             , prefix_ + "eta"            + suffix_);
-    iEvent.put(v_phi             , prefix_ + "phi"            + suffix_);
+    iEvent.put(v_pt              , prefix_ + "pt"               + suffix_);
+    iEvent.put(v_eta             , prefix_ + "eta"              + suffix_);
+    iEvent.put(v_phi             , prefix_ + "phi"              + suffix_);
     iEvent.put(v_hwPt            , prefix_ + "hwPt"             + suffix_);
     iEvent.put(v_hwEta           , prefix_ + "hwEta"            + suffix_);
     iEvent.put(v_hwPhi           , prefix_ + "hwPhi"            + suffix_);
