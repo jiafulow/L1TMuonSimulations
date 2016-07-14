@@ -8,6 +8,7 @@ import os
 import glob
 import tarfile
 
+import sys
 import imp
 import pickle
 
@@ -17,6 +18,7 @@ class UserTarball(object):
         self.name = name
         self.mode = mode
         self.sendPythonFolder = False
+        self.scriptExe = None
 
     def add_files(self, userFiles=None):
         """
@@ -25,6 +27,8 @@ class UserTarball(object):
         directories = ['lib', 'biglib', 'module']
         if self.sendPythonFolder:
             directories.append('python')
+            directories.append('cfipython')
+        # Note that dataDirs are only looked-for and added under the src/ folder.
         # /data/ subdirs contain data files needed by the code
         # /interface/ subdirs contain C++ header files needed e.g. by ROOT6
         dataDirs    = ['data','interface']
@@ -54,13 +58,17 @@ class UserTarball(object):
                     directory = os.path.basename(filename)
                     tar.add(filename, directory, recursive=True)
 
+            if self.scriptExe:
+                tar.add(self.scriptExe, arcname=os.path.basename(self.scriptExe))
+
 
 class CMSSWConfig(object):
     """
     Class to handle CMSSW _cfg.py file
     """
-    def __init__(self, userConfig='pset.py', pklFileName='PSet.pkl', auxFileName='PSet.py'):
+    def __init__(self, userConfig='pset.py', pyCfgParams=[], pklFileName='PSet.pkl', auxFileName='PSet.py'):
         self.userConfig = userConfig
+        self.pyCfgParams = pyCfgParams
         self.pklFileName = pklFileName
         self.auxFileName = auxFileName
 
@@ -70,11 +78,23 @@ class CMSSWConfig(object):
         if userConfig:
             cfgBaseName = os.path.basename(userConfig).replace(".py", "")
             cfgDirName = os.path.dirname(os.path.abspath(userConfig))
+
             if not os.path.isfile(userConfig):
                 msg = "Cannot find CMSSW configuration file %s in %s" % (userConfig, os.getcwd())
                 raise Exception(msg)
-        file, pathname, description = imp.find_module(cfgBaseName, [cfgDirName])
-        self.fullConfig = imp.load_module(cfgBaseName, file, pathname, description)
+
+            originalArgv = sys.argv
+            sys.argv = [self.userConfig]
+            if self.pyCfgParams:
+                sys.argv.extend(self.pyCfgParams)
+            file, pathname, description = imp.find_module(cfgBaseName, [cfgDirName])
+
+            sys.path.append(os.getcwd())
+            try:
+                self.fullConfig = imp.load_module(cfgBaseName, file, pathname, description)
+            finally:
+                file.close()
+            sys.argv = originalArgv
 
     def write_files(self):
         #saving the process object as a pickle

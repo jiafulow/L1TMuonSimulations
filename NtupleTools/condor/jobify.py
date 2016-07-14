@@ -18,7 +18,6 @@ import subprocess
 class CondorJobType(object):
 
     def __init__(self):
-
         self.projdir        = 'blt_projects'
         self.srcdir         = 'sourceFiles'
         self.pset_name      = 'PSet.py'
@@ -87,9 +86,9 @@ class CondorJobType(object):
         #delfile_cmd = "lcg-del --connect-timeout 180 -b -l -D srmv2 "
         #deldir_cmd = "lcg-del -d --connect-timeout 180 -b -l -D srmv2 "
 
-        #cp_cmd = "gfal-copy -f -p -v -t 180 "
-        #delfile_cmd = "gfal-rm -v -t 180 "
-        #deldir_cmd = "gfal-rm -r -v -t 180 "
+        #cp_cmd = "gfal-copy -f -p -v -t 2400 -T 2400 "
+        #delfile_cmd = "gfal-rm -v -t 600 "
+        #deldir_cmd = "gfal-rm -r -v -t 600 "
 
     def safety_check(self):
         if not os.path.exists('{SRCDIR}/{DATASET}.txt'.format(**self.config)):
@@ -100,7 +99,6 @@ class CondorJobType(object):
 
     def run(self):
         self.make_dirs()
-
         self.write_exe()
 
         while self.jobid <= self.njobs:
@@ -112,9 +110,7 @@ class CondorJobType(object):
             self.config['JOBID'] = self.jobid
 
         self.upload_tarball()
-
         self.add_check()
-
         self.submit_jobs()
         return
 
@@ -129,7 +125,7 @@ class CondorJobType(object):
 '''mkdir -p {JOBPATH}/
 rm -rf {JOBPATH}/*
 mkdir {JOBPATH}/{JOBNAME}/ {JOBPATH}/{LOGNAME}/
-gfal-rm -r -v -t 180 {STORAGE} >/dev/null 2>&1
+gfal-rm -r -v -t 600 {STORAGE} >/dev/null
 gfal-mkdir -p {STORAGE}
 ln -s {STORAGE2} {JOBPATH}/{OUTNAME}
 cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
@@ -138,7 +134,6 @@ cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
         return
 
     def write_jdl(self):
-
         # Prepare GRID proxy
         if 'X509_USER_PROXY' not in os.environ:
             #myproxy = '%s' % (subprocess.check_output(['voms-proxy-info', '-path']).rstrip('\n'))
@@ -176,7 +171,7 @@ Error                   = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).stderr
 Log                     = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).out
 Requirements            = (OpSys == "LINUX") && (Arch != "DUMMY")
 request_disk            = 1000000
-request_memory          = 2000
+request_memory          = 2500
 use_x509userproxy       = TRUE
 x509userproxy           = $ENV(X509_USER_PROXY)
 should_transfer_files   = YES
@@ -201,7 +196,6 @@ Queue 1
         return
 
     def write_exe(self):
-
         writeme = \
 '''#!/bin/bash
 
@@ -210,9 +204,17 @@ echo "System `uname -a`"
 echo ">>> arguments: $@"
 #echo ">>> environment variables:"; printenv
 
+JOBID=$7
 MACHINE={MACHINE}
+
+echo ">>> JOBID=$JOBID"
+echo ">>> X509_USER_PROXY=$X509_USER_PROXY"
 echo ">>> MACHINE=$MACHINE"
+echo ">>> OSG_SITE_NAME=$OSG_SITE_NAME"
 echo ">>> OSG_HOSTNAME=$OSG_HOSTNAME"
+echo ">>> GLIDEIN_Gatekeeper=$GLIDEIN_Gatekeeper"
+echo ">>> GLIDEIN_CMSSite=$GLIDEIN_CMSSite"
+echo ">>> Dashboard_taskid=$Dashboard_taskid Dashboard_monitorid=$Dashboard_monitorid Dashboard_syncid=$Dashboard_syncid"
 
 if [ $MACHINE == "ufl.edu" ] && [ ! -z $OSG_WN_TMP ]; then
     REMOTE_INITIAL_DIR=$(pwd)
@@ -223,13 +225,8 @@ if [ $MACHINE == "ufl.edu" ] && [ ! -z $OSG_WN_TMP ]; then
     echo "*** On ufl.edu machine, cd from $REMOTE_INITIAL_DIR to $OSG_WN_TMP"
 fi
 
-RUNTIME_AREA=`pwd`
+RUNTIME_AREA=$(pwd)
 echo ">>> RUNTIME_AREA=$RUNTIME_AREA"
-
-JOBID=$7
-echo ">>> JOBID=$JOBID"
-
-echo ">>> X509_USER_PROXY=$X509_USER_PROXY"
 
 export SCRAM_ARCH={SCRAM_ARCH}
 export CMSSW_VERSION={CMSSW_VERSION}
@@ -256,46 +253,57 @@ elif [ $MACHINE == "ufl.edu" ]; then
     echo ""
 elif [ $MACHINE == "uscms.org" ]; then
     echo ""
+else
+    echo ""
 fi
 
 # Setup CMSSW environment
-scramv1 project CMSSW $CMSSW_VERSION
+scramv1 project CMSSW $CMSSW_VERSION 2>&1
+if [ $EXIT_STATUS -ne 0 ]; then echo "scram project exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 cd $CMSSW_VERSION
-eval `scramv1 runtime -sh`
+eval `scramv1 runtime -sh` 2>&1
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then echo "scram runtime exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
-SOFTWARE_DIR=`pwd`
+SOFTWARE_DIR=$(pwd)
 echo ">>> SOFTWARE_DIR=$SOFTWARE_DIR"
 
 # Copy using lcg-cp or gfal-copy?
 if command -v gfal-copy >/dev/null 2>&1; then
-    export BLTCP='gfal-copy -f -p -v -t 180 '
-elif command -v lcg-cp >/dev/null 2>&1; then
-    export BLTCP='lcg-cp -v -b -D srmv2 --connect-timeout 180 '
+    export BLTCP='gfal-copy -f -p -v -t 2400 -T 2400 '
+    touch /tmp/null
+    gfal-copy -f file:////tmp/null file:////dev/null >/dev/null
+    EXIT_STATUS=$?
 else
     EXIT_STATUS=1
 fi
+if [ $EXIT_STATUS -ne 0 ]; then
+    if command -v lcg-cp >/dev/null 2>&1; then
+        export BLTCP='lcg-cp -v -b -D srmv2 --connect-timeout 2400 '
+        touch /tmp/null
+        lcg-cp file:////tmp/null file:////dev/null >/dev/null
+        EXIT_STATUS=$?
+    else
+        EXIT_STATUS=1
+    fi
+fi
+echo ">>> BLTCP=$BLTCP"
 if [ $EXIT_STATUS -ne 0 ]; then echo "getting copy command exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
-# Download tarball
+# Download and extract tarball
 $BLTCP "{TARBALL2}" file:///$PWD/"../{TARBALL}" >/dev/null
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then echo "transfer tarball exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
-
-# Extract tarball
 tar xzf ../{TARBALL}
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then echo "unpack tarball exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
-echo ">>> Listing SOFTWARE_DIR"
-ls -Al $SOFTWARE_DIR
-
 # Return to working directory
 cd $RUNTIME_AREA
-
 echo ">>> Listing RUNTIME_AREA"
 ls -Al $RUNTIME_AREA
+echo ">>> Listing SOFTWARE_DIR"
+ls -Al $SOFTWARE_DIR
 
 # Modify source file
 cat <<EOF >> modify_source_file.py
@@ -314,7 +322,6 @@ write_lines(f, chunk(read_lines(f),n,i))
 EOF
 
 python modify_source_file.py
-
 echo ">>> cat {SOURCEFILE}:"
 cat {SOURCEFILE}
 
@@ -324,7 +331,7 @@ cat {SOURCEFILE}
 # Modify pset
 mv $SOFTWARE_DIR/PSet.* $RUNTIME_AREA
 cat <<EOF >> {PSETFILE}
-
+####
 i=$JOBID
 f='{SOURCEFILE}'
 process.source.fileNames = open(f).read().splitlines()
@@ -336,7 +343,7 @@ EOF
 #echo ">>> {ANALYZER} $@"
 #{ANALYZER} $@
 echo ">>> cmsRun {PSETFILE}"
-cmsRun {PSETFILE}
+cmsRun {PSETFILE} 2>&1
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then echo "analyzer exited with status=$EXIT_STATUS"; exit $EXIT_STATUS; fi
 
@@ -351,7 +358,7 @@ if [ $EXIT_STATUS -ne 0 ]; then echo "transfer output exited with status=$EXIT_S
 
 # Done
 rm input.txt modify_source_file.py PSet.* *.tgz *.root
-echo "Exit status is $EXIT_STATUS"
+echo "Exit status=$EXIT_STATUS"
 echo "Job finished on host `hostname` on `date`"
 '''.format(**self.config)
 
@@ -368,7 +375,7 @@ echo "Job finished on host `hostname` on `date`"
 
         print "[INFO   ] Uploading tarball ..."
         commands = \
-'''gfal-copy -f -p -v -t 180 file:///$PWD/"{TARBALL}" "{TARBALL2}" >/dev/null 2>&1
+'''gfal-copy -f -p -v -t 2400 -T 2400 file:///$PWD/"{TARBALL}" "{TARBALL2}" >/dev/null
 '''.format(**self.config)
         self.execute_commands(commands)
         return
@@ -401,22 +408,16 @@ cd {JOBPATH}/ && ~/condor_submit {JOBNAME}/{JOBAD}
 
 # ______________________________________________________________________________
 def main():
-
     if len(sys.argv) < 7:
         raise Exception('Expect 6 command line arguments, received %i' % (len(sys.argv)-1))
 
     print('[INFO   ] Creating condor jobs ...')
     print('[INFO   ] Command line arguments: %s' % (' '.join(sys.argv[1:])))
-
     job = CondorJobType()
     job.safety_check()
-
     print('[INFO   ] Job directory: %s' % job.config['JOBPATH'])
-
     job.run()
-
     print('[INFO   ] %s%i jobs are submitted to condor.%s' % ('\033[92m', job.config['NJOBS'], '\033[0m'))
-
 
 # ______________________________________________________________________________
 if __name__ == '__main__':
