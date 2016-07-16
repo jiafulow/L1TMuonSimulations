@@ -146,7 +146,14 @@ GeometryTranslator2::calcRPCSpecificBend(const TriggerPrimitive& tp) const {
 // rather than using the old phi luts
 GlobalPoint
 GeometryTranslator2::getCSCSpecificPoint(const TriggerPrimitive& tp) const {
-  const CSCDetId id(tp.detId<CSCDetId>());
+  //const CSCDetId id(tp.detId<CSCDetId>());
+  CSCDetId id(tp.detId<CSCDetId>());
+  bool isME1A = false;
+  if (id.station() == 1 && id.ring() == 1 && tp.getCSCData().strip >= 128) {  // fix ME1/A coordinates
+    id = CSCDetId(id.endcap(), id.station(), 4, id.chamber(), id.layer());
+    isME1A = true;
+  }
+
   // we should change this to weak_ptrs at some point
   // requires introducing std::shared_ptrs to geometry
   std::unique_ptr<const CSCChamber> chamb(_geocsc->chamber(id));
@@ -157,7 +164,9 @@ GeometryTranslator2::getCSCSpecificPoint(const TriggerPrimitive& tp) const {
     chamb->layer(CSCConstants::KEY_ALCT_LAYER)
     );
 
-  const uint16_t halfstrip = tp.getCSCData().strip;
+  //const uint16_t halfstrip = tp.getCSCData().strip;
+  uint16_t halfstrip = tp.getCSCData().strip;
+  if (isME1A)  halfstrip = tp.getCSCData().strip - 128;
   const uint16_t pattern = tp.getCSCData().pattern;
   const uint16_t keyWG = tp.getCSCData().keywire;
   //const unsigned maxStrips = layer_geom->numberOfStrips();
