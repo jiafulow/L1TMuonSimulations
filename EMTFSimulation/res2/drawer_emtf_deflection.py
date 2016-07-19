@@ -2,44 +2,72 @@
 
 from rootdrawing import *
 from math import sinh, atan2
-from ROOT import Double
 
 
 # Configurations
 col  = TColor.GetColor("#1f78b4")  # mu0
 fcol = TColor.GetColor("#a6cee3")  # mu0
 mcol = TColor.GetColor("#600000")
-#ecol = TColor.GetColor("#FFD600")
-ecol = TColor.GetColor("#322D8C")
 
 palette = map(lambda x: TColor.GetColor(x), ("#66DD66", "#3333FF", "#990099", "#FFBB44", "#EE4477", "#56D3DB", "#454545"))
 
-pt_vec = [3,5,10,20,50,200,1000]
-st_vec = [11,12,14,21,22,31,32,41,42]  # excluded ME+1/3
-std_vec = [2010,2011,2012,2030,2040,3010,3011,3012,3040,4010,4011,4012]
+l1t_pt_vec = (3,5,10,20,50,200,1000)
+l1t_st_vec = (1,2,3,4,5,6,7,8,9,10)  # as defined for iChamberType (see DataFormats/MuonDetId/interface/CSCDetId.h)
+l1t_std_vec = (1,2,3,4,5,6,7,8,9)  # 9 pairs
 
 
 # ______________________________________________________________________________
 # Helper
-def label_st(st):
-    d = {10: 'ME+1/1', 11: 'ME+1/1b', 12: 'ME+1/2', 13: 'ME+1/3', 14: 'ME+1/1a', 20: 'ME+2', 21: 'ME+2/1', 22: 'ME+2/2', 30: 'ME+3', 31: 'ME+3/1', 32: 'ME+3/2', 40: 'ME+4', 41: 'ME+4/1', 42: 'ME+4/2'}
+def find_l1t_pt_bin(pt):
+    for b_pt in l1t_pt_vec:
+        if (0.98 < pt/float(b_pt) < 1.02):
+            return b_pt
+    return -1
+
+def find_l1t_st_bin(istation, iring, strip):
+    if istation == 1 and iring == 1 and strip >= 128:  # fix ME1/A
+        iring = 4
+    b = 2 * istation + iring  # b=2S+R ok for S=2,3,4
+    if istation == 1:
+        b -= 1                # b=1+R (2S+R-1=1+R for S=1)
+        if b > 4:             # b=1 if R=4
+            b = 1
+    if 1 <= b <= 10:
+        return b
+    return -1
+
+def find_l1t_std_bin(st1, st2):
+    # Squash st to 5 values
+    d = {1: 1, 2: 1, 3: 2, 5: 3, 6: 3, 7: 4, 8: 4, 9: 5, 10: 5}
+    squash = lambda x : d[x]
+    st1 = squash(st1)
+    st2 = squash(st2)
+
+    # If station 2 is available, use as the 'key' station,
+    # else if station 3 is avail, use it,
+    # else if station 4 is avail, use it.
+    d = {
+        301: 1, 302: 2, 304: 3, 305: 6,
+        401: 4, 402: 5, 405: 9,
+        501: 7, 502: 8,
+    }
+    std = st1*100 + st2
+    if std in d:
+        return d[std]
+    return -1
+
+def get_st_label(st):
+    d = {1: 'ME+1/1a', 2: 'ME+1/1b', 3: 'ME+1/2', 4: 'ME+1/3', 5: 'ME+2/1', 6: 'ME+2/2', 7: 'ME+3/1', 8: 'ME+3/2', 9: 'ME+4/1', 10: 'ME+4/2'}
     ret = d[st]
     if options.east:
-        ret = d[st].replace("ME+", "ME-")
+        ret = ret.replace("ME+", "ME-")
     return ret
 
-def label_std_i(std):
-    d = {2010: 'ME+2', 2011: 'ME+2', 2012: 'ME+2', 2030: 'ME+2', 2040: 'ME+2', 3010: 'ME+3', 3011: 'ME+3', 3012: 'ME+3', 3040: 'ME+3', 4010: 'ME+4', 4011: 'ME+4', 4012: 'ME+4'}
+def get_std_label(std):
+    d = {1: ('ME+2','ME+1/1'), 2: ('ME+2','ME+1/2'), 3: ('ME+2','ME+3'), 4: ('ME+3','ME+1/1'), 5: ('ME+3','ME+1/2'), 6: ('ME+2','ME+4'), 7: ('ME+4','ME+1/1'), 8: ('ME+4','ME+1/2'), 9: ('ME+3', 'ME+4')}
     ret = d[std]
     if options.east:
-        ret = d[std].replace("ME+", "ME-")
-    return ret
-
-def label_std_j(std):
-    d = {2010: 'ME+1', 2011: 'ME+1/1', 2012: 'ME+1/2', 2030: 'ME+3', 2040: 'ME+4', 3010: 'ME+1', 3011: 'ME+1/1', 3012: 'ME+1/2', 3040: 'ME+4', 4010: 'ME+1', 4011: 'ME+1/1', 4012: 'ME+1/2'}
-    ret = d[std]
-    if options.east:
-        ret = d[std].replace("ME+", "ME-")
+        ret = (ret[0].replace("ME+", "ME-"), ret[1].replace("ME+", "ME-"))
     return ret
 
 def get_integrated(h, forward=True, normalize=False):
@@ -89,63 +117,75 @@ def get_percentile(h, perc):
 # Drawer
 def drawer_book(histos, options):
     # TH1F
-    for pt in pt_vec:
-        for st in st_vec:
-            nbinsx, xmin, xmax = 60, -1.1, 0.1
-            hname = "emtf_dphi_st%i_pt%i" % (st, pt)
-            histos[hname] = TH1F(hname, "; #phi(muon) - #phi(%s) [rad]" % (label_st(st)), nbinsx, xmin, xmax)
-            nbinsx, xmin, xmax = 60, -0.6, 0.6
-            hname = "emtf_dtheta_st%i_pt%i" % (st, pt)
-            histos[hname] = TH1F(hname, "; #theta(muon) - #theta(%s) [rad]" % (label_st(st)), nbinsx, xmin, xmax)
-            nbinsx, xmin, xmax = 60, -0.6, 0.6
-            hname = "emtf_deta_st%i_pt%i" % (st, pt)
-            histos[hname] = TH1F(hname, "; #eta(muon) - #eta(%s)" % (label_st(st)), nbinsx, xmin, xmax)
+    for ptbin in l1t_pt_vec:
+        for stbin in l1t_st_vec:
+            hname = "deviation_phi_in_st%i_pt%i" % (stbin, ptbin)
+            htitle, nbinsx, xmin, xmax = "; #phi(%s) - #phi(muon) [rad]; entries" % (get_st_label(stbin)), 100, -0.2, 1.0
+            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.1, 0.2
+            histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
+            histos[hname].indices = (stbin, ptbin)
+            hname = "deviation_theta_in_st%i_pt%i" % (stbin, ptbin)
+            htitle, nbinsx, xmin, xmax = "; #theta(%s) - #theta(muon) [rad]; entries" % (get_st_label(stbin)), 100, -0.2, 0.2
+            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.1, 0.1
+            histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
+            histos[hname].indices = (stbin, ptbin)
+            hname = "deviation_eta_in_st%i_pt%i" % (stbin, ptbin)
+            htitle, nbinsx, xmin, xmax = "; #eta(%s) - #eta(muon); entries" % (get_st_label(stbin)), 100, -0.6, 0.6
+            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.2, 0.2
+            histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
+            histos[hname].indices = (stbin, ptbin)
 
-        for std in std_vec:
-            if options.high_pt:
-                nbinsx, xmin, xmax = 50, -0.02, 0.02
-            else:
-                nbinsx, xmin, xmax = 100, -0.2, 0.2
-            hname = "emtf_dphi_std%i_pt%i" % (std, pt)
-            histos[hname] = TH1F(hname, "; #phi(%s) - #phi(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsx, xmin, xmax)
-            if options.high_pt:
-                nbinsx, xmin, xmax = 50, -0.02, 0.02
-            else:
-                nbinsx, xmin, xmax = 50, -0.1, 0.1
-            hname = "emtf_dtheta_std%i_pt%i" % (std, pt)
-            histos[hname] = TH1F(hname, "; #theta(%s) - #theta(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsx, xmin, xmax)
-            if options.high_pt:
-                nbinsx, xmin, xmax = 50, -0.04, 0.04
-            else:
-                nbinsx, xmin, xmax = 50, -0.2, 0.2
-            hname = "emtf_deta_std%i_pt%i" % (std, pt)
-            histos[hname] = TH1F(hname, "; #eta(%s) - #eta(%s)" % (label_std_i(std), label_std_j(std)), nbinsx, xmin, xmax)
+            hname = "nstubs_in_st%i_pt%i" % (stbin, ptbin)
+            htitle, nbinsx, xmin, xmax = "; # LCTs in %s; entries" % (get_st_label(stbin)), 16, -0.5, 15.5
+            histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
+            histos[hname].indices = (stbin, ptbin)
+
+        for stdbin in l1t_std_vec:
+            hname = "deflection_phi_in_std%i_pt%i" % (stdbin, ptbin)
+            htitle, nbinsx, xmin, xmax = "; #phi(%s) - #phi(%s) [rad]; entries" % (get_std_label(stdbin)), 100, -0.2, 0.2
+            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.08, 0.08
+            histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
+            histos[hname].indices = (stdbin, ptbin)
+            hname = "deflection_theta_in_std%i_pt%i" % (stdbin, ptbin)
+            htitle, nbinsx, xmin, xmax = "; #theta(%s) - #theta(%s) [rad]; entries" % (get_std_label(stdbin)), 100, -0.1, 0.1
+            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.08, 0.08
+            histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
+            histos[hname].indices = (stdbin, ptbin)
+            hname = "deflection_eta_in_std%i_pt%i" % (stdbin, ptbin)
+            htitle, nbinsx, xmin, xmax = "; #eta(%s) - #eta(%s); entries" % (get_std_label(stdbin)), 100, -0.3, 0.3
+            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.16, 0.16
+            histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
+            histos[hname].indices = (stdbin, ptbin)
 
     # TH2F and TProfile
-    for pt in pt_vec:
-        for std in std_vec:
-            nbinsy, ymin, ymax = 16, 0.9, 2.5
-            nbinsx, xmin, xmax = 100, -0.2, 0.2
-            hname = "emtf_dphi_vs_eta_std%i_pt%i" % (std, pt)
-            histos[hname] = TH2F(hname, "; #eta(Gen); #phi(%s) - #phi(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, nbinsx, xmin, xmax)
-            nbinsx, xmin, xmax = 50, -0.1, 0.1
-            hname = "emtf_dtheta_vs_eta_std%i_pt%i" % (std, pt)
-            histos[hname] = TH2F(hname, "; #eta(Gen); #theta(%s) - #theta(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, nbinsx, xmin, xmax)
-            nbinsx, xmin, xmax = 50, -0.2, 0.2
-            hname = "emtf_deta_vs_eta_std%i_pt%i" % (std, pt)
-            histos[hname] = TH2F(hname, "; #eta(Gen); #eta(%s) - #eta(%s)" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, nbinsx, xmin, xmax)
+    for ptbin in l1t_pt_vec:
+        for stdbin in l1t_std_vec:
+            hname = "deflection_phi_vs_eta_in_std%i_pt%i" % (stdbin, ptbin)
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #phi(%s) - #phi(%s) [rad]" % (get_std_label(stdbin)), 100, -0.2, 0.2, 32, 0.9, 2.5
+            histos[hname] = TH2F(hname, htitle, nbinsy, ymin, ymax, nbinsx, xmin, xmax)
+            histos[hname].indices = (stdbin, ptbin)
+            hname = "deflection_theta_vs_eta_in_std%i_pt%i" % (stdbin, ptbin)
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #theta(%s) - #theta(%s) [rad]" % (get_std_label(stdbin)), 100, -0.1, 0.1, 32, 0.9, 2.5
+            histos[hname] = TH2F(hname, htitle, nbinsy, ymin, ymax, nbinsx, xmin, xmax)
+            histos[hname].indices = (stdbin, ptbin)
+            hname = "deflection_eta_vs_eta_in_std%i_pt%i" % (stdbin, ptbin)
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #eta(%s) - #eta(%s)" % (get_std_label(stdbin)), 100, -0.3, 0.3, 32, 0.9, 2.5
+            histos[hname] = TH2F(hname, htitle, nbinsy, ymin, ymax, nbinsx, xmin, xmax)
+            histos[hname].indices = (stdbin, ptbin)
 
             # error bar indicates std dev
-            nbinsy, ymin, ymax = 16, 0.9, 2.5
-            nbinsx, xmin, xmax = 100, -0.2, 0.2
-            hname = "emtf_dphi_pr_eta_std%i_pt%i" % (std, pt)
-            histos[hname] = TProfile(hname, "; #eta(Gen); #phi(%s) - #phi(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, xmin, xmax, 's')
-            nbinsx, xmin, xmax = 50, -0.1, 0.1
-            hname = "emtf_dtheta_pr_eta_std%i_pt%i" % (std, pt)
-            histos[hname] = TProfile(hname, "; #eta(Gen); #theta(%s) - #theta(%s) [rad]" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, xmin, xmax, 's')
-            nbinsx, xmin, xmax = 50, -0.2, 0.2
-            hname = "emtf_deta_pr_eta_std%i_pt%i" % (std, pt)
-            histos[hname] = TProfile(hname, "; #eta(Gen); #eta(%s) - #eta(%s)" % (label_std_i(std), label_std_j(std)), nbinsy, ymin, ymax, xmin, xmax, 's')
+            hname = "deflection_phi_pr_eta_in_std%i_pt%i" % (stdbin, ptbin)
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #phi(%s) - #phi(%s) [rad]" % (get_std_label(stdbin)), 100, -0.2, 0.2, 32, 0.9, 2.5
+            histos[hname] = TProfile(hname, htitle, nbinsy, ymin, ymax, xmin, xmax, 's')
+            histos[hname].indices = (stdbin, ptbin)
+            hname = "deflection_theta_pr_eta_in_std%i_pt%i" % (stdbin, ptbin)
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #theta(%s) - #theta(%s) [rad]" % (get_std_label(stdbin)), 100, -0.1, 0.1, 32, 0.9, 2.5
+            histos[hname] = TProfile(hname, htitle, nbinsy, ymin, ymax, xmin, xmax, 's')
+            histos[hname].indices = (stdbin, ptbin)
+            hname = "deflection_eta_pr_eta_in_std%i_pt%i" % (stdbin, ptbin)
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #eta(%s) - #eta(%s)" % (get_std_label(stdbin)), 100, -0.3, 0.3, 32, 0.9, 2.5
+            histos[hname] = TProfile(hname, htitle, nbinsy, ymin, ymax, xmin, xmax, 's')
+            histos[hname].indices = (stdbin, ptbin)
 
     # Style
     for hname, h in histos.iteritems():
@@ -156,8 +196,11 @@ def drawer_book(histos, options):
         elif h.ClassName() == "TProfile":
             h.style = 0; h.logx = False; h.logy = False
 
-        if hname.startswith("emtf_dphi") or hname.startswith("emtf_dtheta") or hname.startswith("emtf_deta"):
-            h.logy = True
+        if h.ClassName() == "TH1F":
+            if hname.startswith("deviation_phi") or hname.startswith("deviation_theta") or hname.startswith("deviation_eta") or \
+                hname.startswith("deflection_phi") or hname.startswith("deflection_theta") or hname.startswith("deflection_eta") or \
+                hname.startswith("nstubs_"):
+                h.logy = True
     return
 
 # ______________________________________________________________________________
@@ -179,41 +222,64 @@ def drawer_project(tree, histos, options):
         part_theta = atan2(evt.genParts_pt[0], evt.genParts_pz[0])
         part_charge = evt.genParts_charge[0]
 
-        pt = 0
-        for x in pt_vec:
-            if 0.98 < part_pt/float(x) < 1.02:
-                pt = x
-
         # Select only endcap
         is_endcap = 1.25 < abs(part_eta) < 2.4
 
-        if pt > 0 and is_endcap:
-            for (istation, iring, strip, globalPhi, globalTheta, globalEta) in izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_strip, evt.CSCStubs_globalPhi, evt.CSCStubs_globalTheta, evt.CSCStubs_globalEta):
-                st = istation * 10 + iring
+        # Find pt bin
+        ptbin = find_l1t_pt_bin(part_pt)
 
-                dphi = deltaPhi(part_phi, globalPhi)
-                dtheta = deltaPhi(part_theta, globalTheta)
-                deta = deltaEta(part_eta, globalEta)
+        if options.verbose:
+            print ".. %i gen pt: %f phi: %f eta: %f ptbin: %i" % (ievt, part_pt, part_phi, part_eta, ptbin)
+
+        if ptbin >= 0 and is_endcap:
+
+            # __________________________________________________________________
+            # Loop over stubs
+            counters = {}
+
+            for imuon1, vmuon1 in enumerate(izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_strip, evt.CSCStubs_globalPhi, evt.CSCStubs_globalTheta, evt.CSCStubs_globalEta)):
+                (istation1, iring1, strip1, globalPhi1, globalTheta1, globalEta1) = vmuon1
+
+                if istation1 == 1 and iring1 == 3:  # skip ME+1/3
+                    continue
+
+                stbin = find_l1t_st_bin(istation1, iring1, strip1)
+                if stbin == -1:
+                    raise Exception("Failed to get stbin. Why? %i %i %i" % (istation1, iring1, strip1))
+
+                dphi = deltaPhi(globalPhi1, part_phi)
+                dtheta = deltaPhi(globalTheta1, part_theta)
+                deta = deltaEta(globalEta1, part_eta)
 
                 if part_charge == 1:  # flip dphi for antimuons
                     dphi = -dphi
 
-                if st in st_vec and pt in pt_vec:
-                    hname = "emtf_dphi_st%i_pt%i" % (st, pt)
-                    histos[hname].Fill(dphi)
-                    hname = "emtf_dtheta_st%i_pt%i" % (st, pt)
-                    histos[hname].Fill(dtheta)
-                    hname = "emtf_deta_st%i_pt%i" % (st, pt)
-                    histos[hname].Fill(deta)
+                # Fill histos
+                hname = "deviation_phi_in_st%i_pt%i" % (stbin, ptbin)
+                histos[hname].Fill(dphi)
+                hname = "deviation_theta_in_st%i_pt%i" % (stbin, ptbin)
+                histos[hname].Fill(dtheta)
+                hname = "deviation_eta_in_st%i_pt%i" % (stbin, ptbin)
+                histos[hname].Fill(deta)
+                hname = "nstubs_in_st%i_pt%i" % (stbin, ptbin)
+                counters[hname] = counters.get(hname, 0) + 1
+                continue
 
-            for imuon1, t1 in enumerate(izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_strip, evt.CSCStubs_globalPhi, evt.CSCStubs_globalTheta, evt.CSCStubs_globalEta)):
-                for imuon2, t2 in enumerate(izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_strip, evt.CSCStubs_globalPhi, evt.CSCStubs_globalTheta, evt.CSCStubs_globalEta)):
+            # Fill count histos
+            for stbin in l1t_st_vec:
+                hname = "nstubs_in_st%i_pt%i" % (stbin, ptbin)
+                if hname in counters:
+                    histos[hname].Fill(counters[hname])
 
-                    if imuon1 >= imuon2:
+            # __________________________________________________________________
+            # Loop over pairs of stubs
+            for imuon1, vmuon1 in enumerate(izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_strip, evt.CSCStubs_globalPhi, evt.CSCStubs_globalTheta, evt.CSCStubs_globalEta)):
+                for imuon2, vmuon2 in enumerate(izip(evt.CSCStubs_istation, evt.CSCStubs_iring, evt.CSCStubs_strip, evt.CSCStubs_globalPhi, evt.CSCStubs_globalTheta, evt.CSCStubs_globalEta)):
+                    (istation1, iring1, strip1, globalPhi1, globalTheta1, globalEta1) = vmuon1
+                    (istation2, iring2, strip2, globalPhi2, globalTheta2, globalEta2) = vmuon2
+
+                    if imuon1 >= imuon2:  # no double counting
                         continue
-
-                    (istation1, iring1, strip1, globalPhi1, globalTheta1, globalEta1) = t1
-                    (istation2, iring2, strip2, globalPhi2, globalTheta2, globalEta2) = t2
                     if istation1 == istation2:  # only if different station
                         continue
                     if istation1 == 1 and iring1 == 3:  # skip ME+1/3
@@ -221,24 +287,17 @@ def drawer_project(tree, histos, options):
                     if istation2 == 1 and iring2 == 3:  # skip ME+1/3
                         continue
 
-                    # If station 2 is available, use as the 'key' station,
-                    # else if station 3 is avail, use it,
-                    # else if station 4 is avail, use it.
-                    std1 = istation1 * 1000 + istation2 * 10
-                    std2 = istation2 * 1000 + istation1 * 10
-                    if std1 in std_vec:
-                        pass
-                    elif std2 in std_vec:
-                        (istation2, iring2, strip2, globalPhi2, globalTheta2, globalEta2) = t1
-                        (istation1, iring1, strip1, globalPhi1, globalTheta1, globalEta1) = t2
-                    else:
-                        raise Exception("Unexpected station1: %i, station2: %i" % (istation1, istation2))
-
-                    std = istation1 * 1000 + istation2 * 10
-                    std_more = [std]
-                    if istation2 == 1 and iring2 in [1,2]:
-                        std_1 = std + iring2
-                        std_more.append(std_1)
+                    stbin1 = find_l1t_st_bin(istation1, iring1, strip1)
+                    stbin2 = find_l1t_st_bin(istation2, iring2, strip2)
+                    stdbin = find_l1t_std_bin(stbin1, stbin2)
+                    if stdbin == -1:
+                        (istation2, iring2, strip2, globalPhi2, globalTheta2, globalEta2) = vmuon1
+                        (istation1, iring1, strip1, globalPhi1, globalTheta1, globalEta1) = vmuon2
+                        stbin1 = find_l1t_st_bin(istation1, iring1, strip1)
+                        stbin2 = find_l1t_st_bin(istation2, iring2, strip2)
+                        stdbin = find_l1t_std_bin(stbin1, stbin2)
+                    if stdbin == -1:
+                        raise Exception("Failed to get stdbin. Why? %i %i %i %i %i %i" % (istation1, iring1, strip1, istation2, iring2, strip2))
 
                     dphi = deltaPhi(globalPhi1, globalPhi2)
                     dtheta = deltaPhi(globalTheta1, globalTheta2)
@@ -247,100 +306,34 @@ def drawer_project(tree, histos, options):
                     if part_charge == 1:  # flip dphi for antimuons
                         dphi = -dphi
 
-                    for std in std_more:
-                        hname = "emtf_dphi_std%i_pt%i" % (std, pt)
-                        histos[hname].Fill(dphi)
-                        hname = "emtf_dtheta_std%i_pt%i" % (std, pt)
-                        histos[hname].Fill(dtheta)
-                        hname = "emtf_deta_std%i_pt%i" % (std, pt)
-                        histos[hname].Fill(deta)
+                    # Fill histos
+                    hname = "deflection_phi_in_std%i_pt%i" % (stdbin, ptbin)
+                    histos[hname].Fill(dphi)
+                    hname = "deflection_theta_in_std%i_pt%i" % (stdbin, ptbin)
+                    histos[hname].Fill(dtheta)
+                    hname = "deflection_eta_in_std%i_pt%i" % (stdbin, ptbin)
+                    histos[hname].Fill(deta)
 
-                        hname = "emtf_dphi_vs_eta_std%i_pt%i" % (std, pt)
-                        histos[hname].Fill(part_eta, dphi)
-                        hname = "emtf_dtheta_vs_eta_std%i_pt%i" % (std, pt)
-                        histos[hname].Fill(part_eta, dtheta)
-                        hname = "emtf_deta_vs_eta_std%i_pt%i" % (std, pt)
-                        histos[hname].Fill(part_eta, deta)
+                    hname = "deflection_phi_vs_eta_in_std%i_pt%i" % (stdbin, ptbin)
+                    histos[hname].Fill(part_eta, dphi)
+                    hname = "deflection_theta_vs_eta_in_std%i_pt%i" % (stdbin, ptbin)
+                    histos[hname].Fill(part_eta, dtheta)
+                    hname = "deflection_eta_vs_eta_in_std%i_pt%i" % (stdbin, ptbin)
+                    histos[hname].Fill(part_eta, deta)
 
-                        hname = "emtf_dphi_pr_eta_std%i_pt%i" % (std, pt)
-                        histos[hname].Fill(part_eta, dphi)
-                        hname = "emtf_dtheta_pr_eta_std%i_pt%i" % (std, pt)
-                        histos[hname].Fill(part_eta, dtheta)
-                        hname = "emtf_deta_pr_eta_std%i_pt%i" % (std, pt)
-                        histos[hname].Fill(part_eta, deta)
+                    hname = "deflection_phi_pr_eta_in_std%i_pt%i" % (stdbin, ptbin)
+                    histos[hname].Fill(part_eta, dphi)
+                    hname = "deflection_theta_pr_eta_in_std%i_pt%i" % (stdbin, ptbin)
+                    histos[hname].Fill(part_eta, dtheta)
+                    hname = "deflection_eta_pr_eta_in_std%i_pt%i" % (stdbin, ptbin)
+                    histos[hname].Fill(part_eta, deta)
+                    continue
+                continue
+        continue
     return
 
 # ______________________________________________________________________________
 def drawer_draw(histos, options):
-
-    average = lambda x, y: 0.5*(x+y)
-    absdiff = lambda x, y: abs(x-y)
-
-    tlatex2 = TLatex()
-    tlatex2.SetNDC(False)
-    tlatex2.SetTextFont(62)
-    tlatex2.SetTextSize(0.03)
-    tlatex2.SetTextColor(0)
-    tlatex2.SetTextAngle(90)
-    tlatex2.SetTextAlign(22)
-
-    tlegend2 = TLegend(0.70,0.74,0.96,0.94)
-    tlegend2.SetFillStyle(0)
-    tlegend2.SetLineColor(0)
-    tlegend2.SetShadowColor(0)
-    tlegend2.SetBorderSize(0)
-    tlegend2.SetTextFont(42)
-
-    def display_fit(h):
-        if h.Integral() > 0:
-            h.Fit("gaus","q")
-            h.fit = h.GetFunction("gaus")
-            h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
-        else:
-            h.fit = TF1("fa1", "gaus(0)")
-
-    def display_percentile_y(h2):
-        frame90 = h2.Clone(h2.GetName() + "_frame90")
-        frame95 = h2.Clone(h2.GetName() + "_frame95")
-        frame99 = h2.Clone(h2.GetName() + "_frame99")
-        frame90.Reset()
-        frame95.Reset()
-        frame99.Reset()
-        frame90.GetYaxis().SetTitle("90% cov on " + frame90.GetYaxis().GetTitle())
-        frame95.GetYaxis().SetTitle("95% cov on " + frame95.GetYaxis().GetTitle())
-        frame99.GetYaxis().SetTitle("99% cov on " + frame99.GetYaxis().GetTitle())
-
-        nbinsx = h2.GetNbinsX()
-        gr90 = TGraphErrors(nbinsx)
-        gr95 = TGraphErrors(nbinsx)
-        gr99 = TGraphErrors(nbinsx)
-        gr90.SetName(h2.GetName() + "_gr90")
-        gr95.SetName(h2.GetName() + "_gr95")
-        gr99.SetName(h2.GetName() + "_gr99")
-
-        for i in xrange(1, nbinsx+1):
-            hpy = h2.ProjectionY(h2.GetName() + "_py", i, i)
-            # 90% coverage
-            up90 = get_percentile(hpy, 0.95)
-            low90 = get_percentile(hpy, 0.05)
-            # 95% coverage
-            up95 = get_percentile(hpy, 0.975)
-            low95 = get_percentile(hpy, 0.025)
-            # 99% coverage
-            up99 = get_percentile(hpy, 0.995)
-            low99 = get_percentile(hpy, 0.005)
-
-            if hpy.GetEntries() > 20:
-                gr90.SetPoint(i, h2.GetXaxis().GetBinCenter(i), average(up90,low90))
-                gr90.SetPointError(i, 0.5*h2.GetXaxis().GetBinWidth(i), 0.5*absdiff(up90,low90))
-                gr95.SetPoint(i, h2.GetXaxis().GetBinCenter(i), average(up95,low95))
-                gr95.SetPointError(i, 0.5*h2.GetXaxis().GetBinWidth(i), 0.5*absdiff(up95,low95))
-                gr99.SetPoint(i, h2.GetXaxis().GetBinCenter(i), average(up99,low99))
-                gr99.SetPointError(i, 0.5*h2.GetXaxis().GetBinWidth(i), 0.5*absdiff(up99,low99))
-        h2.additional = [frame90, frame95, frame99, gr90, gr95, gr99]
-        return
-
-    # __________________________________________________________________________
     for hname, h in histos.iteritems():
 
         if h.ClassName() == "TH1F":
@@ -351,13 +344,12 @@ def drawer_draw(histos, options):
                     h.SetLineColor(col); h.SetFillColor(fcol)
                 elif h.style == 1:  # marker
                     h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
-                    h.SetLineColor(col); h.SetMarkerColor(col);
+                    h.SetLineColor(col); h.SetMarkerColor(col)
                 if h.logy:
-                    h.SetMaximum(h.GetMaximum() * 100); h.SetMinimum(0.5)
+                    h.SetMaximum(h.GetMaximum() * 14); h.SetMinimum(0.5)
                 else:
                     h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
-                h.Draw("E")
-                display_fit(h)
+                h.Draw("hist")
                 gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
                 CMS_label()
                 save(options.outdir, hname)
@@ -371,67 +363,11 @@ def drawer_draw(histos, options):
                 h2 = histos[hname.replace("_pr_", "_vs_")]
                 if h.style == 0:
                     h.SetMarkerStyle(20); h.SetMarkerColor(mcol); h.SetLineColor(mcol)
-
                 h2.SetStats(0); h2.Draw("COLZ")
                 h.SetStats(0); h.Draw("same")
-                gPad.SetLogy(h.logy)
+                gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
                 CMS_label()
                 save(options.outdir, hname)
-
-    # Specialized: overlay different pT
-    if True:
-        for var in ["dphi", "dtheta", "deta"]:
-            for std in std_vec:
-                pt = 50
-                hname = "emtf_%s_std%i_pt%i" % (var, std, pt)
-                h = histos[hname]
-                hframe = h.Clone(h.GetName().replace("_pt%i" % pt, "_overlay"))
-                hframe.Reset()
-                hframe.SetStats(0); hframe.Draw()
-
-                moveLegend(tlegend,0.1,0.68,0.5,0.92); tlegend.Clear()
-                moveLegend(tlegend2,0.5,0.68,0.92,0.92); tlegend2.Clear()
-                for i, pt in enumerate(pt_vec):
-                    if options.high_pt and pt < 50:  continue
-                    if (not options.high_pt) and pt >50:  continue
-
-                    hname = "emtf_%s_std%i_pt%i" % (var, std, pt)
-                    h = histos[hname]
-                    h.SetLineColor(palette[i]); h.SetMarkerColor(palette[i]); h.fit.SetLineColor(palette[i])
-                    h.SetStats(0); h.Draw("same E")
-                    tlegend.AddEntry(h, "#color[%i]{#mu(p_{T} = %i GeV) = %.4f}" % (palette[i], pt, h.fit.GetParameter(1)), "")
-                    tlegend2.AddEntry(h, "#color[%i]{#sigma(p_{T} = %i GeV) = %.4f}" % (palette[i], pt, h.fit.GetParameter(2)), "")
-                tlegend.Draw()
-                tlegend2.Draw()
-
-                gPad.SetLogy(h.logy)
-                CMS_label()
-                save(options.outdir, hframe.GetName())
-
-    # Specialized: coverage plots
-    if False:
-        for hname, h2 in histos.iteritems():
-            if h2.ClassName() == "TH2F":
-                display_percentile_y(h2)
-                frame90, frame95, frame99, gr90, gr95, gr99 = h2.additional
-
-                for (frame, gr) in [(frame90, gr90), (frame95, gr95), (frame99, gr99)]:
-                    frame.GetYaxis().SetTitleSize(0.05)
-                    gr.SetFillColor(ecol)
-                    frame.SetStats(0); frame.Draw()
-                    gr.Draw("2")  # filled error band
-
-                    nbinsx = gr.GetN()
-                    for i in xrange(nbinsx):
-                        x, y = Double(1), Double(2)
-                        gr.GetPoint(i, x, y)
-                        ey = gr.GetErrorY(i)
-                        if ey > 0:
-                            tlatex2.DrawLatex(x, y, "%.3f" % (ey*2))
-
-                    gPad.SetLogy(h.logy)
-                    CMS_label()
-                    save(options.outdir, gr.GetName())
     return
 
 # ______________________________________________________________________________

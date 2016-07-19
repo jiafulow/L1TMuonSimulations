@@ -4,11 +4,20 @@ from rootdrawing import *
 d = None
 histos = None
 options = None
+figures = []
 
 col  = TColor.GetColor("#e31a1c")  # nu140
 fcol = TColor.GetColor("#fb9a99")  # nu140
-figures = []
 
+
+# ______________________________________________________________________________
+def display_fit(h, xxmin, xxmax, fun="pol2"):
+    if h.Integral() > 0 and (xxmax > xxmin and h.Integral(h.FindFixBin(xxmin),h.FindFixBin(xxmax))):
+        h.Fit(fun, "q", "", xxmin, xxmax)
+        h.fit = h.GetFunction(fun)
+        h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
+    else:
+        h.fit = TF1("fa1", fun + "(0)")
 
 # ______________________________________________________________________________
 def do_trueNPV(hname="trueNPV"):
@@ -134,14 +143,6 @@ def do_stack(special_hname, special_values, legend, label_0=None, label_1=None, 
 
 # ______________________________________________________________________________
 def do_fit(hname, rebin=0, xxmin=0, xxmax=0, label_0=None, col=col):
-    def display_fit(h, xxmin, xxmax):
-        if h.Integral() > 0:
-            h.Fit("pol2", "q", "", xxmin, xxmax)
-            h.fit = h.GetFunction("pol2")
-            h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
-        else:
-            h.fit = TF1("fa1", "pol2(0)")
-
     h = histos[hname]
     if rebin:
         h.Rebin(rebin)
@@ -227,15 +228,27 @@ def main():
         exclusive=True,
         )
 
-    do_fit(hname="rate_of_pu_in_eta3_bx1_mode2_l1pt0", rebin=0, xxmin=2, xxmax=48,
+    do_fit(hname="rate_of_pu_in_eta3_bx1_mode2_l1pt0", rebin=0, xxmin=2, xxmax=50,
         label_0=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         col=ctapalette[2],
         )
-    do_fit(hname="rate_of_pu_in_eta3_bx1_mode2_l1pt1", rebin=4, xxmin=4, xxmax=48,
+    do_fit(hname="rate_of_pu_in_eta3_bx1_mode2_l1pt1", rebin=2, xxmin=16, xxmax=50,
         label_0=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         col=ctapalette[1],
         )
-    do_fit(hname="rate_of_pu_in_eta3_bx1_mode2_l1pt2", rebin=8, xxmin=8, xxmax=48,
+    do_fit(hname="rate_of_pu_in_eta3_bx1_mode2_l1pt2", rebin=4, xxmin=32, xxmax=48,
+        label_0=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
+        col=ctapalette[0],
+        )
+    do_fit(hname="rate_of_pu_in_eta3_bx0_mode2_l1pt0", rebin=0, xxmin=2, xxmax=50,
+        label_0=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
+        col=ctapalette[2],
+        )
+    do_fit(hname="rate_of_pu_in_eta3_bx0_mode2_l1pt1", rebin=2, xxmin=4, xxmax=50,
+        label_0=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
+        col=ctapalette[1],
+        )
+    do_fit(hname="rate_of_pu_in_eta3_bx0_mode2_l1pt2", rebin=4, xxmin=4, xxmax=48,
         label_0=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         col=ctapalette[0],
         )
