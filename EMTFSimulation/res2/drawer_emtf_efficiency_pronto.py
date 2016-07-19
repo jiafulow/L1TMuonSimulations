@@ -15,7 +15,7 @@ def do_overlay(special_hname, special_values, legend, label_0=None, label_1=None
 
     ymax = 1.1
     h1 = h.GetCopyTotalHisto().Clone(hname+"_frame"); h1.Reset()
-    h1.SetMinimum(0); h1.SetMaximum(ymax)
+    h1.SetMaximum(ymax); h1.SetMinimum(0)
     h1.SetStats(0); h1.Draw()
     gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
     if "efficiency_of_pt" in special_hname:
@@ -45,8 +45,8 @@ def do_overlay(special_hname, special_values, legend, label_0=None, label_1=None
     tpavetext.Draw()
 
     CMS_label()
-    imgname = special_hname % (99); figures.append(imgname)
-    save(options.outdir, imgname)
+    imgname = special_hname % (99)
+    save(options.outdir, imgname); figures.append(imgname)
     return
 
 # ______________________________________________________________________________
@@ -60,9 +60,10 @@ def serve_figures(htmlfile='index.html'):
     writeme = '\n'.join(writeme)
     writeme = html % writeme
 
-    import subprocess
-    subprocess.check_call(['wget', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'])
-    subprocess.check_call(['mv', 'bootstrap.min.css', options.outdir])
+    if not os.path.isfile(options.outdir+"bootstrap.min.css"):
+        import subprocess
+        subprocess.check_call(['wget', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'])
+        subprocess.check_call(['mv', 'bootstrap.min.css', options.outdir])
 
     with open(options.outdir+htmlfile, 'w') as f:
         f.write(writeme)
@@ -79,8 +80,6 @@ def main():
 
     # Init
     drawer = MyDrawer()
-    gStyle.SetPadGridX(True)
-    gStyle.SetPadGridY(True)
     gROOT.SetBatch(True)
 
     # Import
@@ -95,7 +94,7 @@ def main():
     histos, options = unpack_histos(imgdir)
 
     # Process
-    do_overlay(special_hname="efficiency_of_pt_in_eta2_bx1_mode2_l1pt%i", special_values=(2,1,0),
+    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx1_mode2_l1pt%i", special_values=(2,1,0),
         legend=( lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
         label_1=(lambda h: d.get_l1t_eta_label(h.indices[0])),
@@ -111,7 +110,7 @@ def main():
         label_3=(lambda h: d.get_l1t_mode_label(h.indices[2])),
         )
 
-    do_overlay(special_hname="efficiency_of_pt_in_eta2_bx1_mode%i_l1pt2", special_values=(2,1,0),
+    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx1_mode%i_l1pt2", special_values=(2,1,0),
         legend= (lambda h: d.get_l1t_mode_label(h.indices[2])),
         label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
         label_1=(lambda h: d.get_l1t_eta_label(h.indices[0])),
@@ -127,7 +126,7 @@ def main():
         label_3=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         )
 
-    do_overlay(special_hname="efficiency_of_pt_in_eta2_bx%i_mode2_l1pt2", special_values=(1,0),
+    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx%i_mode2_l1pt2", special_values=(1,0),
         legend= (lambda h: d.get_l1t_bx_label(h.indices[1]) if h.indices[1] != 1 else "BX = 0"),
         label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
         label_1=(lambda h: d.get_l1t_eta_label(h.indices[0])),
@@ -143,7 +142,7 @@ def main():
         label_3=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         )
 
-    do_overlay(special_hname="efficiency_of_pt_in_eta%i_bx1_mode2_l1pt2", special_values=(0,1),
+    do_overlay(special_hname="efficiency_of_pt_in_eta%i_bx1_mode2_l1pt2", special_values=(0,1,2),
         legend= (lambda h: d.get_l1t_eta_label(h.indices[0])),
         label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
         label_1=(lambda h: d.get_l1t_bx_label(h.indices[1])),
@@ -159,7 +158,7 @@ def main():
         label_3=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         )
 
-    do_overlay(special_hname="efficiency_of_pt_in_eta2_bx1_mode2_pu%i", special_values=(0,1,2,3),
+    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx1_mode2_pu%i", special_values=(0,1,2,3),
         legend=( lambda h: d.get_l1t_pu_label(h.indices[3])),
         label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
         label_1=(lambda h: d.get_l1t_eta_label(h.indices[0])),
@@ -175,6 +174,7 @@ def main():
         label_3=(lambda h: d.get_l1t_mode_label(h.indices[2])),
         )
 
+    # Serve
     serve_figures()
     return
 

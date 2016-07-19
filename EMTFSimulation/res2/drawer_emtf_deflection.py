@@ -448,8 +448,6 @@ def drawer_sitrep(histos, options):
 def main(histos, options):
     # Init
     drawer = MyDrawer()
-    gStyle.SetPadGridX(True)
-    gStyle.SetPadGridY(True)
     tchain = TChain("ntupler/tree", "")
     tchain.AddFileInfoList(options.tfilecoll.GetList())
 
@@ -460,10 +458,11 @@ def main(histos, options):
         drawer_draw(histos, options)
         drawer_sitrep(histos, options)
 
-    import subprocess
+    # Pronto
     prog = sys.argv[0]
     prog = prog.replace(".py", "_pronto.py")
     if os.path.isfile(prog):
+        import subprocess
         subprocess.check_call(["python", prog, options.outdir])
 
 # ______________________________________________________________________________

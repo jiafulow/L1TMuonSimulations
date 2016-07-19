@@ -14,8 +14,8 @@ l1t_mode_vec = (0, 1, 2, 3)  # MuOpen, DoubleMu, SingleMu, Mode15
 l1t_mode_integers = ((3,5,6,7,9,10,11,12,13,14,15), (7,10,11,12,13,14,15), (11,13,14,15), (15,))
 l1t_bx_vec = (0, 1)  # BX=any, BX=0
 l1t_bx_integers = (range(-12,3), (0,))
-l1t_eta_vec = (0, 1, 2)  # 2 eta bins + inclusive
-l1t_eta_floats = ((1.2,1.6), (1.6, 2.4), (-99999999.,99999999.))
+l1t_eta_vec = (0, 1, 2, 3)  # 3 eta bins + inclusive
+l1t_eta_floats = ((1.2,1.6), (1.6,2.0), (2.0,2.4), (-99999999.,99999999.))
 l1t_genpt_vec = (0, 1, 2)  # 2 genpt bins + inclusive
 l1t_genpt_floats = ((20.,80.), (150.,2000.), (-99999999.,99999999.))
 l1t_pu_vec = (0, 1, 2, 3)  # 4 pu bins
@@ -87,7 +87,7 @@ def get_l1t_genpt_label(b):
 
 def in_l1t_pu_bin(b, pu):
     a = (l1t_pu_floats[b][0] <= pu < l1t_pu_floats[b][1])
-    return -1
+    return a
 
 def get_l1t_pu_label(b):
     label = "# PU = %.0f" % (l1t_pu_labeling[b])
@@ -113,7 +113,7 @@ def drawer_book(histos, options):
                     histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
                     histos[hname].indices = (etabin, bxbin, modebin, l1ptbin)
                     hname = "efficiency_of_pu_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
-                    histos[hname] = TEfficiency(hname, "; gen # PU; #varepsilon", 52, 0, 52)
+                    histos[hname] = TEfficiency(hname, "; gen # PU; #varepsilon", 56, 0, 56)
                     histos[hname].indices = (etabin, bxbin, modebin, l1ptbin)
 
                 for genptbin in l1t_genpt_vec:
@@ -184,7 +184,7 @@ def drawer_project(tree, histos, options):
         #part_cottheta = sinh(evt.genParts_eta[0])
         part_theta = atan2(evt.genParts_pt[0], evt.genParts_pz[0])
         part_charge = evt.genParts_charge[0]
-        part_isector = (part_phi * (180.0/pi) - 15.0) / 60.
+        #part_isector = (part_phi * (180.0/pi) - 15.0) / 60.
 
         part_globalPhiME2 = evt.genParts_globalPhiME[0][2]
         part_globalEtaME2 = evt.genParts_globalEtaME[0][2]
@@ -295,7 +295,7 @@ def drawer_draw(histos, options):
                     h.SetLineColor(col); h.SetFillColor(fcol)
                 elif h.style == 1:  # marker
                     h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
-                    h.SetLineColor(col); h.SetMarkerColor(col);
+                    h.SetLineColor(col); h.SetMarkerColor(col)
                 if h.logy:
                     h.SetMaximum(h.GetMaximum() * 14); #h.SetMinimum(0.5)
                 else:
@@ -346,8 +346,6 @@ def drawer_sitrep(histos, options):
 def main(histos, options):
     # Init
     drawer = MyDrawer()
-    gStyle.SetPadGridX(True)
-    gStyle.SetPadGridY(True)
     tchain = TChain("ntupler/tree", "")
     tchain.AddFileInfoList(options.tfilecoll.GetList())
 
@@ -358,10 +356,11 @@ def main(histos, options):
         drawer_draw(histos, options)
         drawer_sitrep(histos, options)
 
-    import subprocess
+    # Pronto
     prog = sys.argv[0]
     prog = prog.replace(".py", "_pronto.py")
     if os.path.isfile(prog):
+        import subprocess
         subprocess.check_call(["python", prog, options.outdir])
 
 # ______________________________________________________________________________

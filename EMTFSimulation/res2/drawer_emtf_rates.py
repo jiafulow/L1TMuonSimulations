@@ -14,13 +14,13 @@ l1t_mode_vec = (0, 1, 2, 3)  # MuOpen, DoubleMu, SingleMu, Mode15
 l1t_mode_integers = ((3,5,6,7,9,10,11,12,13,14,15), (7,10,11,12,13,14,15), (11,13,14,15), (15,))
 l1t_bx_vec = (0, 1)  # BX=any, BX=0
 l1t_bx_integers = (range(-12,3), (0,))
-l1t_eta_vec = (0, 1, 2)  # 2 eta bins + inclusive
-l1t_eta_floats = ((1.2,1.6), (1.6, 2.4), (-99999999.,99999999.))
+l1t_eta_vec = (0, 1, 2, 3)  # 3 eta bins + inclusive
+l1t_eta_floats = ((1.2,1.6), (1.6,2.0), (2.0,2.4), (-99999999.,99999999.))
 l1t_genpt_vec = (0, 1, 2)  # 2 genpt bins + inclusive
 l1t_genpt_floats = ((20.,80.), (150.,2000.), (-99999999.,99999999.))
-l1t_pu_vec = (0, 1, 2, 3)  # 4 pu bins
-l1t_pu_floats = ((-0.1,0.1), (20.-1,20.+2), (30.-1,30.+2), (45.-1,45.+2))
-l1t_pu_labeling = (0, 20, 30, 45)
+l1t_pu_vec = (0,)  # inclusive
+l1t_pu_floats = ((-99999999.,99999999.),)
+l1t_pu_labeling = (-1,)
 
 
 # ______________________________________________________________________________
@@ -87,7 +87,7 @@ def get_l1t_genpt_label(b):
 
 def in_l1t_pu_bin(b, pu):
     a = (l1t_pu_floats[b][0] <= pu < l1t_pu_floats[b][1])
-    return -1
+    return a
 
 def get_l1t_pu_label(b):
     label = "# PU = %.0f" % (l1t_pu_labeling[b])
@@ -97,23 +97,35 @@ def get_l1t_pu_label(b):
 # Drawer
 def drawer_book(histos, options):
     # Rates
-    for modebin in l1t_mode_vec:
-        for bxbin in l1t_bx_vec:
-            for etabin in l1t_eta_vec:
-                hname = "rate_of_pt_in_eta%i_bx%i_mode%i" % (etabin, bxbin, modebin)
-                histos[hname] = TH1F(hname, "; p_{T} [GeV]; entries", 100, 0, 200)
-                histos[hname].indices = (etabin, bxbin, modebin)
-                hname = "rate_of_ptcut_in_eta%i_bx%i_mode%i" % (etabin, bxbin, modebin)
-                histos[hname] = TH1F(hname, "; cutoff p_{T} [GeV]; entries", 100, 0, 200)
-                histos[hname].indices = (etabin, bxbin, modebin)
+    for pubin in l1t_pu_vec:
+        for modebin in l1t_mode_vec:
+            for bxbin in l1t_bx_vec:
+                for etabin in l1t_eta_vec:
+                    hname = "rate_of_pt_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
+                    histos[hname] = TH1F(hname, "; p_{T} [GeV]; entries", 100, 0, 200)
+                    histos[hname].indices = (etabin, bxbin, modebin, pubin)
+                    hname = "rate_of_ptcut_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
+                    histos[hname] = TH1F(hname, "; cutoff p_{T} [GeV]; entries", 100, 0, 200)
+                    histos[hname].indices = (etabin, bxbin, modebin, pubin)
 
-            hname = "rate_of_eta_in_bx%i_mode%i" % (bxbin, modebin)
-            #histos[hname] = TH1F(hname, "; #eta; entries", 50, -2.5, 2.5)
-            histos[hname] = TH1F(hname, "; |#eta|; entries", 52, 1.2, 2.5)
-            histos[hname].indices = (bxbin, modebin)
-            hname = "rate_of_phi_in_bx%i_mode%i" % (bxbin, modebin)
-            histos[hname] = TH1F(hname, "; #phi; entries", 64, -3.2, 3.2)
-            histos[hname].indices = (bxbin, modebin)
+    for l1ptbin in l1t_l1pt_vec:
+        for modebin in l1t_mode_vec:
+            for bxbin in l1t_bx_vec:
+                for etabin in l1t_eta_vec:
+                    hname = "rate_of_pu_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
+                    histos[hname] = TH1F(hname, "; gen # PU; entries", 56, 0, 56)
+                    histos[hname].indices = (etabin, bxbin, modebin, l1ptbin)
+
+                hname = "rate_of_eta_in_bx%i_mode%i_l1pt%i" % (bxbin, modebin, l1ptbin)
+                #histos[hname] = TH1F(hname, "; #eta; entries", 50, -2.5, 2.5)
+                histos[hname] = TH1F(hname, "; |#eta|; entries", 52, 1.2, 2.5)
+                histos[hname].indices = (bxbin, modebin, l1ptbin)
+                hname = "rate_of_phi_in_bx%i_mode%i_l1pt%i" % (bxbin, modebin, l1ptbin)
+                histos[hname] = TH1F(hname, "; #phi; entries", 64, -3.2, 3.2)
+                histos[hname].indices = (bxbin, modebin, l1ptbin)
+
+    hname = "trueNPV"
+    histos[hname] = TH1F(hname, "; gen # PU; entries", 56, 0, 56)
 
     # Style
     for hname, h in histos.iteritems():
@@ -149,15 +161,8 @@ def drawer_project(tree, histos, options):
         h.SetEntries(h.GetEntries() - nbinsx)
         return
 
-    def normalize_by_entries(h, entries):
-        if entries > 0:
-            h.Scale(1.0/entries)
-
     # __________________________________________________________________________
     # Loop over events
-
-    entries_in_pubin = [0 for pubin in l1t_pu_vec]
-
     for ievt, evt in enumerate(tree):
         if (ievt == options.nentries):  break
         if (ievt % 1000 == 0):  print "Processing event: %i" % ievt
@@ -177,42 +182,45 @@ def drawer_project(tree, histos, options):
             is_endcap = 1.25 < abs(trig_eta) < 2.4
 
             if trig_pt > 0 and is_endcap:
-                for modebin in l1t_mode_vec:
-                    for bxbin in l1t_bx_vec:
-                        for etabin in l1t_eta_vec:
+                for pubin in l1t_pu_vec:
+                    for modebin in l1t_mode_vec:
+                        for bxbin in l1t_bx_vec:
+                            for etabin in l1t_eta_vec:
+                                select = (in_l1t_pu_bin(pubin, trueNPV)) and (in_l1t_mode_bin(modebin, mode)) and (in_l1t_bx_bin(bxbin, bx)) and (in_l1t_eta_bin(etabin, trig_eta))
+                                if select:
+                                    hname = "rate_of_pt_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
+                                    histos[hname].Fill(trig_pt)
+                                    hname = "rate_of_ptcut_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
+                                    histos[hname].Fill(trig_pt)
 
-                            select = (in_l1t_mode_bin(modebin, mode)) and (in_l1t_bx_bin(bxbin, bx)) and (in_l1t_eta_bin(etabin, bx))
-                            if select:
-                                hname = "rate_of_pt_in_eta%i_bx%i_mode%i" % (etabin, bxbin, modebin)
-                                histos[hname].Fill(trig_pt)
+                for l1ptbin in l1t_l1pt_vec:
+                    for modebin in l1t_mode_vec:
+                        for bxbin in l1t_bx_vec:
+                            for etabin in l1t_eta_vec:
+                                select = (in_l1t_l1pt_bin(l1ptbin, trig_pt)) and (in_l1t_mode_bin(modebin, mode)) and (in_l1t_bx_bin(bxbin, bx)) and (in_l1t_eta_bin(etabin, trig_eta))
+                                if select:
+                                    hname = "rate_of_pu_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
+                                    histos[hname].Fill(trueNPV)
+                                    if etabin == l1t_eta_vec[-1]:  # inclusive
+                                        hname = "rate_of_eta_in_bx%i_mode%i_l1pt%i" % (bxbin, modebin, l1ptbin)
+                                        #histos[hname].Fill(trig_eta)
+                                        histos[hname].Fill(abs(trig_eta))
+                                        hname = "rate_of_phi_in_bx%i_mode%i_l1pt%i" % (bxbin, modebin, l1ptbin)
+                                        histos[hname].Fill(trig_phi)
+                continue
 
-                                if etabin == l1t_eta_vec[-1]:  # inclusive
-                                    hname = "rate_of_eta_in_bx%i_mode%i" % (bxbin, modebin)
-                                    histos[hname].Fill(trig_eta)
-                                    hname = "rate_of_phi_in_bx%i_mode%i" % (bxbin, modebin)
-                                    histos[hname].Fill(trig_phi)
-            continue
-
-        for pubin in l1t_pu_vec:
-            entries_in_pubin[pubin] += 1
+        hname = "trueNPV"
+        histos[hname].Fill(trueNPV)
         continue
 
     # __________________________________________________________________________
     # Modify ptcut histograms
-    for modebin in l1t_mode_vec:
-        for bxbin in l1t_bx_vec:
-            for etabin in l1t_eta_vec:
-                hname = "rate_of_ptcut_in_eta%i_bx%i_mode%i" % (etabin, bxbin, modebin)
-                modify_ptcut(histos[hname])
-
-    # __________________________________________________________________________
-    # Normalize histograms by entries in pubin
     for pubin in l1t_pu_vec:
         for modebin in l1t_mode_vec:
-            for etabin in l1t_eta_vec:
-                pass
-                #hname = "rate_of_ptcut_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
-                #normalize_by_entries(histos[hname], entries_in_pubin[pubin])
+            for bxbin in l1t_bx_vec:
+                for etabin in l1t_eta_vec:
+                    hname = "rate_of_ptcut_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
+                    modify_ptcut(histos[hname])
     return
 
 # ______________________________________________________________________________
@@ -227,25 +235,12 @@ def drawer_draw(histos, options):
                     h.SetLineColor(col); h.SetFillColor(fcol)
                 elif h.style == 1:  # marker
                     h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
-                    h.SetLineColor(col); h.SetMarkerColor(col);
+                    h.SetLineColor(col); h.SetMarkerColor(col)
                 if h.logy:
-                    h.SetMaximum(h.GetMaximum() * 14); #h.SetMinimum(0.5)
+                    h.SetMaximum(h.GetMaximum() * 14); h.SetMinimum(0.5)
                 else:
                     h.SetMaximum(h.GetMaximum() * 1.4); h.SetMinimum(0.)
                 h.Draw("hist")
-
-                # Customize
-                if hname.startswith("pt_"):
-                    for j, l1ptbin in enumerate(l1t_l1pt_vec):
-                        l1pt = l1t_l1pt_thresholds[l1ptbin]
-                        rate = h.Integral(h.FindBin(l1pt), h.GetNbinsX())
-                        tlatex.DrawLatex(0.67, 0.70-j*0.04, "Entries w/ p_{T}>%3i: %.0f" % (l1pt, rate))
-                if hname.startswith("ptcut_"):
-                    for j, l1ptbin in enumerate(l1t_l1pt_vec):
-                        l1pt = l1t_l1pt_thresholds[l1ptbin]
-                        rate = h.GetBinContent(h.FindBin(l1pt))
-                        tlatex.DrawLatex(0.67, 0.70-j*0.04, "Entries w/ p_{T}>%3i: %.0f" % (l1pt, rate))
-
                 gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
                 CMS_label()
                 save(options.outdir, hname)
@@ -291,8 +286,6 @@ def drawer_sitrep(histos, options):
 def main(histos, options):
     # Init
     drawer = MyDrawer()
-    gStyle.SetPadGridX(True)
-    gStyle.SetPadGridY(True)
     tchain = TChain("ntupler/tree", "")
     tchain.AddFileInfoList(options.tfilecoll.GetList())
 
@@ -303,10 +296,11 @@ def main(histos, options):
         drawer_draw(histos, options)
         drawer_sitrep(histos, options)
 
-    import subprocess
+    # Pronto
     prog = sys.argv[0]
     prog = prog.replace(".py", "_pronto.py")
     if os.path.isfile(prog):
+        import subprocess
         subprocess.check_call(["python", prog, options.outdir])
 
 # ______________________________________________________________________________

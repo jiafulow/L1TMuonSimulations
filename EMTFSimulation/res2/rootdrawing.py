@@ -34,6 +34,8 @@ class MyDrawer:
         gStyle.SetLabelSize(0.04, "XY")
         gStyle.SetLabelSize(0.04, "Z")
         #gStyle.SetNdivisions(505, "XY")
+        gStyle.SetPadGridX(True)
+        gStyle.SetPadGridY(True)
 
         #gStyle.SetPalette(55)  # rainbow color map
         gStyle.SetPalette(kBird)  # new default color map
