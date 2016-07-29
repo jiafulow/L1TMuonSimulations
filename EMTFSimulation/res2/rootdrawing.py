@@ -26,7 +26,8 @@ class MyDrawer:
     def __init__(self):
         # ROOT
         gROOT.LoadMacro("tdrstyle.C")
-        gROOT.ProcessLine("setTDRStyle()")
+        gROOT.ProcessLine("setTDRStyle();")
+        gROOT.ProcessLine("gErrorIgnoreLevel = kWarning;")
 
         gStyle.SetEndErrorSize(2)
         gStyle.SetPadRightMargin(0.05)

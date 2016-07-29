@@ -120,18 +120,24 @@ def drawer_book(histos, options):
     for ptbin in l1t_pt_vec:
         for stbin in l1t_st_vec:
             hname = "deviation_phi_in_st%i_pt%i" % (stbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #phi(%s) - #phi(muon) [rad]; entries" % (get_st_label(stbin)), 100, -0.2, 1.0
-            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.1, 0.2
+            htitle, nbinsx, xmin, xmax = "; #phi(%s) - #phi(muon) [rad]; entries" % (get_st_label(stbin)), 100, -0.2, 0.2
+            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.08, 0.08
+            if options.no_propagator:  nbinsx, xmin, xmax = 100, -0.2, 1.0
+            if options.high_pt and options.no_propagator:  nbinsx, xmin, xmax = 100, -0.1, 0.2
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (stbin, ptbin)
             hname = "deviation_theta_in_st%i_pt%i" % (stbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #theta(%s) - #theta(muon) [rad]; entries" % (get_st_label(stbin)), 100, -0.2, 0.2
-            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.1, 0.1
+            htitle, nbinsx, xmin, xmax = "; #theta(%s) - #theta(muon) [rad]; entries" % (get_st_label(stbin)), 100, -0.1, 0.1
+            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.08, 0.08
+            if options.no_propagator:  nbinsx, xmin, xmax = 100, -0.2, 0.2
+            if options.high_pt and options.no_propagator:  nbinsx, xmin, xmax = 100, -0.1, 0.1
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (stbin, ptbin)
             hname = "deviation_eta_in_st%i_pt%i" % (stbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #eta(%s) - #eta(muon); entries" % (get_st_label(stbin)), 100, -0.6, 0.6
-            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.2, 0.2
+            htitle, nbinsx, xmin, xmax = "; #eta(%s) - #eta(muon); entries" % (get_st_label(stbin)), 100, -0.3, 0.3
+            if options.high_pt:  nbinsx, xmin, xmax = 100, -0.16, 0.16
+            if options.no_propagator:  nbinsx, xmin, xmax = 100, -0.6, 0.6
+            if options.high_pt and options.no_propagator:  nbinsx, xmin, xmax = 100, -0.2, 0.2
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (stbin, ptbin)
 
@@ -246,6 +252,12 @@ def drawer_project(tree, histos, options):
                 stbin = find_l1t_st_bin(istation1, iring1, strip1)
                 if stbin == -1:
                     raise Exception("Failed to get stbin. Why? %i %i %i" % (istation1, iring1, strip1))
+
+                if not options.no_propagator:
+                    layer = (stbin - 1)/2
+                    part_phi = evt.genParts_globalPhiME[0][layer]
+                    part_theta = evt.genParts_globalThetaME[0][layer]
+                    part_eta = evt.genParts_globalEtaME[0][layer]
 
                 dphi = deltaPhi(globalPhi1, part_phi)
                 dtheta = deltaPhi(globalTheta1, part_theta)
@@ -408,6 +420,7 @@ if __name__ == '__main__':
     parser = MyParser()
     parser.add_argument("--east", action="store_true", help="Draw for East (i.e. negative) endcap (default: %(default)s)")
     parser.add_argument("--high-pt", action="store_true", help="Draw for high-pt (i.e. 50 GeV and above) (default: %(default)s)")
+    parser.add_argument("--no-propagator", action="store_true", help="Draw without using the propagator (default: %(default)s)")
     options = parser.parse_args()
     histos = {}
 

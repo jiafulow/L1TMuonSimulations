@@ -13,7 +13,11 @@ fcol = TColor.GetColor("#fb9a99")  # nu140
 # ______________________________________________________________________________
 def display_fit(h, xxmin, xxmax, fun="pol2"):
     if h.Integral() > 0 and (xxmax > xxmin and h.Integral(h.FindFixBin(xxmin),h.FindFixBin(xxmax))):
-        h.Fit(fun, "q", "", xxmin, xxmax)
+        if fun == "pol2":
+            f1 = TF1("f1", fun)
+            f1.SetParLimits(0, -50., h.GetMaximum())
+            fun = "f1"
+        h.Fit(fun, "qB", "", xxmin, xxmax)
         h.fit = h.GetFunction(fun)
         h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
     else:
@@ -34,7 +38,7 @@ def do_trueNPV(hname="trueNPV"):
     return
 
 # ______________________________________________________________________________
-def do_ptcut(hname="rate_of_pt_in_eta3_bx1_mode2_pu0"):
+def do_ptcut(hname="rate_of_pt_in_eta3_bx2_mode2_pu0"):
     h = histos[hname]
     h.SetLineWidth(2); h.SetMarkerSize(0)
     h.SetLineColor(col); h.SetFillColor(fcol)
@@ -42,7 +46,7 @@ def do_ptcut(hname="rate_of_pt_in_eta3_bx1_mode2_pu0"):
     h.Draw("hist")
     for j, l1ptbin in enumerate(d.l1t_l1pt_vec):
         l1pt = d.l1t_l1pt_thresholds[l1ptbin]
-        rate = h.Integral(h.FindBin(l1pt), h.GetNbinsX())
+        rate = h.Integral(h.FindBin(l1pt), h.GetNbinsX())  #
         tlatex.DrawLatex(0.67, 0.70-j*0.04, "Entries w/ p_{T}>%3i: %.0f" % (l1pt, rate))
 
     gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
@@ -58,7 +62,7 @@ def do_ptcut(hname="rate_of_pt_in_eta3_bx1_mode2_pu0"):
     h.Draw("hist")
     for j, l1ptbin in enumerate(d.l1t_l1pt_vec):
         l1pt = d.l1t_l1pt_thresholds[l1ptbin]
-        rate = h.GetBinContent(h.FindBin(l1pt))
+        rate = h.GetBinContent(h.FindBin(l1pt))  #
         tlatex.DrawLatex(0.67, 0.70-j*0.04, "Entries w/ p_{T}>%3i: %.0f" % (l1pt, rate))
 
     gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
@@ -68,27 +72,31 @@ def do_ptcut(hname="rate_of_pt_in_eta3_bx1_mode2_pu0"):
     return
 
 # ______________________________________________________________________________
-def do_etaphi(hname="rate_of_eta_in_bx1_mode2_l1pt0"):
-    h = histos[hname]
-    h.SetLineWidth(2); h.SetMarkerSize(0)
-    h.SetLineColor(col); h.SetFillColor(fcol)
-    h.Draw("hist")
+def do_etaphi(hname="rate_of_eta_in_bx2_mode2_l1pt0", hname1="rate_of_eta_in_bx2_mode2_l1pt1", rebin=0):
+    def doit():
+        h = histos[hname]
+        if rebin:
+            h.Rebin(rebin)
+            h.Scale(1.0/rebin)
+        h.SetLineWidth(2); h.SetMarkerSize(0)
+        h.SetLineColor(col); h.SetFillColor(fcol)
+        h.Draw("hist")
 
-    gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
-    CMS_label()
-    imgname = hname
-    save(options.outdir, imgname); figures.append(imgname)
+        gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
+        CMS_label()
+        imgname = hname
+        save(options.outdir, imgname); figures.append(imgname)
+    doit()
 
     hname = hname.replace("rate_of_eta_", "rate_of_phi_")
-    h = histos[hname]
-    h.SetLineWidth(2); h.SetMarkerSize(0)
-    h.SetLineColor(col); h.SetFillColor(fcol)
-    h.Draw("hist")
+    doit()
 
-    gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
-    CMS_label()
-    imgname = hname
-    save(options.outdir, imgname); figures.append(imgname)
+    hname = hname1
+    rebin = 2
+    doit()
+
+    hname = hname.replace("rate_of_eta_", "rate_of_phi_")
+    doit()
     return
 
 # ______________________________________________________________________________
@@ -212,31 +220,32 @@ def main():
     do_ptcut()
     do_etaphi()
 
-    do_stack(special_hname="rate_of_ptcut_in_eta%i_bx1_mode2_pu0", special_values=(2,1,0),
-        legend= (lambda h: d.get_l1t_eta_label(h.indices[0])),
-        label_0=(lambda h: d.get_l1t_mode_label(h.indices[2])),
-        exclusive=True,
-        )
-    do_stack(special_hname="rate_of_ptcut_in_eta3_bx%i_mode2_pu0", special_values=(0,1),
-        legend= (lambda h: d.get_l1t_bx_label(h.indices[1]) if h.indices[1] != 1 else "BX = 0"),
-        label_0=(lambda h: d.get_l1t_mode_label(h.indices[2])),
-        exclusive=False,
-        )
-    do_stack(special_hname="rate_of_ptcut_in_eta3_bx1_mode%i_pu0", special_values=(0,1,2),
+    do_stack(special_hname="rate_of_ptcut_in_eta3_bx2_mode%i_pu0", special_values=(0,1,2),
         legend= (lambda h: d.get_l1t_mode_label(h.indices[2])),
         label_0=(lambda h: ""),
         exclusive=True,
         )
 
-    do_fit(hname="rate_of_pu_in_eta3_bx1_mode2_l1pt0", rebin=0, xxmin=2, xxmax=50,
+    do_stack(special_hname="rate_of_ptcut_in_eta%i_bx2_mode2_pu0", special_values=(2,1,0),
+        legend= (lambda h: d.get_l1t_eta_label(h.indices[0])),
+        label_0=(lambda h: d.get_l1t_mode_label(h.indices[2])),
+        exclusive=True,
+        )
+    do_stack(special_hname="rate_of_ptcut_in_eta3_bx%i_mode2_pu0", special_values=(0,2),
+        legend= (lambda h: d.get_l1t_bx_label(h.indices[1]) if h.indices[1] != 2 else "BX = 0"),
+        label_0=(lambda h: d.get_l1t_mode_label(h.indices[2])),
+        exclusive=False,
+        )
+
+    do_fit(hname="rate_of_pu_in_eta3_bx2_mode2_l1pt0", rebin=0, xxmin=2, xxmax=50,
         label_0=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         col=ctapalette[2],
         )
-    do_fit(hname="rate_of_pu_in_eta3_bx1_mode2_l1pt1", rebin=2, xxmin=16, xxmax=50,
+    do_fit(hname="rate_of_pu_in_eta3_bx2_mode2_l1pt1", rebin=2, xxmin=16, xxmax=50,
         label_0=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         col=ctapalette[1],
         )
-    do_fit(hname="rate_of_pu_in_eta3_bx1_mode2_l1pt2", rebin=4, xxmin=32, xxmax=48,
+    do_fit(hname="rate_of_pu_in_eta3_bx2_mode2_l1pt2", rebin=4, xxmin=32, xxmax=48,
         label_0=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         col=ctapalette[0],
         )
