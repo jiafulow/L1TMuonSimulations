@@ -11,7 +11,7 @@ def read_hlt_paths(filename):
             if not line.startswith('#'):
                 lines.append(line)
         paths.extend(lines)
-    print "Using HLT file: %s with %i paths." % (filename, len(paths))
+    #print "Using HLT file: %s with %i paths." % (filename, len(paths))
     return paths
 
 hlt_paths = read_hlt_paths('hlt_paths.txt')

@@ -73,11 +73,11 @@ def cust_event_content(process):
     return process
 
 def cust_pgun(process):
-    cust_event_content(process)
+    process = cust_event_content(process)
     return process
 
 def cust_pileup(process):
-    add_pileup(process)
-    cust_event_content(process)
+    process = add_pileup(process)
+    process = cust_event_content(process)
     return process
 

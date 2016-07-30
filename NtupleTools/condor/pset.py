@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: ntupleMC --step L1REPACK:FullMC,RAW2DIGI --mc --no_output --era Run2_2016 --conditions 80X_mcRun2_asymptotic_v14 --geometry Extended2016,Extended2016Reco --customise L1TMuonSimulations/NtupleTools/customiseNtuple.cust_all --filein file:SingleMuon_PositiveEndCap.root --fileout file:SingleMuon_PositiveEndCap_ntuple.root --no_exec -n 100
+# with command line options: ntuple --step L1REPACK:FullMC,RAW2DIGI --mc --no_output --era Run2_2016 --conditions 80X_mcRun2_asymptotic_v14 --geometry Extended2016,Extended2016Reco --customise L1TMuonSimulations/NtupleTools/customise.cust_ntuple --filein file:SingleMuon_PositiveEndCap.root --no_exec -n 100
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -28,8 +28,7 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    #fileNames = cms.untracked.vstring('file:SingleMuon_PositiveEndCap.root'),
-    fileNames = cms.untracked.vstring('root://xrootd2.ihepa.ufl.edu//store/user/jiafulow/L1MuonTrigger/8_0_9/SingleMuon_PositiveEndCap/ParticleGuns/CRAB3/160705_223732/0000/SingleMuon_PositiveEndCap_103.root'),
+    fileNames = cms.untracked.vstring('file:SingleMuon_PositiveEndCap.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -39,7 +38,7 @@ process.options = cms.untracked.PSet(
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    annotation = cms.untracked.string('ntupleMC nevts:100'),
+    annotation = cms.untracked.string('ntuple nevts:100'),
     name = cms.untracked.string('Applications'),
     version = cms.untracked.string('$Revision: 1.19 $')
 )
@@ -62,21 +61,13 @@ process.schedule = cms.Schedule(process.L1RePack_step,process.raw2digi_step,proc
 
 # customisation of the process.
 
-# Automatic addition of the customisation function from L1TMuonSimulations.NtupleTools.customiseNtuple
-from L1TMuonSimulations.NtupleTools.customiseNtuple import cust_all 
+# Automatic addition of the customisation function from L1TMuonSimulations.NtupleTools.customise
+from L1TMuonSimulations.NtupleTools.customise import cust_ntuple 
 
-#call to customisation function cust_all imported from L1TMuonSimulations.NtupleTools.customiseNtuple
-process = cust_all(process)
+#call to customisation function cust_ntuple imported from L1TMuonSimulations.NtupleTools.customise
+process = cust_ntuple(process)
 
 # End of customisation functions
 
-
-# Configure framework report and summary
-#process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-#process.MessageLogger.cerr.INFO.limit = 1000000
-
-# Dump the full python config
-#with open("dump.py", "w") as f:
-#    f.write(process.dumpPython())
 

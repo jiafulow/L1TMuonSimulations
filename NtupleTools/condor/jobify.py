@@ -271,7 +271,7 @@ echo ">>> SOFTWARE_DIR=$SOFTWARE_DIR"
 # Copy using lcg-cp or gfal-copy?
 if command -v gfal-copy >/dev/null 2>&1; then
     export BLTCP='gfal-copy -f -p -v -t 2400 -T 2400 '
-    touch /tmp/null
+    [[ -f /tmp/null ]] || touch /tmp/null
     gfal-copy -f file:////tmp/null file:////dev/null >/dev/null
     EXIT_STATUS=$?
 else
@@ -280,7 +280,7 @@ fi
 if [ $EXIT_STATUS -ne 0 ]; then
     if command -v lcg-cp >/dev/null 2>&1; then
         export BLTCP='lcg-cp -v -b -D srmv2 --connect-timeout 2400 '
-        touch /tmp/null
+        [[ -f /tmp/null ]] || touch /tmp/null
         lcg-cp file:////tmp/null file:////dev/null >/dev/null
         EXIT_STATUS=$?
     else

@@ -2,15 +2,31 @@
 #cmsDriver.py  --conditions 80X_mcRun2_asymptotic_v14  -s L1REPACK:FullMC,RAW2DIGI --no_output -n 10 --era=Run2_2016 --filein root://eoscms.cern.ch//eos/cms/store/mc/RunIISpring16DR80/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RAWAODSIM/PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v2/30000/040AFBF1-8E0B-E611-9C22-001E67E95A58.root --processName reL1T --python_filename l1t_test.py --customise=L1Trigger/L1TNtuples/customiseL1Ntuple.L1NtupleRAW
 #cmsRun l1t_test.py
 
+
 # This ntuplization
-cmsDriver.py ntupleMC \
+cmsDriver.py ntuple \
   --step L1REPACK:FullMC,RAW2DIGI \
   --mc --no_output \
   --era Run2_2016 \
   --conditions 80X_mcRun2_asymptotic_v14 \
   --geometry Extended2016,Extended2016Reco \
-  --customise L1TMuonSimulations/NtupleTools/customiseNtuple.cust_all \
+  --customise L1TMuonSimulations/NtupleTools/customise.cust_ntuple \
   --filein file:SingleMuon_PositiveEndCap.root \
-  --fileout file:SingleMuon_PositiveEndCap_ntuple.root \
+  --no_exec -n 100
+
+
+# All-you-can-eat ntuplization
+# (drop HLT,L1Reco,RECO, use no_output, add ntuplization)
+cmsDriver.py L1TMuonSimulations/Configuration/python/sector/SingleMuonFlatOneOverPt2To7000_sp0_cfi.py \
+  --step GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,RAW2DIGI \
+  --mc --no_output --processName RAWSIM \
+  --era Run2_2016 \
+  --conditions 80X_mcRun2_asymptotic_v14 \
+  --customise L1TMuonSimulations/Configuration/customise.cust_pgun \
+  --customise L1TMuonSimulations/NtupleTools/customise.cust_ntuple \
+  --customise L1TMuonSimulations/NtupleTools/customise.do_less_please \
+  --beamspot Realistic50ns13TeVCollision \
+  --magField 38T_PostLS1 \
+  --python_filename ntuple_SingleMuon_sp0.py \
   --no_exec -n 100
 
