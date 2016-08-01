@@ -125,7 +125,7 @@ def main():
         label_3=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         )
 
-    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx2_mode%i_l1pt0", special_values=(2,1,0),
+    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx2_mode%i_l1pt0", special_values=(2,1,0,3),
         legend= (lambda h: d.get_l1t_mode_label(h.indices[2])),
         label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
         label_1=(lambda h: d.get_l1t_eta_label(h.indices[0])),
@@ -133,7 +133,23 @@ def main():
         label_3=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         )
 
-    do_overlay(special_hname="efficiency_of_eta_in_genpt2_bx2_mode%i_l1pt0", special_values=(2,1,0),
+    do_overlay(special_hname="efficiency_of_eta_in_genpt2_bx2_mode%i_l1pt0", special_values=(2,1,0,3),
+        legend= (lambda h: d.get_l1t_mode_label(h.indices[2])),
+        label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
+        label_1=(lambda h: d.get_l1t_genpt_label(h.indices[0])),
+        label_2=(lambda h: d.get_l1t_bx_label(h.indices[1])),
+        label_3=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
+        )
+
+    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx2_mode%i_l1pt2", special_values=(2,1,0,3),
+        legend= (lambda h: d.get_l1t_mode_label(h.indices[2])),
+        label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
+        label_1=(lambda h: d.get_l1t_eta_label(h.indices[0])),
+        label_2=(lambda h: d.get_l1t_bx_label(h.indices[1])),
+        label_3=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
+        )
+
+    do_overlay(special_hname="efficiency_of_eta_in_genpt2_bx2_mode%i_l1pt2", special_values=(2,1,0,3),
         legend= (lambda h: d.get_l1t_mode_label(h.indices[2])),
         label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
         label_1=(lambda h: d.get_l1t_genpt_label(h.indices[0])),
@@ -173,7 +189,7 @@ def main():
         label_3=(lambda h: d.get_l1t_l1pt_label(h.indices[3])),
         )
 
-    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx2_mode2_pu%i", special_values=(0,1,2,3),
+    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx2_mode2_pu%i", special_values=(0,3),
         legend=( lambda h: d.get_l1t_pu_label(h.indices[3])),
         label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
         label_1=(lambda h: d.get_l1t_bx_label(h.indices[1])),
@@ -181,7 +197,23 @@ def main():
         label_3=(lambda h: d.get_l1t_l1pt_label(2)),
         )
 
-    do_overlay(special_hname="efficiency_of_eta_in_genpt2_bx2_mode2_pu%i", special_values=(0,1,2,3),
+    do_overlay(special_hname="efficiency_of_eta_in_genpt2_bx2_mode2_pu%i", special_values=(0,3),
+        legend= (lambda h: d.get_l1t_pu_label(h.indices[3])),
+        label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
+        label_1=(lambda h: d.get_l1t_bx_label(h.indices[1])),
+        label_2=(lambda h: d.get_l1t_mode_label(h.indices[2])),
+        label_3=(lambda h: d.get_l1t_l1pt_label(2)),
+        )
+
+    do_overlay(special_hname="efficiency_of_pt_in_eta3_bx1_mode2_pu%i", special_values=(0,3),
+        legend=( lambda h: d.get_l1t_pu_label(h.indices[3])),
+        label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
+        label_1=(lambda h: d.get_l1t_bx_label(h.indices[1])),
+        label_2=(lambda h: d.get_l1t_mode_label(h.indices[2])),
+        label_3=(lambda h: d.get_l1t_l1pt_label(2)),
+        )
+
+    do_overlay(special_hname="efficiency_of_eta_in_genpt2_bx1_mode2_pu%i", special_values=(0,3),
         legend= (lambda h: d.get_l1t_pu_label(h.indices[3])),
         label_0=(lambda h: "gen p_{T} > 20" if "efficiency_of_pt" not in h.GetName() else ""),
         label_1=(lambda h: d.get_l1t_bx_label(h.indices[1])),

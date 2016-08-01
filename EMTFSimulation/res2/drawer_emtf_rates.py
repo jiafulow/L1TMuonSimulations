@@ -126,6 +126,13 @@ def drawer_book(histos, options):
                 histos[hname] = TH1F(hname, "; #phi; entries", 64, -3.2, 3.2)
                 histos[hname].indices = (bxbin, modebin, l1ptbin)
 
+            hname = "rate_of_bx_in_mode%i_l1pt%i" % (modebin, l1ptbin)
+            histos[hname] = TH1F(hname, "; BX; entries", 5, -2.5, 2.5)
+            histos[hname].indices = (bxbin, modebin, l1ptbin)
+            hname = "rate_of_sebx_in_mode%i_l1pt%i" % (modebin, l1ptbin)
+            histos[hname] = TH1F(hname, "; seBX; entries", 5, -2.5, 2.5)
+            histos[hname].indices = (bxbin, modebin, l1ptbin)
+
     hname = "trueNPV"
     histos[hname] = TH1F(hname, "; gen # PU; entries", 56, 0, 56)
 
@@ -207,12 +214,19 @@ def drawer_project(tree, histos, options):
                                 if select:
                                     hname = "rate_of_pu_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
                                     histos[hname].Fill(trueNPV)
+
                                     if etabin == l1t_eta_vec[-1]:  # inclusive
                                         hname = "rate_of_eta_in_bx%i_mode%i_l1pt%i" % (bxbin, modebin, l1ptbin)
                                         #histos[hname].Fill(trig_eta)
                                         histos[hname].Fill(abs(trig_eta))
                                         hname = "rate_of_phi_in_bx%i_mode%i_l1pt%i" % (bxbin, modebin, l1ptbin)
                                         histos[hname].Fill(trig_phi)
+
+                                        if bxbin == 0:  # inclusive
+                                            hname = "rate_of_bx_in_mode%i_l1pt%i" % (modebin, l1ptbin)
+                                            histos[hname].Fill(bx)
+                                            hname = "rate_of_sebx_in_mode%i_l1pt%i" % (modebin, l1ptbin)
+                                            histos[hname].Fill(sebx)
                 continue
 
         hname = "trueNPV"

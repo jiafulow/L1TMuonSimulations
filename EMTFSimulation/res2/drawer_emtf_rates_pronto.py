@@ -100,6 +100,37 @@ def do_etaphi(hname="rate_of_eta_in_bx2_mode2_l1pt0", hname1="rate_of_eta_in_bx2
     return
 
 # ______________________________________________________________________________
+def do_bx(hname="rate_of_bx_in_mode2_l1pt0", hname1="rate_of_bx_in_mode2_l1pt1", hname2="rate_of_bx_in_mode2_l1pt2", rebin=0):
+    def doit():
+        h = histos[hname]
+        if rebin:
+            h.Rebin(rebin)
+            h.Scale(1.0/rebin)
+        h.SetLineWidth(2); h.SetMarkerSize(0)
+        h.SetLineColor(col); h.SetFillColor(fcol)
+        h.Draw("hist")
+
+        gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
+        CMS_label()
+        imgname = hname
+        save(options.outdir, imgname); figures.append(imgname)
+    doit()
+
+    hname = hname.replace("rate_of_bx_", "rate_of_sebx_")
+    doit()
+
+    hname = hname1
+    doit()
+    hname = hname.replace("rate_of_bx_", "rate_of_sebx_")
+    doit()
+
+    hname = hname2
+    doit()
+    hname = hname.replace("rate_of_bx_", "rate_of_sebx_")
+    doit()
+    return
+
+# ______________________________________________________________________________
 def do_stack(special_hname, special_values, legend, label_0=None, label_1=None, label_2=None, label_3=None, label_4=None, label_5=None, exclusive=False):
     ymax = 0.
     prev = None
@@ -135,6 +166,39 @@ def do_stack(special_hname, special_values, legend, label_0=None, label_1=None, 
         h.SetFillColor(lighten_color(ctapalette[j],40)); h.SetLineColor(ctapalette[j])
         h.Draw("same hist")
         tlegend.AddEntry(h, legend(h), "f")
+    if label_0 and label_0(h):  tpavetext.AddText(label_0(h))
+    if label_1 and label_1(h):  tpavetext.AddText(label_1(h))
+    if label_2 and label_2(h):  tpavetext.AddText(label_2(h))
+    if label_3 and label_3(h):  tpavetext.AddText(label_3(h))
+    if label_4 and label_4(h):  tpavetext.AddText(label_4(h))
+    if label_5 and label_5(h):  tpavetext.AddText(label_5(h))
+    tlegend.Draw()
+    tpavetext.Draw()
+
+    CMS_label()
+    imgname = special_hname % (99)
+    save(options.outdir, imgname); figures.append(imgname)
+    return
+
+# ______________________________________________________________________________
+def do_overlay(special_hname, special_values, legend, label_0=None, label_1=None, label_2=None, label_3=None, label_4=None, label_5=None):
+    hname = special_hname % (special_values[-1])
+    h = histos[hname]
+
+    ymax = h.GetMaximum()
+    h1 = h.Clone(hname+"_frame"); h1.Reset()
+    h1.SetMaximum(ymax); h1.SetMinimum(0.5)
+    h1.SetStats(0); h1.Draw()
+    gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
+
+    moveLegend(tlegend,0.66,0.80,0.90,0.92); tlegend.Clear()
+    movePaveText(tpavetext, 0.66, 0.68, 0.90, 0.80); tpavetext.Clear()
+    for i, v in enumerate(special_values):
+        hname = special_hname % v
+        h = histos[hname]
+        h.SetFillStyle(0); h.SetLineColor(ctapalette[i])
+        h.Draw("same hist")
+        tlegend.AddEntry(h, legend(h), "l")
     if label_0 and label_0(h):  tpavetext.AddText(label_0(h))
     if label_1 and label_1(h):  tpavetext.AddText(label_1(h))
     if label_2 and label_2(h):  tpavetext.AddText(label_2(h))
@@ -219,6 +283,7 @@ def main():
     do_trueNPV()
     do_ptcut()
     do_etaphi()
+    do_bx()
 
     do_stack(special_hname="rate_of_ptcut_in_eta3_bx2_mode%i_pu0", special_values=(0,1,2),
         legend= (lambda h: d.get_l1t_mode_label(h.indices[2])),
@@ -231,10 +296,15 @@ def main():
         label_0=(lambda h: d.get_l1t_mode_label(h.indices[2])),
         exclusive=True,
         )
-    do_stack(special_hname="rate_of_ptcut_in_eta3_bx%i_mode2_pu0", special_values=(0,2),
+    #do_stack(special_hname="rate_of_ptcut_in_eta3_bx%i_mode2_pu0", special_values=(0,2),
+    #    legend= (lambda h: d.get_l1t_bx_label(h.indices[1]) if h.indices[1] != 2 else "BX = 0"),
+    #    label_0=(lambda h: d.get_l1t_mode_label(h.indices[2])),
+    #    exclusive=False,
+    #    )
+
+    do_overlay(special_hname="rate_of_ptcut_in_eta3_bx%i_mode2_pu0", special_values=(2,1),
         legend= (lambda h: d.get_l1t_bx_label(h.indices[1]) if h.indices[1] != 2 else "BX = 0"),
         label_0=(lambda h: d.get_l1t_mode_label(h.indices[2])),
-        exclusive=False,
         )
 
     do_fit(hname="rate_of_pu_in_eta3_bx2_mode2_l1pt0", rebin=0, xxmin=2, xxmax=50,
