@@ -1,5 +1,5 @@
-#ifndef EMTFSimulation_PatternBankContainer_h_
-#define EMTFSimulation_PatternBankContainer_h_
+#ifndef EMTFSimulationUtilities_PatternBankContainer_h_
+#define EMTFSimulationUtilities_PatternBankContainer_h_
 
 #include "L1TMuonSimulations/EMTFSimulationDataFormats/interface/Pattern.h"
 #include "L1TMuonSimulations/EMTFSimulationDataFormats/interface/PatternBank.h"

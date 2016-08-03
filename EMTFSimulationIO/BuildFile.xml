@@ -1,4 +1,3 @@
-<Flags CXXFLAGS="-O3 -Wno-error=unused-but-set-variable -Wno-error=unused-variable"/>
 <use   name="L1TMuonSimulations/EMTFSimulationDataFormats"/>
 <use   name="root"/>
 <use   name="rootcore"/>

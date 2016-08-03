@@ -1,4 +1,4 @@
-#include "L1TMuonSimulations/EMTFSimulation/interface/SuperstripArbiter.h"
+#include "L1TMuonSimulations/EMTFSimulationUtilities/interface/SuperstripArbiter.h"
 
 
 namespace {

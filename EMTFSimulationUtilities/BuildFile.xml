@@ -1,7 +1,10 @@
 <Flags CXXFLAGS="-O3 -Wno-error=unused-but-set-variable -Wno-error=unused-variable"/>
 <use   name="L1TMuonSimulations/EMTFSimulationDataFormats"/>
-<use   name="L1TMuonSimulations/EMTFSimulationIO"/>
-<use   name="L1TMuonSimulations/EMTFSimulationUtilities"/>
+<use   name="root"/>
+<use   name="rootcore"/>
+<!--use   name="rootmath"/-->
+<!--use   name="rootmathcore"/-->
+<!--use   name="eigen"/-->
 <export>
    <lib   name="1"/>
 </export>

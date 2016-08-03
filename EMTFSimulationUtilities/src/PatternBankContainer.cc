@@ -1,4 +1,4 @@
-#include "L1TMuonSimulations/EMTFSimulation/interface/PatternBankContainer.h"
+#include "L1TMuonSimulations/EMTFSimulationUtilities/interface/PatternBankContainer.h"
 
 #include <algorithm>
 #include <cassert>

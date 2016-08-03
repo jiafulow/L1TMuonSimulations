@@ -1,5 +1,5 @@
-#ifndef EMTFSimulation_SuperstripArbiter_h_
-#define EMTFSimulation_SuperstripArbiter_h_
+#ifndef EMTFSimulationUtilities_SuperstripArbiter_h_
+#define EMTFSimulationUtilities_SuperstripArbiter_h_
 
 #include "TString.h"
 #include <vector>

@@ -1,5 +1,5 @@
-#ifndef EMTFSimulation_StubSelectorAlgo_h_
-#define EMTFSimulation_StubSelectorAlgo_h_
+#ifndef EMTFSimulationUtilities_StubSelectorAlgo_h_
+#define EMTFSimulationUtilities_StubSelectorAlgo_h_
 
 #include <vector>
 
