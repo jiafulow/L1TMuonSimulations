@@ -1,13 +1,13 @@
 #ifndef EMTFSimulationUtilities_SuperstripArbiter_h_
 #define EMTFSimulationUtilities_SuperstripArbiter_h_
 
-#include "TString.h"
-#include <vector>
+#include "L1TMuonSimulations/EMTFSimulationUtilities/interface/SuperstripShapes.h"
 
-enum SuperstripType {UNKNOWN, FIXEDWIDTH, PROJECTIVE, FOUNTAIN, OPTIMIZED};
+
+namespace phasetwoemtf {
 
 class SuperstripArbiter {
-  public:
+public:
     SuperstripArbiter();
     ~SuperstripArbiter();
 
@@ -17,19 +17,31 @@ class SuperstripArbiter {
     // Superstrip using global coordinates
     unsigned superstripGlobal(unsigned moduleId, float rho, float phi, float theta, float bend) const;
 
-    void setDefinition(TString definition);
+    void setDefinition(const std::string& definition);
+
+    std::string getDefinition() const { return definition_; }
+
+    SuperstripCoordType getCoordType() const { return coordType_; }
+
+    SuperstripShapeType getShapeType() const { return shapeType_; }
 
     unsigned nx() const { return nx_; }
 
     unsigned nz() const { return nz_; }
 
-    bool useGlobalCoord() const { return useGlobalCoord_; }
+    std::string str() const;
 
-  private:
-    SuperstripType     sstype_;
-    unsigned           nx_;
-    unsigned           nz_;
-    bool               useGlobalCoord_;
+private:
+    std::string         definition_;
+    SuperstripCoordType coordType_;
+    SuperstripShapeType shapeType_;
+    unsigned            nx_;
+    unsigned            nz_;
+
+    std::vector<SuperstripLocalParams>  localParams_;
+    std::vector<SuperstripGlobalParams> globalParams_;
 };
+
+}  // namespace phasetwoemtf
 
 #endif

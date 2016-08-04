@@ -7,6 +7,8 @@
 #include <unordered_map>
 
 
+namespace phasetwoemtf {
+
 class PatternBankContainer {
 public:
     PatternBankContainer();
@@ -55,5 +57,7 @@ private:
     PatternBank            patternBank_;
     bool frozen_;
 };
+
+}  // namespace phasetwoemtf
 
 #endif

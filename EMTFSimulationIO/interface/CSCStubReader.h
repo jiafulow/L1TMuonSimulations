@@ -12,6 +12,8 @@
 #include <vector>
 
 
+namespace phasetwoemtf {
+
 // _____________________________________________________________________________
 class CSCStubReader {
 public:
@@ -53,9 +55,10 @@ public:
     std::vector<float> *          vb_globalX;
     std::vector<float> *          vb_globalY;
     std::vector<float> *          vb_globalZ;
-    std::vector<uint32_t> *       vb_ichamber;
-    std::vector<uint16_t> *       vb_isector;
-    std::vector<uint16_t> *       vb_isubsector;
+    std::vector<uint32_t> *       vb_geoId;
+    std::vector<uint32_t> *       vb_moduleId;
+    std::vector<int16_t> *        vb_isector;
+    std::vector<int16_t> *        vb_isubsector;
     std::vector<uint16_t> *       vb_keywire;
     std::vector<uint16_t> *       vb_strip;
     std::vector<uint16_t> *       vb_pattern;
@@ -87,5 +90,7 @@ protected:
     TTree* ttree_;
     const int verbose_;
 };
+
+}  // namespace phasetwoemtf
 
 #endif

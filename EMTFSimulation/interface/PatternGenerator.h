@@ -1,12 +1,14 @@
 #ifndef EMTFSimulation_PatternGenerator_h_
 #define EMTFSimulation_PatternGenerator_h_
 
-#include "L1TMuonSimulations/EMTFSimulation/interface/Helper.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/ProgramOption.h"
 
+#include "L1TMuonSimulations/EMTFSimulationUtilities/interface/Helper.h"
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/PatternBankContainer.h"
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/SuperstripArbiter.h"
 
+
+namespace phasetwoemtf {
 
 class PatternGenerator {
   public:
@@ -29,6 +31,7 @@ class PatternGenerator {
     // Program options
     const ProgramOption po_;
     long long nEvents_;
+    long long firstEvent_;
     int verbose_;
 
     // Pattern bank
@@ -37,5 +40,7 @@ class PatternGenerator {
     // Superstrip operation
     std::unique_ptr<SuperstripArbiter>     arbiter_;
 };
+
+}  // namespace phasetwoemtf
 
 #endif

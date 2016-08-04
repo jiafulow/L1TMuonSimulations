@@ -1,23 +1,18 @@
 #include "L1TMuonSimulations/EMTFSimulation/interface/ProgramOption.h"
+#include "L1TMuonSimulations/EMTFSimulationIO/interface/MessageLogger.h"
 
-#include <iostream>
-#include <iterator>
 
-// Print vector
-template<class T>
-std::ostream& operator<<(std::ostream& o, const std::vector<T>& v) {
-    std::copy(v.begin(), v.end(), std::ostream_iterator<T>(o, " "));
-    return o;
-}
+namespace phasetwoemtf {
 
 std::ostream& operator<<(std::ostream& o, const ProgramOption& po) {
     o << "Parsed program options:\n"
-      << "  input: "        << po.input
+      << "input: "          << po.input
       << "  output: "       << po.output
       << "  bankfile: "     << po.bankfile
 
       << "  verbose: "      << po.verbose
       << "  maxEvents: "    << po.maxEvents
+      << "  skipEvents: "   << po.skipEvents
       << "  datadir: "      << po.datadir
 
       << "  minPt: "        << po.minPt
@@ -42,4 +37,6 @@ std::ostream& operator<<(std::ostream& o, const ProgramOption& po) {
 
     return o;
 }
+
+}  // namespace phasetwoemtf
 

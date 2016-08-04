@@ -13,6 +13,8 @@
 #include <vector>
 
 
+namespace phasetwoemtf {
+
 // _____________________________________________________________________________
 class PatternBankReader {
 public:
@@ -33,13 +35,13 @@ public:
     std::vector<superstrip_t> *    pb_superstripIds;
     unsigned                       pb_popularity;
     float                          pb_invPt_mean;
-    float                          pb_invPt_sigma;
+    float                          pb_invPt_stdev;
     float                          pb_cotTheta_mean;
-    float                          pb_cotTheta_sigma;
+    float                          pb_cotTheta_stdev;
     float                          pb_phi_mean;
-    float                          pb_phi_sigma;
+    float                          pb_phi_stdev;
     float                          pb_z0_mean;
-    float                          pb_z0_sigma;
+    float                          pb_z0_stdev;
 
     // Pattern bank info
     float                          pb_coverage;
@@ -76,13 +78,13 @@ public:
     std::unique_ptr<std::vector<superstrip_t> >    pb_superstripIds;
     std::unique_ptr<unsigned>                      pb_popularity;
     std::unique_ptr<float>                         pb_invPt_mean;
-    std::unique_ptr<float>                         pb_invPt_sigma;
+    std::unique_ptr<float>                         pb_invPt_stdev;
     std::unique_ptr<float>                         pb_cotTheta_mean;
-    std::unique_ptr<float>                         pb_cotTheta_sigma;
+    std::unique_ptr<float>                         pb_cotTheta_stdev;
     std::unique_ptr<float>                         pb_phi_mean;
-    std::unique_ptr<float>                         pb_phi_sigma;
+    std::unique_ptr<float>                         pb_phi_stdev;
     std::unique_ptr<float>                         pb_z0_mean;
-    std::unique_ptr<float>                         pb_z0_sigma;
+    std::unique_ptr<float>                         pb_z0_stdev;
 
     // Pattern bank info
     std::unique_ptr<float>                         pb_coverage;
@@ -99,5 +101,7 @@ protected:
     TTree* ttree2_;  // for pattern bank info
     const int verbose_;
 };
+
+}  // namespace phasetwoemtf
 
 #endif

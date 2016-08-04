@@ -2,10 +2,11 @@
 
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/MessageLogger.h"
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/CSCStubReader.h"
+using namespace phasetwoemtf;
+
 
 static const unsigned MIN_NGOODSTUBS = 3;
 static const unsigned MAX_NGOODSTUBS = 8;
-
 
 namespace {
     // Select elements in a vector according to indices
@@ -13,25 +14,40 @@ namespace {
     void selectVectorElements(std::vector<T>& vec, const std::vector<unsigned>& indices) {
         std::vector<T> buffer;
         for (unsigned i=0; i<indices.size(); i++) {
-            buffer.push_back(vec.at(indices.at(i)));
+            unsigned index = indices.at(i);
+
+            if (index != 999999) {
+                buffer.push_back(vec.at(index));
+            } else {
+                buffer.push_back(T());  // CUIDADO: missing stub
+            }
         }
         vec = buffer;
     }
-}
+
+    template<typename T>
+    void flagMissingVectorElements(std::vector<T>& vec, const std::vector<unsigned>& indices) {
+        for (unsigned i=0; i<indices.size(); i++) {
+            unsigned index = indices.at(i);
+
+            if (index == 999999) {
+                vec.at(i) = 999999;
+            }
+        }
+    }
+}  // namespace
 
 
 // _____________________________________________________________________________
 StubSelector::StubSelector(const ProgramOption& po)
-: po_(po), nEvents_(po.maxEvents), verbose_(po.verbose)
+: po_(po), nEvents_(po.maxEvents), firstEvent_(po.skipEvents), verbose_(po.verbose)
 {
     algo_.reset(new StubSelectorAlgo());
 }
 
 StubSelector::~StubSelector() {}
 
-void StubSelector::init() {
-
-}
+void StubSelector::init() {}
 
 void StubSelector::run() {
     selectStubs(po_.input, po_.output);
@@ -41,6 +57,9 @@ void StubSelector::run() {
 // _____________________________________________________________________________
 // Select one unique stub per layer
 void StubSelector::selectStubs(TString src, TString out) {
+    LogInfo("StubSelector", verbose_) << "Using nEvents " << nEvents_ << " firstEvent " << firstEvent_ << std::endl;
+
+    //const int good_tpId = 0;
 
     // _________________________________________________________________________
     // For reading
@@ -54,17 +73,15 @@ void StubSelector::selectStubs(TString src, TString out) {
     // _________________________________________________________________________
     // Loop over all events
 
-    const int good_tpId = 0;
-
     // Bookkeepers
     long int nRead1 = 0, nKept1 = 0;
     long int nRead2 = 0, nKept2 = 0;
 
-    for (long long ievt=0; ievt<nEvents_; ++ievt) {
+    for (long long ievt=firstEvent_; ievt<nEvents_; ++ievt) {
         if (reader.loadTree(ievt) < 0)  break;
         reader.getEntry(ievt);
 
-        const unsigned nstubs = reader.vb_ichamber->size();
+        const unsigned nstubs = reader.vb_moduleId->size();
         const unsigned nparts = reader.vp_pt->size();
 
         if (ievt%10000==0) {
@@ -77,13 +94,14 @@ void StubSelector::selectStubs(TString src, TString out) {
             throw std::runtime_error("Way too many stubs.");
         }
 
+        // _____________________________________________________________________
         // Loop over genParticles
 
         std::vector<std::vector<unsigned> > evt_selectedStubRefs;
 
         for (unsigned ipart=0; ipart<nparts; ++ipart) {
 
-            // _____________________________________________________________________
+            // _________________________________________________________________
             // Start stub selection
 
             // Events that fail don't exit the loop immediately, so that event info
@@ -97,15 +115,15 @@ void StubSelector::selectStubs(TString src, TString out) {
 
             // Check sim info
             assert(reader.vp_pt->size() == 1);
-            float simPt           = reader.vp_pt->at(ipart);
-            float simEta          = reader.vp_eta->at(ipart);
-            float simPhi          = reader.vp_phi->at(ipart);
-            //float simVx           = reader.vp_vx->at(ipart);
-            //float simVy           = reader.vp_vy->at(ipart);
-            float simVz           = reader.vp_vz->at(ipart);
-            int   simCharge       = reader.vp_charge->at(ipart);
-            float simCotTheta     = std::sinh(simEta);
-            float simChargeOverPt = float(simCharge)/simPt;
+            float simPt       = reader.vp_pt->at(ipart);
+            float simEta      = reader.vp_eta->at(ipart);
+            float simPhi      = reader.vp_phi->at(ipart);
+            //float simVx       = reader.vp_vx->at(ipart);
+            //float simVy       = reader.vp_vy->at(ipart);
+            float simVz       = reader.vp_vz->at(ipart);
+            int   simCharge   = reader.vp_charge->at(ipart);
+            float simCotTheta = std::sinh(simEta);
+            float simInvPt    = float(simCharge)/simPt;
 
             // Apply pt, eta, phi requirements
             bool sim = (po_.minPt  <= simPt  && simPt  <= po_.maxPt  &&
@@ -115,49 +133,49 @@ void StubSelector::selectStubs(TString src, TString out) {
             if (!sim)
                 keep = false;
 
-            LogDebug("StubSelector", verbose_) << "... evt: " << ievt << " simPt: " << simPt << " simEta: " << simEta << " simPhi: " << simPhi << " simVz: " << simVz << " simChargeOverPt: " << simChargeOverPt << " keep? " << keep << std::endl;
+            LogDebug("StubSelector", verbose_) << "... evt: " << ievt << " simPt: " << simPt << " simEta: " << simEta << " simPhi: " << simPhi << " simVz: " << simVz << " simInvPt: " << simInvPt << " keep? " << keep << std::endl;
 
             // _____________________________________________________________________
-            // Remove multiple stubs in one layer
-
-            evt_selectedStubRefs.push_back(std::vector<unsigned>());
+            // Filter multiple stubs in one layer
 
             if (keep) {
                 // This assumes 5 endcap disks (ME1/1, ME1/2, ME2, ME3, ME4)
                 assert(reader.vp_globalPhiME->at(ipart).size()   == 5);
                 assert(reader.vp_globalThetaME->at(ipart).size() == 5);
-                //assert(reader.vp_globalEtaME->at(ipart).size()   == 5);
-                //assert(reader.vp_globalRhoME->at(ipart).size()   == 5);
 
-                algo_->reset();
+                std::vector<std::vector<unsigned> > stubRefs(5, std::vector<unsigned>());
+                std::vector<std::vector<unsigned> > moduleIds(5, std::vector<unsigned>());
+                std::vector<std::vector<float> > globalPhiStubs(5, std::vector<float>());
+                std::vector<std::vector<float> > globalThetaStubs(5, std::vector<float>());
 
                 for (unsigned istub=0; istub<nstubs; ++istub) {
                     //int tpId = reader.vb_tpId->at(istub);  // check sim info
                     //if (tpId != good_tpId)
                     //    continue;
 
-                    uint32_t ichamber    = reader.vb_ichamber     ->at(istub);
-                    uint16_t isector     = reader.vb_isector      ->at(istub);
-                    uint16_t isubsector  = reader.vb_isubsector   ->at(istub);
+                    uint32_t moduleId    = reader.vb_moduleId     ->at(istub);
                     float    globalPhi   = reader.vb_globalPhi    ->at(istub);
                     float    globalTheta = reader.vb_globalTheta  ->at(istub);
 
-                    algo_->select(istub, ichamber, isector, isubsector, globalPhi, globalTheta,
-                                  reader.vp_globalPhiME->at(ipart), reader.vp_globalThetaME->at(ipart));
+                    unsigned layME = decodeLayerME(moduleId);
+                    stubRefs.at(layME).push_back(istub);
+                    moduleIds.at(layME).push_back(moduleId);
+                    globalPhiStubs.at(layME).push_back(globalPhi);
+                    globalThetaStubs.at(layME).push_back(globalTheta);
+
+                    LogDebug("StubSelector", verbose_) << "... ... stub: " << istub << " moduleId: " << moduleId << " globalPhi: " << globalPhi << " globalTheta: " << globalTheta << std::endl;
                 }
 
-                std::vector<unsigned>& selectedStubRefs = evt_selectedStubRefs.back();  // assign by reference
-
-                selectedStubRefs = algo_->get_indices();
+                const std::vector<unsigned>& selectedStubRefs = algo_->select(
+                        stubRefs, moduleIds, globalPhiStubs, globalThetaStubs,
+                        reader.vp_globalPhiME->at(ipart), reader.vp_globalThetaME->at(ipart) );
                 assert(selectedStubRefs.size() == 5);  // 5 endcap disks
+                LogDebug("StubSelector", verbose_) << "... evt: " << ievt << " selectedStubRefs: [" << selectedStubRefs << "]" << std::endl;
 
-                if (selectedStubRefs.at(0) != 999999) {
-                    selectedStubRefs.at(1) = selectedStubRefs.at(0);  // use ME1/1 if it exists
-                }
-                selectedStubRefs = std::vector<unsigned>(selectedStubRefs.begin()+1, selectedStubRefs.end()); // reduce from 5 endcap disks to 4
+                evt_selectedStubRefs.push_back(selectedStubRefs);
 
-                if (std::count(selectedStubRefs.begin(), selectedStubRefs.end(), 999999))
-                    selectedStubRefs.clear();  // if any index is 999999, don't keep the event
+            } else {
+                evt_selectedStubRefs.push_back(std::vector<unsigned>());
             }
         }  // end loop over genParticles
 
@@ -198,13 +216,17 @@ void StubSelector::selectStubs(TString src, TString out) {
             selectVectorElements(*reader.vb_globalX       , selectedStubRefs);
             selectVectorElements(*reader.vb_globalY       , selectedStubRefs);
             selectVectorElements(*reader.vb_globalZ       , selectedStubRefs);
-            selectVectorElements(*reader.vb_ichamber      , selectedStubRefs);
+            selectVectorElements(*reader.vb_geoId         , selectedStubRefs);
+            selectVectorElements(*reader.vb_moduleId      , selectedStubRefs);
             selectVectorElements(*reader.vb_isector       , selectedStubRefs);
             selectVectorElements(*reader.vb_isubsector    , selectedStubRefs);
             selectVectorElements(*reader.vb_keywire       , selectedStubRefs);
             selectVectorElements(*reader.vb_strip         , selectedStubRefs);
             selectVectorElements(*reader.vb_pattern       , selectedStubRefs);
             selectVectorElements(*reader.vb_cscID         , selectedStubRefs);
+
+            // Flag 999999
+            flagMissingVectorElements(*reader.vb_moduleId      , selectedStubRefs);
 
             ++nKept2;
             keepEvent = true;

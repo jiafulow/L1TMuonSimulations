@@ -2,11 +2,14 @@
 #define EMTFSimulationIO_MessageLogger_h_
 
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <string>
-#include <memory>
+#include <array>
+#include <vector>
 
-#include "TString.h"
+
+namespace phasetwoemtf {
 
 // _____________________________________________________________________________
 // Global logging tools
@@ -24,14 +27,14 @@ public:
         return instance;
     }
 
-    const TString& Color(const TString& c) const;
-    const TString& EndColor() const;
+    const std::string& Color(const std::string& c) const;
+    const std::string& EndColor() const;
     void UseColor(bool use=true);
 
-    TString Error() const;
-    TString Warning() const;
-    TString Info() const;
-    TString Debug() const;
+    std::string Error() const;
+    std::string Warning() const;
+    std::string Info() const;
+    std::string Debug() const;
 
 private:
     bool useColor_;
@@ -66,7 +69,7 @@ class LogError {
 public:
     explicit LogError( std::string const & id, int verbose) {
         valid_ = (verbose >= 0);
-        padding_ = logTools().Error().Data();
+        padding_ = logTools().Error();
     }
     ~LogError() {
         if (valid_) {
@@ -93,7 +96,7 @@ class LogWarning : public LogError {
 public:
     explicit LogWarning( std::string const & id, int verbose) : LogError(id, verbose) {
         valid_ = (verbose >= 1);
-        padding_ = logTools().Warning().Data();
+        padding_ = logTools().Warning();
     }
     ~LogWarning() {}
 };
@@ -102,7 +105,7 @@ class LogInfo : public LogError{
 public:
     explicit LogInfo( std::string const & id, int verbose) : LogError(id, verbose) {
         valid_ = (verbose >= 2);
-        padding_ = logTools().Info().Data();
+        padding_ = logTools().Info();
     }
     ~LogInfo() {}
 };
@@ -111,10 +114,24 @@ class LogDebug : public LogError {
 public:
     explicit LogDebug( std::string const & id, int verbose) : LogError(id, verbose) {
         valid_ = (verbose >= 3);
-        padding_ = logTools().Debug().Data();
+        padding_ = logTools().Debug();
     }
     ~LogDebug() {}
 };
+
+// _____________________________________________________________________________
+// Useful stream functions
+//
+
+// Print vector
+template<class T>
+std::ostream& operator<<(std::ostream& s, const std::vector<T>& t);
+
+// Print array
+template<class T, std::size_t N>
+std::ostream& operator<<(std::ostream& s, const std::array<T,N>& t);
+
+}  // namespace phasetwoemtf
 
 #define EMTFSimulationIO_MessageLogger_icc_
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/MessageLogger.icc"

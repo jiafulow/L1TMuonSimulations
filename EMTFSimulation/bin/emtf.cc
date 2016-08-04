@@ -1,6 +1,7 @@
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/MessageLogger.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/StubSelector.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/PatternGenerator.h"
+using namespace phasetwoemtf;
 
 #include "boost/program_options.hpp"
 #include <cstdlib>
@@ -44,6 +45,7 @@ int main(int argc, char **argv) {
 
         ("verbosity,v"  , po::value<int>(&option.verbose)->default_value(1), "Verbosity level (-1 = very quiet; 0 = quiet, 1 = verbose, 2+ = debug)")
         ("maxEvents,n"  , po::value<long long>(&option.maxEvents)->default_value(-1), "Specfiy max number of events")
+        ("skipEvents,m" , po::value<long long>(&option.skipEvents)->default_value(0), "Specfiy number of events to skip")
 
         // MC truth
         ("minPt"        , po::value<float>(&option.minPt)->default_value(     3.0), "Specify min pt")
@@ -64,7 +66,7 @@ int main(int argc, char **argv) {
         ("sector"       , po::value<unsigned>(&option.sector)->default_value(0), "Specify the trigger sector")
 
         // Superstrip definition
-        ("superstrip,s" , po::value<std::string>(&option.superstrip)->default_value("ss4"), "Specify the superstrip definition (default: ss4)")
+        ("superstrip,s" , po::value<std::string>(&option.superstrip)->default_value("ss1_sg128"), "Specify the superstrip definition (default: ss1_sg128)")
 
         // Track fitting algorithm
         ("fitter,f"     , po::value<std::string>(&option.fitter)->default_value("PCA4"), "Select track fitter -- PCA4: PCA fitter 4 params; PCA5: PCA fitter 5 params (default: PCA4)")
@@ -125,7 +127,8 @@ int main(int argc, char **argv) {
     int vmcount = vm.count("selectStubs")       +
                   vm.count("generateBank")      ;
     if (vmcount != 1) {
-        std::cerr << "ERROR: Must select exactly one option: '-B'" << std::endl;
+        std::cerr << logTools().Color("red") << "ERROR: " << logTools().EndColor() << "Must select exactly one routine. "
+                  << "Available routines: '-S', '-B'" << std::endl;
         //std::cout << visible << std::endl;
         return EXIT_FAILURE;
     }
@@ -137,6 +140,8 @@ int main(int argc, char **argv) {
     // Update options
     if (option.maxEvents < 0)
         option.maxEvents = std::numeric_limits<long long>::max();
+    if (option.skipEvents < 0)
+        option.skipEvents = 0;
 
     // Add options
     option.datadir = std::getenv("CMSSW_BASE");

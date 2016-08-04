@@ -3,6 +3,9 @@
 #include <iomanip>
 #include <cmath>
 
+
+namespace phasetwoemtf {
+
 std::ostream& operator<<(std::ostream& o, const pattern_t& patt) {
     for (pattern_t::const_iterator it=patt.begin(); it!=patt.end(); ++it) {
         o << std::setw(6) << *it << " ";
@@ -30,3 +33,5 @@ std::ostream& operator<<(std::ostream& o, const pattern_pair& pair) {
     o << pair.first << " " << pair.second;
     return o;
 }
+
+}  // namespace phasetwoemtf

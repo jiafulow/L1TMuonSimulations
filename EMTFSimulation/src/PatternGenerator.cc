@@ -3,22 +3,22 @@
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/MessageLogger.h"
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/CSCStubReader.h"
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/PatternBankReader.h"
+using namespace phasetwoemtf;
 
 
 // _____________________________________________________________________________
 PatternGenerator::PatternGenerator(const ProgramOption& po)
-: po_(po), nEvents_(po.maxEvents), verbose_(po.verbose)
+: po_(po), nEvents_(po.maxEvents), firstEvent_(po.skipEvents), verbose_(po.verbose)
 {
     bank_.reset(new PatternBankContainer());
 
     arbiter_.reset(new SuperstripArbiter());
+    arbiter_ -> setDefinition(po_.superstrip);
 }
 
 PatternGenerator::~PatternGenerator() {}
 
-void PatternGenerator::init() {
-
-}
+void PatternGenerator::init() {}
 
 void PatternGenerator::run() {
     makePatterns(po_.input);
@@ -30,6 +30,9 @@ void PatternGenerator::run() {
 // _____________________________________________________________________________
 // Make pattern bank
 void PatternGenerator::makePatterns(TString src) {
+
+    LogInfo("PatternGenerator", verbose_) << "Using nEvents " << nEvents_ << " firstEvent " << firstEvent_ << std::endl;
+    LogInfo("PatternGenerator", verbose_) << "Using superstrip " << arbiter_ -> str() << std::endl;
 
     // _________________________________________________________________________
     // For reading
@@ -47,7 +50,7 @@ void PatternGenerator::makePatterns(TString src) {
     long int bankSize = 0, bankSizeOld = -100000, nKeptOld = -100000;
     long int nRead = 0, nKept = 0;
 
-    for (long long ievt=0; ievt<nEvents_; ++ievt) {
+    for (long long ievt=firstEvent_; ievt<nEvents_; ++ievt) {
         if (reader.loadTree(ievt) < 0)  break;
         reader.getEntry(ievt);
 
@@ -62,41 +65,81 @@ void PatternGenerator::makePatterns(TString src) {
             nKeptOld = nKept;
         }
 
-        const unsigned nstubs = reader.vb_ichamber->size();
+        const unsigned nstubs = reader.vb_moduleId->size();
         LogDebug("PatternGenerator", verbose_) << "... evt: " << ievt << " # stubs: " << nstubs << std::endl;
 
         // Get sim info
-        float simPt           = reader.vp_pt->front();
-        float simEta          = reader.vp_eta->front();
-        float simPhi          = reader.vp_phi->front();
-        //float simVx           = reader.vp_vx->front();
-        //float simVy           = reader.vp_vy->front();
-        float simVz           = reader.vp_vz->front();
-        int   simCharge       = reader.vp_charge->front();
-        float simCotTheta     = std::sinh(simEta);
-        float simChargeOverPt = float(simCharge)/simPt;
+        float simPt       = reader.vp_pt->front();
+        float simEta      = reader.vp_eta->front();
+        float simPhi      = reader.vp_phi->front();
+        //float simVx       = reader.vp_vx->front();
+        //float simVy       = reader.vp_vy->front();
+        float simVz       = reader.vp_vz->front();
+        int   simCharge   = reader.vp_charge->front();
+        float simCotTheta = std::sinh(simEta);
+        float simInvPt    = float(simCharge)/simPt;
 
         // Apply pt, eta, phi requirements
         bool sim = (po_.minPt  <= simPt  && simPt  <= po_.maxPt  &&
                     po_.minEta <= simEta && simEta <= po_.maxEta &&
                     po_.minPhi <= simPhi && simPhi <= po_.maxPhi &&
                     po_.minVz  <= simVz  && simVz  <= po_.maxVz);
+
+        LogDebug("StubSelector", verbose_) << "... evt: " << ievt << " simPt: " << simPt << " simEta: " << simEta << " simPhi: " << simPhi << " simVz: " << simVz << " simInvPt: " << simInvPt << " keep? " << sim << std::endl;
+
         if (!sim) {
             ++nRead;
             continue;
         }
 
+        // _____________________________________________________________________
         // Apply trigger tower acceptance
-        assert(nstubs == 4);  // 4 endcap disks
-        unsigned ngoodstubs = 0;
-        for (unsigned istub=0; istub<nstubs; ++istub) {
-            unsigned isector = reader.vb_isector  ->at(istub);
 
-            if (isector == po_.sector)  //FIXME: include neighbors
-                ++ngoodstubs;
+        assert(nstubs == 5);
+        unsigned ngoodstubs = 0;
+        unsigned ngoodstubs_ME11 = 0;
+        unsigned ngoodstubs_ME12 = 0;
+        unsigned ngoodstubs_ME2to4 = 0;
+
+        for (unsigned istub=0; istub<nstubs; ++istub) {
+            uint32_t moduleId    = reader.vb_moduleId   ->at(istub);
+            int16_t  isector     = reader.vb_isector    ->at(istub);
+
+            if (unsigned(isector) != po_.sector)  //FIXME: include neighbors
+                continue;
+
+            if (moduleId == 999999)  //FIXME: handle missing stubs
+                continue;
+
+            ++ngoodstubs;
+            if (istub == 0) {
+                ++ngoodstubs_ME11;
+            } else if (istub == 1) {
+                ++ngoodstubs_ME12;
+            } else {
+                ++ngoodstubs_ME2to4;
+            }
         }
 
-        if (ngoodstubs != 4) {  // 4 endcap disks
+        // Categorize events
+        unsigned category = 0;
+        if (ngoodstubs_ME11 && ngoodstubs_ME2to4 == 3) {
+            category = 0;
+        } else if (ngoodstubs_ME11 && ngoodstubs_ME2to4 == 2) {
+            category = 1;
+        } else if (ngoodstubs_ME12 && ngoodstubs_ME2to4 == 3) {
+            category = 2;
+        } else if (ngoodstubs_ME12 && ngoodstubs_ME2to4 == 2) {
+            category = 3;
+        } else if (ngoodstubs_ME2to4 == 3) {
+            category = 4;
+        } else {
+            category = 5;
+        }
+
+        LogDebug("PatternGenerator", verbose_) << "... evt: " << ievt << " ngoodstubs: " << ngoodstubs << " ngoodstubs_ME11: " << ngoodstubs_ME11 << " ngoodstubs_ME12: " << ngoodstubs_ME12 << " ngoodstubs_ME2to4: " << ngoodstubs_ME2to4 << " category: " << category << std::endl;
+
+        if (category > 0) {
             ++nRead;
             continue;
         }
@@ -111,68 +154,54 @@ void PatternGenerator::makePatterns(TString src) {
         // Loop over reconstructed stubs
         for (unsigned istub=0; istub<nstubs; ++istub) {
 
-            uint32_t ichamber    = reader.vb_ichamber   ->at(istub);
-            //uint16_t isector     = reader.vb_isector    ->at(istub);
-            uint16_t isubsector  = reader.vb_isubsector ->at(istub);
+            uint32_t moduleId    = reader.vb_moduleId   ->at(istub);
+            int16_t  isector     = reader.vb_isector    ->at(istub);
+            //int16_t  isubsector  = reader.vb_isubsector ->at(istub);
             uint16_t keywire     = reader.vb_keywire    ->at(istub);
             uint16_t strip       = reader.vb_strip      ->at(istub);
             uint16_t pattern     = reader.vb_pattern    ->at(istub);
-            uint16_t cscID       = reader.vb_cscID      ->at(istub);
 
             float    globalPhi   = reader.vb_globalPhi  ->at(istub);
             float    globalTheta = reader.vb_globalTheta->at(istub);
             //float    globalEta   = reader.vb_globalEta  ->at(istub);
             float    globalRho   = reader.vb_globalRho  ->at(istub);
 
-            // Customized
-            unsigned lay = decodeLayer(ichamber);   // endcap*10 + station
-            unsigned lad = decodeLadder(ichamber);  // ring
-            //unsigned mod = decodeLayer(ichamber);   // chamber
-            unsigned station = lay%10;
-            unsigned ring = lad;
+            // _________________________________________________________________
+            // Different strategy for different categories
+            if (category == 0) {
+                if (istub == 1)
+                    continue;
 
-            if (station == 1) {  // station 1 has 2 subsectors
-                cscID = (isubsector - 1)*10 + cscID;
-            }
+            } else if (category == 1) {
+                if (istub == 1)
+                    continue;
 
-            //FIXME: check proper 'factor'
-            if (station == 1 && ring == 4) {  // strip pitch is not constant in ME1/n
-                strip *= 1707;
-                strip >>= 10;
-            } else if (station == 1 && ring == 3) {
-                strip *= 947;
-                strip >>= 10;
-            } else if (station == 1 && ring == 1) {
-                strip *= 1301;
-                strip >>= 10;
+                if (unsigned(isector) != po_.sector)
+                    continue;
+                if (moduleId == 999999)
+                    continue;
+
             } else {
-                strip *= 1024;
-                strip >>= 10;
+                // ?
             }
-
-            if (station == 1 || (cscID%10) > 3) {  // 10 degree chambers
-                strip >>= 1;
-            }
-
-            strip >>= 0;  //FIXME
 
             // _________________________________________________________________
             // Find superstrip ID
             unsigned ssId = 0;
-            if (!arbiter_ -> useGlobalCoord()) {  // local coordinates
-                ssId = arbiter_ -> superstripLocal(cscID, strip, keywire, pattern);
+            if (arbiter_ -> getCoordType() == SuperstripCoordType::LOCAL) {
+                ssId = arbiter_ -> superstripLocal(moduleId, strip, keywire, pattern);
 
-            } else {                              // global coordinates
-                ssId = arbiter_ -> superstripGlobal(cscID, globalRho, globalPhi, globalTheta, pattern);
+            } else if (arbiter_ -> getCoordType() == SuperstripCoordType::GLOBAL) {
+                ssId = arbiter_ -> superstripGlobal(moduleId, globalRho, globalPhi, globalTheta, pattern);
             }
             patt.at(istub) = ssId;
 
-            LogDebug("PatternGenerator", verbose_) << "... ... stub: " << istub << " moduleId: " << cscID << " strip: " << strip << " segment: " << keywire << " rho: " << globalRho << " phi: " << globalPhi << " theta: " << globalTheta << " ds: " << pattern << std::endl;
+            LogDebug("PatternGenerator", verbose_) << "... ... stub: " << istub << " moduleId: " << moduleId << " strip: " << strip << " segment: " << keywire << " rho: " << globalRho << " phi: " << globalPhi << " theta: " << globalTheta << " ds: " << pattern << std::endl;
             LogDebug("PatternGenerator", verbose_) << "... ... stub: " << istub << " ssId: " << ssId << std::endl;
         }
 
         // Fill pattern
-        bank_ -> fill(std::make_pair(patt, attr), simChargeOverPt, simCotTheta, simPhi, simVz);
+        bank_ -> fill(std::make_pair(patt, attr), simInvPt, simCotTheta, simPhi, simVz);
 
         LogDebug("PatternGenerator", verbose_) << "... evt: " << ievt << " patt: " << patt << std::endl;
 

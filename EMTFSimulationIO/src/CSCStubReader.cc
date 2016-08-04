@@ -5,6 +5,8 @@
 #include <stdexcept>
 
 
+namespace phasetwoemtf {
+
 // _____________________________________________________________________________
 CSCStubReader::CSCStubReader(int verbose)
 : vp_pt               (0),
@@ -29,7 +31,8 @@ CSCStubReader::CSCStubReader(int verbose)
   vb_globalX          (0),
   vb_globalY          (0),
   vb_globalZ          (0),
-  vb_ichamber         (0),
+  vb_geoId            (0),
+  vb_moduleId         (0),
   vb_isector          (0),
   vb_isubsector       (0),
   vb_keywire          (0),
@@ -95,7 +98,8 @@ void CSCStubReader::init(TString src) {
     tchain_->SetBranchAddress("CSCStubs_globalX"      , &(vb_globalX));
     tchain_->SetBranchAddress("CSCStubs_globalY"      , &(vb_globalY));
     tchain_->SetBranchAddress("CSCStubs_globalZ"      , &(vb_globalZ));
-    tchain_->SetBranchAddress("CSCStubs_ichamber"     , &(vb_ichamber));
+    tchain_->SetBranchAddress("CSCStubs_geoId"        , &(vb_geoId));
+    tchain_->SetBranchAddress("CSCStubs_moduleId"     , &(vb_moduleId));
     tchain_->SetBranchAddress("CSCStubs_isector"      , &(vb_isector));
     tchain_->SetBranchAddress("CSCStubs_isubsector"   , &(vb_isubsector));
     tchain_->SetBranchAddress("CSCStubs_keywire"      , &(vb_keywire));
@@ -126,7 +130,8 @@ void CSCStubReader::init(TString src) {
     tchain_->SetBranchStatus("CSCStubs_globalX"       , 1);
     tchain_->SetBranchStatus("CSCStubs_globalY"       , 1);
     tchain_->SetBranchStatus("CSCStubs_globalZ"       , 1);
-    tchain_->SetBranchStatus("CSCStubs_ichamber"      , 1);
+    tchain_->SetBranchStatus("CSCStubs_geoId"         , 1);
+    tchain_->SetBranchStatus("CSCStubs_moduleId"      , 1);
     tchain_->SetBranchStatus("CSCStubs_isector"       , 1);
     tchain_->SetBranchStatus("CSCStubs_isubsector"    , 1);
     tchain_->SetBranchStatus("CSCStubs_keywire"       , 1);
@@ -186,3 +191,5 @@ Long64_t CSCStubWriter::writeTree() {
     //tfile_->Close();
     return nentries;
 }
+
+}  // namespace phasetwoemtf

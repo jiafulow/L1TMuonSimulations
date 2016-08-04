@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+namespace phasetwoemtf {
+
 class PatternBankInfo {
 public:
     PatternBankInfo() : coverage(0.), count(0) {}
@@ -21,5 +23,6 @@ public:
 
 typedef std::vector<pattern_pair> PatternBank;
 
-#endif
+}  // namespace phasetwoemtf
 
+#endif

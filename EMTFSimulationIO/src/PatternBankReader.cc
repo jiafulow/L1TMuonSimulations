@@ -5,18 +5,20 @@
 #include <stdexcept>
 
 
+namespace phasetwoemtf {
+
 // _____________________________________________________________________________
 PatternBankReader::PatternBankReader(int verbose)
 : pb_superstripIds  (0),
   pb_popularity     (0),
   pb_invPt_mean     (0.),
-  pb_invPt_sigma    (0.),
+  pb_invPt_stdev    (0.),
   pb_cotTheta_mean  (0.),
-  pb_cotTheta_sigma (0.),
+  pb_cotTheta_stdev (0.),
   pb_phi_mean       (0.),
-  pb_phi_sigma      (0.),
+  pb_phi_stdev      (0.),
   pb_z0_mean        (0.),
-  pb_z0_sigma       (0.),
+  pb_z0_stdev       (0.),
   //
   pb_coverage       (0.),
   pb_count          (0),
@@ -67,13 +69,13 @@ void PatternBankReader::init(TString src) {
     ttree_->SetBranchAddress("superstripIds" , &pb_superstripIds);
     ttree_->SetBranchAddress("popularity"    , &pb_popularity);
     ttree_->SetBranchAddress("invPt_mean"    , &pb_invPt_mean);
-    ttree_->SetBranchAddress("invPt_sigma"   , &pb_invPt_sigma);
+    ttree_->SetBranchAddress("invPt_stdev"   , &pb_invPt_stdev);
     ttree_->SetBranchAddress("cotTheta_mean" , &pb_cotTheta_mean);
-    ttree_->SetBranchAddress("cotTheta_sigma", &pb_cotTheta_sigma);
+    ttree_->SetBranchAddress("cotTheta_stdev", &pb_cotTheta_stdev);
     ttree_->SetBranchAddress("phi_mean"      , &pb_phi_mean);
-    ttree_->SetBranchAddress("phi_sigma"     , &pb_phi_sigma);
+    ttree_->SetBranchAddress("phi_stdev"     , &pb_phi_stdev);
     ttree_->SetBranchAddress("z0_mean"       , &pb_z0_mean);
-    ttree_->SetBranchAddress("z0_sigma"      , &pb_z0_sigma);
+    ttree_->SetBranchAddress("z0_stdev"      , &pb_z0_stdev);
 }
 
 
@@ -82,13 +84,13 @@ PatternBankWriter::PatternBankWriter(int verbose)
 : pb_superstripIds  (new std::vector<superstrip_t>()),
   pb_popularity     (new unsigned(0)),
   pb_invPt_mean     (new float(0.)),
-  pb_invPt_sigma    (new float(0.)),
+  pb_invPt_stdev    (new float(0.)),
   pb_cotTheta_mean  (new float(0.)),
-  pb_cotTheta_sigma (new float(0.)),
+  pb_cotTheta_stdev (new float(0.)),
   pb_phi_mean       (new float(0.)),
-  pb_phi_sigma      (new float(0.)),
+  pb_phi_stdev      (new float(0.)),
   pb_z0_mean        (new float(0.)),
-  pb_z0_sigma       (new float(0.)),
+  pb_z0_stdev       (new float(0.)),
   //
   pb_coverage       (new float(0.)),
   pb_count          (new ULong64_t(0)),
@@ -139,13 +141,13 @@ void PatternBankWriter::init(TString out) {
     ttree_->Branch("superstripIds"  , &(*pb_superstripIds));
     ttree_->Branch("popularity"     , &(*pb_popularity));
     ttree_->Branch("invPt_mean"     , &(*pb_invPt_mean));
-    ttree_->Branch("invPt_sigma"    , &(*pb_invPt_sigma));
+    ttree_->Branch("invPt_stdev"    , &(*pb_invPt_stdev));
     ttree_->Branch("cotTheta_mean"  , &(*pb_cotTheta_mean));
-    ttree_->Branch("cotTheta_sigma" , &(*pb_cotTheta_sigma));
+    ttree_->Branch("cotTheta_stdev" , &(*pb_cotTheta_stdev));
     ttree_->Branch("phi_mean"       , &(*pb_phi_mean));
-    ttree_->Branch("phi_sigma"      , &(*pb_phi_sigma));
+    ttree_->Branch("phi_stdev"      , &(*pb_phi_stdev));
     ttree_->Branch("z0_mean"        , &(*pb_z0_mean));
-    ttree_->Branch("z0_sigma"       , &(*pb_z0_sigma));
+    ttree_->Branch("z0_stdev"       , &(*pb_z0_stdev));
 }
 
 void PatternBankWriter::fillPatternBankInfo(const PatternBankInfo& bankInfo) {
@@ -168,13 +170,13 @@ void PatternBankWriter::fillPatternBank(const PatternBank& bank) {
         *pb_superstripIds  = std::vector<superstrip_t>(patt.begin(), patt.end());
         *pb_popularity     = attr.n;
         *pb_invPt_mean     = attr.invPt_mean;
-        *pb_invPt_sigma    = std::sqrt(attr.invPt_variance);
+        *pb_invPt_stdev    = std::sqrt(attr.invPt_variance);
         *pb_cotTheta_mean  = attr.cotTheta_mean;
-        *pb_cotTheta_sigma = std::sqrt(attr.cotTheta_variance);
+        *pb_cotTheta_stdev = std::sqrt(attr.cotTheta_variance);
         *pb_phi_mean       = attr.phi_mean;
-        *pb_phi_sigma      = std::sqrt(attr.phi_variance);
+        *pb_phi_stdev      = std::sqrt(attr.phi_variance);
         *pb_z0_mean        = attr.z0_mean;
-        *pb_z0_sigma       = std::sqrt(attr.z0_variance);
+        *pb_z0_stdev       = std::sqrt(attr.z0_variance);
         ttree_->Fill();
     }
 }
@@ -185,3 +187,5 @@ Long64_t PatternBankWriter::writeTree() {
     //tfile_->Close();
     return nentries;
 }
+
+}  // namespace phasetwoemtf

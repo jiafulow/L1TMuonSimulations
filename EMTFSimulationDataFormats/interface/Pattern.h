@@ -1,11 +1,14 @@
 #ifndef EMTFSimulationDataFormats_Pattern_h_
 #define EMTFSimulationDataFormats_Pattern_h_
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 #include <iosfwd>
 
-typedef uint32_t superstrip_t;
+
+namespace phasetwoemtf {
+
+typedef std::uint32_t superstrip_t;
 typedef std::array<superstrip_t,8> pattern_t;
 
 struct PatternAttribute {
@@ -31,6 +34,8 @@ struct PatternAttribute {
         phi_variance      = 0.;
         z0_mean           = 0.;
         z0_variance       = 0.;
+        //d0_mean           = 0.;
+        //d0_variance       = 0.;
     }
 };
 typedef PatternAttribute attrib_t;
@@ -43,6 +48,8 @@ typedef std::pair<pattern_t, attrib_t> pattern_pair;
 std::ostream& operator<<(std::ostream& o, const pattern_t& patt);
 std::ostream& operator<<(std::ostream& o, const attrib_t& attr);
 std::ostream& operator<<(std::ostream& o, const pattern_pair& pair);
+
+}  // namespace phasetwoemtf
 
 #endif
 

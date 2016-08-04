@@ -1,5 +1,7 @@
 #ifdef EMTFSimulationIO_MessageLogger_icc_
 
+namespace phasetwoemtf {
+
 template<class T>
 LogError & LogError::operator<< (T const& t) {
     if (valid_) {
@@ -21,5 +23,19 @@ inline LogError & LogError::operator<< ( std::ios_base&(*f)(std::ios_base&) ) {
     }
     return *this;
 }
+
+template<class T>
+std::ostream& operator<<(std::ostream& s, const std::vector<T>& t) {
+    std::copy(t.begin(), t.end(), std::ostream_iterator<T>(s, " "));
+    return s;
+}
+
+template<class T, std::size_t N>
+std::ostream& operator<<(std::ostream& s, const std::array<T,N>& t) {
+    std::copy(t.begin(), t.end(), std::ostream_iterator<T>(s, " "));
+    return s;
+}
+
+}  // namespace phasetwoemtf
 
 #endif

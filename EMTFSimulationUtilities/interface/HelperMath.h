@@ -1,5 +1,5 @@
-#ifndef EMTFSimulation_HelperMath_h_
-#define EMTFSimulation_HelperMath_h_
+#ifndef EMTFSimulationUtilities_HelperMath_h_
+#define EMTFSimulationUtilities_HelperMath_h_
 
 #include <cmath>
 

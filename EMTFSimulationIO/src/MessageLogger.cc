@@ -1,37 +1,38 @@
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/MessageLogger.h"
 
+namespace phasetwoemtf {
 
 // Global accessor
 LogTools& logTools() {  return LogTools::getInstance(); }
 
 // Stolen from $ROOTSYS/tmva/src/Tools.cxx
-const TString& LogTools::Color(const TString& c) const {
+const std::string& LogTools::Color(const std::string& c) const {
     // human readable color strings
-    static const TString gClr_none         = "" ;
-    static const TString gClr_white        = "\033[1;37m";  // white
-    static const TString gClr_black        = "\033[30m";    // black
-    static const TString gClr_blue         = "\033[34m";    // blue
-    static const TString gClr_red          = "\033[1;31m" ; // red
-    static const TString gClr_yellow       = "\033[1;33m";  // yellow
-    static const TString gClr_darkred      = "\033[31m";    // dark red
-    static const TString gClr_darkgreen    = "\033[32m";    // dark green
-    static const TString gClr_darkyellow   = "\033[33m";    // dark yellow
+    static const std::string gClr_none         = "" ;
+    static const std::string gClr_white        = "\033[1;37m";  // white
+    static const std::string gClr_black        = "\033[30m";    // black
+    static const std::string gClr_blue         = "\033[34m";    // blue
+    static const std::string gClr_red          = "\033[1;31m" ; // red
+    static const std::string gClr_yellow       = "\033[1;33m";  // yellow
+    static const std::string gClr_darkred      = "\033[31m";    // dark red
+    static const std::string gClr_darkgreen    = "\033[32m";    // dark green
+    static const std::string gClr_darkyellow   = "\033[33m";    // dark yellow
 
-    static const TString gClr_bold         = "\033[1m"    ; // bold
-    static const TString gClr_black_b      = "\033[30m"   ; // bold black
-    static const TString gClr_lblue_b      = "\033[1;34m" ; // bold light blue
-    static const TString gClr_magenta_b    = "\033[1;35m" ; // bold magenta
-    static const TString gClr_cyan_b       = "\033[0;36m" ; // bold cyan
-    static const TString gClr_gray_b       = "\033[0;37m" ; // bold gray
-    static const TString gClr_lgreen_b     = "\033[1;32m";  // bold light green
+    static const std::string gClr_bold         = "\033[1m"    ; // bold
+    static const std::string gClr_black_b      = "\033[30m"   ; // bold black
+    static const std::string gClr_lblue_b      = "\033[1;34m" ; // bold light blue
+    static const std::string gClr_magenta_b    = "\033[1;35m" ; // bold magenta
+    static const std::string gClr_cyan_b       = "\033[0;36m" ; // bold cyan
+    static const std::string gClr_gray_b       = "\033[0;37m" ; // bold gray
+    static const std::string gClr_lgreen_b     = "\033[1;32m";  // bold light green
 
-    static const TString gClr_blue_bg      = "\033[44m";    // blue background
-    static const TString gClr_red_bg       = "\033[1;41m";  // white on red background
-    static const TString gClr_whiteonblue  = "\033[1;44m";  // white on blue background
-    static const TString gClr_whiteongreen = "\033[1;42m";  // white on green background
-    static const TString gClr_grey_bg      = "\033[47m";    // grey background
+    static const std::string gClr_blue_bg      = "\033[44m";    // blue background
+    static const std::string gClr_red_bg       = "\033[1;41m";  // white on red background
+    static const std::string gClr_whiteonblue  = "\033[1;44m";  // white on blue background
+    static const std::string gClr_whiteongreen = "\033[1;42m";  // white on green background
+    static const std::string gClr_grey_bg      = "\033[47m";    // grey background
 
-    static const TString gClr_reset  = "\033[0m";     // reset
+    static const std::string gClr_reset  = "\033[0m";     // reset
 
     if (!useColor_)            return gClr_none;
 
@@ -61,9 +62,9 @@ const TString& LogTools::Color(const TString& c) const {
     return gClr_none;
 }
 
-const TString& LogTools::EndColor() const {
-    static TString gClr_none         = "" ;
-    static TString gClr_reset        = "\033[0m";     // reset
+const std::string& LogTools::EndColor() const {
+    static std::string gClr_none         = "" ;
+    static std::string gClr_reset        = "\033[0m";     // reset
     if (!useColor_)            return gClr_none;
     return gClr_reset;
 }
@@ -72,18 +73,20 @@ void LogTools::UseColor(bool use) {
     useColor_ = use;
 }
 
-TString LogTools::Error() const {
+std::string LogTools::Error() const {
     return "[" + Color("red") + "ERROR" + Color("reset") + "  ] ";
 }
 
-TString LogTools::Warning() const {
+std::string LogTools::Warning() const {
     return "[" + Color("yellow") + "WARNING" + Color("reset") + "] ";
 }
 
-TString LogTools::Info() const {
+std::string LogTools::Info() const {
     return "[" + Color("lightblue") + "INFO" + Color("reset") + "   ] ";
 }
 
-TString LogTools::Debug() const {
+std::string LogTools::Debug() const {
     return "[" + Color("gray") + "DEBUG" + Color("reset") + "  ] ";
 }
+
+}  // namespace phasetwoemtf

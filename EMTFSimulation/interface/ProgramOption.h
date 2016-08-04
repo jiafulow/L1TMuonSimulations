@@ -5,6 +5,9 @@
 #include <vector>
 #include <iosfwd>
 
+
+namespace phasetwoemtf {
+
 struct ProgramOption {
     std::string input;
     std::string output;
@@ -12,6 +15,7 @@ struct ProgramOption {
 
     int         verbose;
     long long   maxEvents;
+    long long   skipEvents;
     std::string datadir;
 
     float       minPt;
@@ -37,6 +41,8 @@ struct ProgramOption {
 // _____________________________________________________________________________
 // Output streams
 std::ostream& operator<<(std::ostream& o, const ProgramOption& po);
+
+}  // namespace phasetwoemtf
 
 #endif
 

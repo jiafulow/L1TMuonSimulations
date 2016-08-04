@@ -1,21 +1,22 @@
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/PatternBankContainer.h"
-
 #include <algorithm>
 #include <cassert>
 
 
 namespace {
-    bool sortByPopularity(const pattern_pair& lhs, const pattern_pair& rhs) {
-        return lhs.second.n > rhs.second.n;
-    }
+bool sortByPopularity(const phasetwoemtf::pattern_pair& lhs, const phasetwoemtf::pattern_pair& rhs) {
+    return lhs.second.n > rhs.second.n;
 }
+}  // namespace
 
-// _____________________________________________________________________________
+namespace phasetwoemtf {
+
 PatternBankContainer::PatternBankContainer()
 : patternBankMap_(), patternBankInfo_(), patternBank_(), frozen_(false)
 {
-    patternBankMap_.reserve(1<<20);
-    patternBank_.reserve(1<<20);
+    unsigned guess_size = 1<<20;
+    patternBankMap_.reserve(guess_size);
+    patternBank_.reserve(guess_size);
 }
 
 void PatternBankContainer::fill_statistics(const float x, const unsigned long n, float& mean, float& variance) {
@@ -74,3 +75,5 @@ void PatternBankContainer::clear() {
     PatternBank emptyVector;
     emptyVector.swap(patternBank_);
 }
+
+}  // namespace phasetwoemtf

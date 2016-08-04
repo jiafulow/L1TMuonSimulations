@@ -1,11 +1,13 @@
 #ifndef EMTFSimulation_StubSelector_h_
 #define EMTFSimulation_StubSelector_h_
 
-#include "L1TMuonSimulations/EMTFSimulation/interface/Helper.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/ProgramOption.h"
 
+#include "L1TMuonSimulations/EMTFSimulationUtilities/interface/Helper.h"
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/StubSelectorAlgo.h"
 
+
+namespace phasetwoemtf {
 
 class StubSelector {
   public:
@@ -22,10 +24,13 @@ class StubSelector {
     // Program options
     const ProgramOption po_;
     long long nEvents_;
+    long long firstEvent_;
     int verbose_;
 
     // Selector algo
     std::unique_ptr<StubSelectorAlgo> algo_;
 };
+
+}  // namespace phasetwoemtf
 
 #endif
