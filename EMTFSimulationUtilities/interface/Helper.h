@@ -70,4 +70,14 @@ inline unsigned getMaxModuleId() {
     return (12 * (2*12 + 3*9)) - 1;
 }
 
+// Get 'layerME' z positions
+inline std::vector<float> getLayerMEPositions() {
+    float z[5] = {602.332, 698.693, 828.392, 935.437, 1025.17};
+    return std::vector<float>(z, z+5);
+}
+inline std::vector<float> getLayerMEPositionsBackward() {
+    float z[5] = {-602.298, -699.064, -828.573, -935.498, -1024.88};
+    return std::vector<float>(z, z+5);
+}
+
 #endif

@@ -93,27 +93,25 @@ void PatternGenerator::makePatterns(TString src) {
         }
 
         // _____________________________________________________________________
-        // Apply trigger tower acceptance
+        // Categorize events
 
         assert(nstubs == 5);
         unsigned ngoodstubs = 0;
-        unsigned ngoodstubs_ME11 = 0;
-        unsigned ngoodstubs_ME12 = 0;
-        unsigned ngoodstubs_ME2to4 = 0;
+        unsigned ngoodstubs_ME11 = 0, ngoodstubs_ME12 = 0, ngoodstubs_ME2to4 = 0;
 
         for (unsigned istub=0; istub<nstubs; ++istub) {
-            uint32_t moduleId    = reader.vb_moduleId   ->at(istub);
             int16_t  isector     = reader.vb_isector    ->at(istub);
-
             if (unsigned(isector) != po_.sector)  //FIXME: include neighbors
-                continue;
+                reader.vb_moduleId->at(istub) = 999999;  // mask out-of-sector stub
 
-            if (moduleId == 999999)  //FIXME: handle missing stubs
+            uint32_t moduleId    = reader.vb_moduleId   ->at(istub);
+            if (moduleId == 999999)
                 continue;
 
             ++ngoodstubs;
             if (istub == 0) {
                 ++ngoodstubs_ME11;
+                reader.vb_moduleId->at(1) = 999999;  // mask ME1/2 stub
             } else if (istub == 1) {
                 ++ngoodstubs_ME12;
             } else {
@@ -121,7 +119,6 @@ void PatternGenerator::makePatterns(TString src) {
             }
         }
 
-        // Categorize events
         unsigned category = 0;
         if (ngoodstubs_ME11 && ngoodstubs_ME2to4 == 3) {
             category = 0;
@@ -137,7 +134,7 @@ void PatternGenerator::makePatterns(TString src) {
             category = 5;
         }
 
-        LogDebug("PatternGenerator", verbose_) << "... evt: " << ievt << " ngoodstubs: " << ngoodstubs << " ngoodstubs_ME11: " << ngoodstubs_ME11 << " ngoodstubs_ME12: " << ngoodstubs_ME12 << " ngoodstubs_ME2to4: " << ngoodstubs_ME2to4 << " category: " << category << std::endl;
+        LogDebug("PatternGenerator", verbose_) << "... evt: " << ievt << " ngoodstubs: " << ngoodstubs << " ME1/1: " << ngoodstubs_ME11 << " ME1/2: " << ngoodstubs_ME12 << " ME2to4: " << ngoodstubs_ME2to4 << " category: " << category << std::endl;
 
         if (category > 0) {
             ++nRead;
@@ -167,28 +164,13 @@ void PatternGenerator::makePatterns(TString src) {
             float    globalRho   = reader.vb_globalRho  ->at(istub);
 
             // _________________________________________________________________
-            // Different strategy for different categories
-            if (category == 0) {
-                if (istub == 1)
-                    continue;
-
-            } else if (category == 1) {
-                if (istub == 1)
-                    continue;
-
-                if (unsigned(isector) != po_.sector)
-                    continue;
-                if (moduleId == 999999)
-                    continue;
-
-            } else {
-                // ?
-            }
-
-            // _________________________________________________________________
             // Find superstrip ID
             unsigned ssId = 0;
-            if (arbiter_ -> getCoordType() == SuperstripCoordType::LOCAL) {
+
+            if (moduleId == 999999) {
+                ssId = 0xffffffff;
+
+            } else if (arbiter_ -> getCoordType() == SuperstripCoordType::LOCAL) {
                 ssId = arbiter_ -> superstripLocal(moduleId, strip, keywire, pattern);
 
             } else if (arbiter_ -> getCoordType() == SuperstripCoordType::GLOBAL) {
