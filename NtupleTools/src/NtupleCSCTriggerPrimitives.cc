@@ -120,21 +120,22 @@ void NtupleCSCTriggerPrimitives::extractPrimitives(edm::Handle<CSCCorrelatedLCTD
 
 // _____________________________________________________________________________
 namespace {
-float getConvGlobalPhi(unsigned int isector, int iphi) {
+// FIXME: check these
+float getConvGlobalPhi(int isector, int iphi) {
     if (iphi == -999)  return -999.;
     float fphi = (iphi*0.0166666) + (isector%6)*60.0 + 13.0;
     fphi *= M_PI / 180.0;
     if (fphi > M_PI) fphi -= 2*M_PI;  // convert from [0,2pi] to [-pi,pi]
     return fphi;
 }
-float getConvGlobalTheta(unsigned int isector, int itheta) {
+float getConvGlobalTheta(int isector, int itheta) {
     if (itheta == -999)  return -999.;
     float ftheta = (itheta*0.2851562) + 8.5;
     ftheta *= M_PI / 180.0;
     if (isector/6 == 1) ftheta = -ftheta;
     return ftheta;
 }
-float getConvGlobalEta(unsigned int isector, int itheta) {
+float getConvGlobalEta(int isector, int itheta) {
     if (itheta == -999)  return -999.;
     float ftheta = getConvGlobalTheta(isector, itheta);
     float feta = - std::log(std::tan(ftheta/2.0));
