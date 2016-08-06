@@ -56,14 +56,14 @@ def find_l1t_std_bin(st1, st2):
         return d[std]
     return -1
 
-def get_st_label(st):
+def get_l1t_st_label(st):
     d = {1: 'ME+1/1a', 2: 'ME+1/1b', 3: 'ME+1/2', 4: 'ME+1/3', 5: 'ME+2/1', 6: 'ME+2/2', 7: 'ME+3/1', 8: 'ME+3/2', 9: 'ME+4/1', 10: 'ME+4/2'}
     ret = d[st]
     if options.east:
         ret = ret.replace("ME+", "ME-")
     return ret
 
-def get_std_label(std):
+def get_l1t_std_label(std):
     d = {1: ('ME+2','ME+1/1'), 2: ('ME+2','ME+1/2'), 3: ('ME+2','ME+3'), 4: ('ME+3','ME+1/1'), 5: ('ME+3','ME+1/2'), 6: ('ME+2','ME+4'), 7: ('ME+4','ME+1/1'), 8: ('ME+4','ME+1/2'), 9: ('ME+3', 'ME+4')}
     ret = d[std]
     if options.east:
@@ -120,21 +120,21 @@ def drawer_book(histos, options):
     for ptbin in l1t_pt_vec:
         for stbin in l1t_st_vec:
             hname = "deviation_phi_in_st%i_pt%i" % (stbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #phi(%s) - #phi(muon) [rad]; entries" % (get_st_label(stbin)), 100, -0.2, 0.2
+            htitle, nbinsx, xmin, xmax = "; #phi(%s) - #phi(muon) [rad]; entries" % (get_l1t_st_label(stbin)), 100, -0.2, 0.2
             if options.high_pt:  nbinsx, xmin, xmax = 100, -0.08, 0.08
             if options.no_propagator:  nbinsx, xmin, xmax = 100, -0.2, 1.0
             if options.high_pt and options.no_propagator:  nbinsx, xmin, xmax = 100, -0.1, 0.2
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (stbin, ptbin)
             hname = "deviation_theta_in_st%i_pt%i" % (stbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #theta(%s) - #theta(muon) [rad]; entries" % (get_st_label(stbin)), 100, -0.1, 0.1
+            htitle, nbinsx, xmin, xmax = "; #theta(%s) - #theta(muon) [rad]; entries" % (get_l1t_st_label(stbin)), 100, -0.1, 0.1
             if options.high_pt:  nbinsx, xmin, xmax = 100, -0.08, 0.08
             if options.no_propagator:  nbinsx, xmin, xmax = 100, -0.2, 0.2
             if options.high_pt and options.no_propagator:  nbinsx, xmin, xmax = 100, -0.1, 0.1
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (stbin, ptbin)
             hname = "deviation_eta_in_st%i_pt%i" % (stbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #eta(%s) - #eta(muon); entries" % (get_st_label(stbin)), 100, -0.3, 0.3
+            htitle, nbinsx, xmin, xmax = "; #eta(%s) - #eta(muon); entries" % (get_l1t_st_label(stbin)), 100, -0.3, 0.3
             if options.high_pt:  nbinsx, xmin, xmax = 100, -0.16, 0.16
             if options.no_propagator:  nbinsx, xmin, xmax = 100, -0.6, 0.6
             if options.high_pt and options.no_propagator:  nbinsx, xmin, xmax = 100, -0.2, 0.2
@@ -142,23 +142,23 @@ def drawer_book(histos, options):
             histos[hname].indices = (stbin, ptbin)
 
             hname = "nstubs_in_st%i_pt%i" % (stbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; # LCTs in %s; entries" % (get_st_label(stbin)), 16, -0.5, 15.5
+            htitle, nbinsx, xmin, xmax = "; # LCTs in %s; entries" % (get_l1t_st_label(stbin)), 16, -0.5, 15.5
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (stbin, ptbin)
 
         for stdbin in l1t_std_vec:
             hname = "deflection_phi_in_std%i_pt%i" % (stdbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #phi(%s) - #phi(%s) [rad]; entries" % (get_std_label(stdbin)), 100, -0.2, 0.2
+            htitle, nbinsx, xmin, xmax = "; #phi(%s) - #phi(%s) [rad]; entries" % (get_l1t_std_label(stdbin)), 100, -0.2, 0.2
             if options.high_pt:  nbinsx, xmin, xmax = 100, -0.08, 0.08
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (stdbin, ptbin)
             hname = "deflection_theta_in_std%i_pt%i" % (stdbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #theta(%s) - #theta(%s) [rad]; entries" % (get_std_label(stdbin)), 100, -0.1, 0.1
+            htitle, nbinsx, xmin, xmax = "; #theta(%s) - #theta(%s) [rad]; entries" % (get_l1t_std_label(stdbin)), 100, -0.1, 0.1
             if options.high_pt:  nbinsx, xmin, xmax = 100, -0.08, 0.08
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (stdbin, ptbin)
             hname = "deflection_eta_in_std%i_pt%i" % (stdbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #eta(%s) - #eta(%s); entries" % (get_std_label(stdbin)), 100, -0.3, 0.3
+            htitle, nbinsx, xmin, xmax = "; #eta(%s) - #eta(%s); entries" % (get_l1t_std_label(stdbin)), 100, -0.3, 0.3
             if options.high_pt:  nbinsx, xmin, xmax = 100, -0.16, 0.16
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (stdbin, ptbin)
@@ -167,29 +167,29 @@ def drawer_book(histos, options):
     for ptbin in l1t_pt_vec:
         for stdbin in l1t_std_vec:
             hname = "deflection_phi_vs_eta_in_std%i_pt%i" % (stdbin, ptbin)
-            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #phi(%s) - #phi(%s) [rad]" % (get_std_label(stdbin)), 100, -0.2, 0.2, 32, 0.9, 2.5
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #phi(%s) - #phi(%s) [rad]" % (get_l1t_std_label(stdbin)), 100, -0.2, 0.2, 32, 0.9, 2.5
             histos[hname] = TH2F(hname, htitle, nbinsy, ymin, ymax, nbinsx, xmin, xmax)
             histos[hname].indices = (stdbin, ptbin)
             hname = "deflection_theta_vs_eta_in_std%i_pt%i" % (stdbin, ptbin)
-            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #theta(%s) - #theta(%s) [rad]" % (get_std_label(stdbin)), 100, -0.1, 0.1, 32, 0.9, 2.5
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #theta(%s) - #theta(%s) [rad]" % (get_l1t_std_label(stdbin)), 100, -0.1, 0.1, 32, 0.9, 2.5
             histos[hname] = TH2F(hname, htitle, nbinsy, ymin, ymax, nbinsx, xmin, xmax)
             histos[hname].indices = (stdbin, ptbin)
             hname = "deflection_eta_vs_eta_in_std%i_pt%i" % (stdbin, ptbin)
-            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #eta(%s) - #eta(%s)" % (get_std_label(stdbin)), 100, -0.3, 0.3, 32, 0.9, 2.5
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #eta(%s) - #eta(%s)" % (get_l1t_std_label(stdbin)), 100, -0.3, 0.3, 32, 0.9, 2.5
             histos[hname] = TH2F(hname, htitle, nbinsy, ymin, ymax, nbinsx, xmin, xmax)
             histos[hname].indices = (stdbin, ptbin)
 
             # error bar indicates std dev
             hname = "deflection_phi_pr_eta_in_std%i_pt%i" % (stdbin, ptbin)
-            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #phi(%s) - #phi(%s) [rad]" % (get_std_label(stdbin)), 100, -0.2, 0.2, 32, 0.9, 2.5
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #phi(%s) - #phi(%s) [rad]" % (get_l1t_std_label(stdbin)), 100, -0.2, 0.2, 32, 0.9, 2.5
             histos[hname] = TProfile(hname, htitle, nbinsy, ymin, ymax, xmin, xmax, 's')
             histos[hname].indices = (stdbin, ptbin)
             hname = "deflection_theta_pr_eta_in_std%i_pt%i" % (stdbin, ptbin)
-            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #theta(%s) - #theta(%s) [rad]" % (get_std_label(stdbin)), 100, -0.1, 0.1, 32, 0.9, 2.5
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #theta(%s) - #theta(%s) [rad]" % (get_l1t_std_label(stdbin)), 100, -0.1, 0.1, 32, 0.9, 2.5
             histos[hname] = TProfile(hname, htitle, nbinsy, ymin, ymax, xmin, xmax, 's')
             histos[hname].indices = (stdbin, ptbin)
             hname = "deflection_eta_pr_eta_in_std%i_pt%i" % (stdbin, ptbin)
-            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #eta(%s) - #eta(%s)" % (get_std_label(stdbin)), 100, -0.3, 0.3, 32, 0.9, 2.5
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta(muon); #eta(%s) - #eta(%s)" % (get_l1t_std_label(stdbin)), 100, -0.3, 0.3, 32, 0.9, 2.5
             histos[hname] = TProfile(hname, htitle, nbinsy, ymin, ymax, xmin, xmax, 's')
             histos[hname].indices = (stdbin, ptbin)
 

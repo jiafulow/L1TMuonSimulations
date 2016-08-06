@@ -13,7 +13,8 @@ import re
 import os
 from math import sqrt, pi, ceil, floor
 from itertools import izip, count
-from array import array
+import numpy as np
+#from array import array
 import argparse
 import tempfile
 import json

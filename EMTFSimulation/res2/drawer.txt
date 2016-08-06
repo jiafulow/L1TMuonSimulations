@@ -4,3 +4,5 @@ python drawer_emtf_rates.py ntuple_singlenu.root -b
 
 python drawer_emtf_deflection.py ntuple_singlemu_3to50GeV.txt -b
 python drawer_emtf_deflection.py ntuple_singlemu_50to1000GeV.txt --high-pt --outdir figures_emtf_deflection_highpt -b
+
+python drawer_emtf_resolution.py ntuple_singlemu_3to1000GeV.txt -b

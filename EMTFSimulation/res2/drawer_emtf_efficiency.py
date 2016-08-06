@@ -95,16 +95,26 @@ def get_l1t_pu_label(b):
     label = "# PU = %.0f" % (l1t_pu_labeling[b])
     return label
 
+def mode_to_quality(mode):
+    # modes [15]       --> quality = 16
+    # modes [11,13,14] --> quality = 12
+    # modes [7,10,12]  --> quality = 8
+    # modes [3,5,6,9]  --> quality = 4
+    qualities = [
+        0, 0, 0, 4,
+        0, 4, 4, 8,
+        0, 4, 8,12,
+        8,12,12,16,
+    ]
+    return qualities[mode]
+
 # ______________________________________________________________________________
 # Drawer
 def drawer_book(histos, options):
-    ##mybins = [200.0]+[100.0/x for x in xrange(1,100)]
-    #mybins = [200.0]+[100.0/x for x in xrange(1,80)]
-    #mybins = list(reversed(mybins))
 
     # Bins from Benjamin (Seoul National University) but modified
-    #mybins = [0.0, 50.0, 53.0, 55.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0, 550.0, 600.0, 650.0, 700.0, 800.0, 1000.0]
-    mybins = [0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0, 70.0, 80.0, 100.0, 125.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0, 550.0, 600.0, 650.0, 700.0, 800.0, 1000.0, 2000.0]
+    #myptbins = [0.0, 50.0, 53.0, 55.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0, 550.0, 600.0, 650.0, 700.0, 800.0, 1000.0]
+    myptbins = [0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0, 70.0, 80.0, 100.0, 125.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0, 550.0, 600.0, 650.0, 700.0, 800.0, 1000.0, 2000.0, 7000.0]
 
     # Efficiency
     for l1ptbin in l1t_l1pt_vec:
@@ -112,7 +122,7 @@ def drawer_book(histos, options):
             for bxbin in l1t_bx_vec:
                 for etabin in l1t_eta_vec:
                     hname = "efficiency_of_pt_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
-                    histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
+                    histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(myptbins)-1, np.array(myptbins))
                     histos[hname].indices = (etabin, bxbin, modebin, l1ptbin)
                     hname = "efficiency_of_pu_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
                     histos[hname] = TEfficiency(hname, "; gen # PU; #varepsilon", 56, 0, 56)
@@ -132,7 +142,7 @@ def drawer_book(histos, options):
             for bxbin in l1t_bx_vec:
                 for etabin in l1t_eta_vec:
                     hname = "efficiency_of_pt_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
-                    histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(mybins)-1, array('d', mybins))
+                    histos[hname] = TEfficiency(hname, "; gen p_{T} [GeV]; #varepsilon", len(myptbins)-1, np.array(myptbins))
                     histos[hname].indices = (etabin, bxbin, modebin, pubin)
 
                 for genptbin in l1t_genpt_vec:
@@ -199,8 +209,8 @@ def drawer_project(tree, histos, options):
             print ".. %i # PU: %i ntracks: %i is_endcap: %i" % (ievt, trueNPV, len(evt.EMTFTracks_pt), is_endcap)
 
         if part_pt > 0 and is_endcap:
-            best_mode, best_dR = 0, 0.
-            best_trig_pt, best_trig_phi, best_trig_eta = 0., 0., 0.
+            best_quality, best_dR = 0, 99999999.
+            best_itrack, best_mode, best_trig_pt, best_trig_phi, best_trig_eta = 0, 0, 0., 0., 0.
 
             # This is a 3D array: trigger_decisions[l1ptbin][modebin][bxbin]
             trigger_decisions = [[[False for bxbin in l1t_bx_vec] for modebin in l1t_mode_vec] for l1ptbin in l1t_l1pt_vec]
@@ -212,6 +222,7 @@ def drawer_project(tree, histos, options):
                     print ".... %i gen pt: %f phi: %f eta: %f" % (itrack, part_pt, part_phi, part_eta)
                     print ".... %i l1t pt: %f phi: %f eta: %f mode: %i bx: %i sebx: %i" % (itrack, trig_pt, trig_phi, trig_eta, mode, int(bx), int(sebx))
 
+                quality = mode_to_quality(mode)
                 dR = deltaR(trig_eta, trig_phi, part_globalEtaME2, part_globalPhiME2)
 
                 # Get trigger decisions
@@ -228,12 +239,12 @@ def drawer_project(tree, histos, options):
 
                 # Get best match
                 if (int(bx) == 0):
-                    if (best_mode < mode):
-                        best_mode, best_dR = mode, dR
-                        best_trig_pt, best_trig_phi, best_trig_eta = trig_pt, trig_phi, trig_eta
-                    elif (best_mode == mode and best_dR > dR):
-                        best_mode, best_dR = mode, dR
-                        best_trig_pt, best_trig_phi, best_trig_eta = trig_pt, trig_phi, trig_eta
+                    if (best_quality < quality):
+                        best_quality, best_dR = quality, dR
+                        best_itrack, best_mode, best_trig_pt, best_trig_phi, best_trig_eta = itrack, mode, trig_pt, trig_phi, trig_eta
+                    elif (best_quality == quality) and (best_dR > dR):
+                        best_quality, best_dR = quality, dR
+                        best_itrack, best_mode, best_trig_pt, best_trig_phi, best_trig_eta = itrack, mode, trig_pt, trig_phi, trig_eta
                 continue
 
             this_l1t_eta_vec = filter(lambda x: in_l1t_eta_bin(x, part_eta), l1t_eta_vec)

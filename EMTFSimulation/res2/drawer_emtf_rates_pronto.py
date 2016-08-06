@@ -12,16 +12,18 @@ fcol = TColor.GetColor("#fb9a99")  # nu140
 
 # ______________________________________________________________________________
 def display_fit(h, xxmin, xxmax, fun="pol2"):
+    status = 99
     if h.Integral() > 0 and (xxmax > xxmin and h.Integral(h.FindFixBin(xxmin),h.FindFixBin(xxmax))):
         if fun == "pol2":
             f1 = TF1("f1", fun)
             f1.SetParLimits(0, -50., h.GetMaximum())
             fun = "f1"
-        h.Fit(fun, "qB", "", xxmin, xxmax)
+        status = int(h.Fit(fun, "QB", "", xxmin, xxmax))
+    if status == 0:
         h.fit = h.GetFunction(fun)
-        h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
     else:
         h.fit = TF1("fa1", fun + "(0)")
+    h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
 
 # ______________________________________________________________________________
 def do_trueNPV(hname="trueNPV"):

@@ -7,18 +7,20 @@ options = None
 figures = []
 tables = {}
 
-palette = map(lambda x: TColor.GetColor(x), ("#66DD66", "#3333FF", "#990099", "#FFBB44", "#EE4477", "#56D3DB", "#454545"))
+ptpalette = map(lambda x: TColor.GetColor(x), ("#66DD66", "#3333FF", "#990099", "#FFBB44", "#EE4477", "#56D3DB", "#454545"))
 tlegend2 = tlegend.Clone()
 
 
 # ______________________________________________________________________________
 def display_fit(h, xxmin, xxmax, fun="gaus"):
+    status = 99
     if h.Integral() > 0 and (xxmax > xxmin and h.Integral(h.FindFixBin(xxmin),h.FindFixBin(xxmax))):
-        h.Fit(fun, "q", "", xxmin, xxmax)
+        status = int(h.Fit(fun, "Q", "", xxmin, xxmax))
+    if status == 0:
         h.fit = h.GetFunction(fun)
-        h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
     else:
         h.fit = TF1("fa1", fun + "(0)")
+    h.fit.SetLineWidth(2); h.fit.SetLineColor(darken_color(h.GetLineColor(),20))
 
 # ______________________________________________________________________________
 def do_deviation_overlays(special_hname = "deviation_%s_in_st%i_pt%i", variables=["phi", "theta", "eta"]):
@@ -49,7 +51,7 @@ def do_deviation_overlays(special_hname = "deviation_%s_in_st%i_pt%i", variables
                     if pt > 50:  continue
                     xxmin, xxmax = h.GetMean()-4.0*h.GetRMS(), h.GetMean()+4.0*h.GetRMS()
                 h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
-                h.SetLineColor(palette[i]); h.SetMarkerColor(palette[i])
+                h.SetLineColor(ptpalette[i]); h.SetMarkerColor(ptpalette[i])
                 h.SetStats(0); h.Draw("same e")
                 display_fit(h, xxmin, xxmax)
                 tlegend.AddEntry(h, "#color[%i]{#mu(p_{T} = %i GeV) = %.2fe-03}" % (h.fit.GetLineColor(), pt, h.fit.GetParameter(1)*1e3), "")
@@ -89,7 +91,7 @@ def do_nstubs_overlays(special_hname = "%s_in_st%i_pt%i", variables=["nstubs"]):
                 else:
                     if pt > 50:  continue
                 h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
-                h.SetLineColor(palette[i]); h.SetMarkerColor(palette[i])
+                h.SetLineColor(ptpalette[i]); h.SetMarkerColor(ptpalette[i])
                 h.SetMinimum(0.5)
                 h.SetStats(0); h.Draw("same hist")
             #tlegend.Draw()
@@ -127,7 +129,7 @@ def do_deflection_overlays(special_hname = "deflection_%s_in_std%i_pt%i", variab
                     if pt > 50:  continue
                     xxmin, xxmax = h.GetMean()-4.0*h.GetRMS(), h.GetMean()+4.0*h.GetRMS()
                 h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
-                h.SetLineColor(palette[i]); h.SetMarkerColor(palette[i])
+                h.SetLineColor(ptpalette[i]); h.SetMarkerColor(ptpalette[i])
                 h.SetStats(0); h.Draw("same e")
                 display_fit(h, xxmin, xxmax)
                 tlegend.AddEntry(h, "#color[%i]{#mu(p_{T} = %i GeV) = %.2fe-03}" % (h.fit.GetLineColor(), pt, h.fit.GetParameter(1)*1e3), "")

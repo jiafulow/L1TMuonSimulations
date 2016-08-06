@@ -19,7 +19,7 @@ def do_overlay(special_hname, special_values, legend, label_0=None, label_1=None
     gPad.SetLogx(h.logx); gPad.SetLogy(h.logy)
     if "efficiency_of_pt" in special_hname:
         gPad.SetLogx(True)
-        h1.GetXaxis().SetRangeUser(2, 1000)
+        h1.GetXaxis().SetRangeUser(2, 2000)
 
     xmin, xmax = h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax()
     tline2 = TLine(); tline2.SetLineColor(1)
