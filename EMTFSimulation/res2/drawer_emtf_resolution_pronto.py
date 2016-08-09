@@ -26,8 +26,8 @@ def display_yfit(h, xxmin, xxmax, fun="gaus"):
     htitle, htitle2 = h.GetXaxis().GetTitle(), h.GetYaxis().GetTitle()
     h.yfit1 = h.ProjectionX(h.GetName()+"_yfit1"); h.yfit1.Reset()
     h.yfit2 = h.ProjectionX(h.GetName()+"_yfit2"); h.yfit2.Reset()
-    h.yfit1.SetTitle(";"+htitle+";"+re.sub(r"(.*)({.*})", r"#mu(\1)\2", htitle2))
-    h.yfit2.SetTitle(";"+htitle+";"+re.sub(r"(.*)({.*})", r"#sigma(\1)\2", htitle2))
+    h.yfit1.SetTitle(";"+htitle+";"+htitle2)
+    h.yfit2.SetTitle(";"+htitle+";"+htitle2)
 
     for b in xrange(1,nbinsx+1):
         py = h.ProjectionY("_py", b, b)
@@ -61,10 +61,11 @@ def do_resolution_pt_vs_pt_overlays(special_hname = "resolution_pt_vs_pt_in_mode
             h = histos[hname]; h = getattr(h, yfit)
             htitle2 = h.GetYaxis().GetTitle()
             h1 = h.Clone(hname+"_frame"); h1.Reset()
-            h1.GetYaxis().SetTitle(re.sub(r"(.*)({.*})", r"\1", htitle2))
             if yfit == "yfit1":
+                h1.GetYaxis().SetTitle(re.sub(r"(.*)({.*})", r"#mu(\1)", htitle2))
                 h1.SetMinimum(ymin); h1.SetMaximum(ymax)
             else:
+                h1.GetYaxis().SetTitle(re.sub(r"(.*)({.*})", r"#sigma(\1)", htitle2))
                 h1.SetMinimum(0.); h1.SetMaximum(3.)
             h1.SetStats(0); h1.Draw()
             tlatex.DrawLatex(0.68, 0.76, re.sub(r"(.*){(.*)}", r"\2", htitle2))
@@ -112,10 +113,11 @@ def do_resolution_pt_vs_eta_overlays(special_hname = "resolution_pt_vs_eta_in_mo
             h = histos[hname]; h = getattr(h, yfit)
             htitle2 = h.GetYaxis().GetTitle()
             h1 = h.Clone(hname+"_frame"); h1.Reset()
-            h1.GetYaxis().SetTitle(re.sub(r"(.*)({.*})", r"\1", htitle2))
             if yfit == "yfit1":
+                h1.GetYaxis().SetTitle(re.sub(r"(.*)({.*})", r"#mu(\1)", htitle2))
                 h1.SetMinimum(ymin); h1.SetMaximum(ymax)
             else:
+                h1.GetYaxis().SetTitle(re.sub(r"(.*)({.*})", r"#sigma(\1)", htitle2))
                 h1.SetMinimum(0.); h1.SetMaximum(3.)
             h1.SetStats(0); h1.Draw()
             tlatex.DrawLatex(0.68, 0.68, re.sub(r"(.*){(.*)}", r"\2", htitle2))
