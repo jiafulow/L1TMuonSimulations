@@ -38,6 +38,10 @@ cache_size = 20000
 
 minInvPt = -1.0/3
 maxInvPt = +1.0/3
+minEta = 1.85
+maxEta = 2.2
+#minEta = 1.2
+#maxEta = 2.4
 
 z_center = np.asarray([602.332, 698.693, 828.392, 935.437, 1025.17])
 phi_center = pi*(15+75)/2/180
@@ -122,7 +126,8 @@ def process_step1():
         # Get track variables
         simInvPt = float(evt.genParts_charge[0])/evt.genParts_pt[0]
         simPhi = evt.genParts_phi[0]
-        simCotTheta = sinh(evt.genParts_eta[0])
+        simEta = evt.genParts_eta[0]
+        simCotTheta = sinh(simEta)
         simTanTheta = 1.0/simCotTheta
         simVz = evt.genParts_vz[0]
 
@@ -134,7 +139,7 @@ def process_step1():
             raise
 
         # Must satisfy invPt range
-        if not (minInvPt <= simInvPt < maxInvPt):
+        if not ((minInvPt <= simInvPt < maxInvPt) and (minEta <= simEta < maxEta)):
             continue
 
         # Get stub variables
@@ -219,7 +224,8 @@ def process_step1():
         # Get track variables
         simInvPt = float(evt.genParts_charge[0])/evt.genParts_pt[0]
         simPhi = evt.genParts_phi[0]
-        simCotTheta = sinh(evt.genParts_eta[0])
+        simEta = evt.genParts_eta[0]
+        simCotTheta = sinh(simEta)
         simTanTheta = 1.0/simCotTheta
         simVz = evt.genParts_vz[0]
 
@@ -228,7 +234,7 @@ def process_step1():
         parameters2 = np.array([simTanTheta, simVz])
 
         # Must satisfy invPt range
-        if not (minInvPt <= simInvPt < maxInvPt):
+        if not ((minInvPt <= simInvPt < maxInvPt) and (minEta <= simEta < maxEta)):
             continue
 
         # Get stub variables
@@ -634,9 +640,10 @@ def process_step3():
         data_err1.append(parameters_err1)
         data_err2.append(parameters_err2)
 
-        parameters_errPt = (abs(1.0/parameters_fit1[0]) - abs(1.0/parameters1[0])) * parameters1[0]
-        #parameters_errPt = (abs(1.0/(parameters_fit1[0]/parameters_fit2[0])) - abs(1.0/(parameters1[0]/parameters2[0]))) * (parameters1[0]/parameters2[0])
-        data_errPt.append(parameters_errPt)
+        errPt = (1.0/abs(parameters_fit1[0]) - 1.0/abs(parameters1[0])) * abs(parameters1[0])
+        #errPt = (1.0/abs(parameters_fit1[0])/parameters_fit2[0] - 1.0/abs(parameters1[0])/parameters2[0]) * (abs(parameters1[0])/parameters2[0])
+        errInvPt = (parameters1[0] - parameters_fit1[0]) / abs(parameters1[0])
+        data_errPt.append([errPt, errInvPt])
         continue
 
     if verbose > 0:
@@ -707,7 +714,7 @@ def process_step3():
                     nbinsx, xmin, xmax = 20, -1, 1
                 histos[hname] = TH2F(hname, ";"+htitle+";"+htitle2, nbinsx, xmin, xmax, nbinsy, ymin, ymax)
 
-        for i in xrange(nparameters3D + 1):
+        for i in xrange(nparameters3D + 2):
             hname = "err%i" % (i)
             if i == 0:
                 htitle = "#Delta q/p_{T} [1/GeV]"
@@ -723,7 +730,10 @@ def process_step3():
                 nbinsx, xmin, xmax = 1000, -40, 40
             elif i == 4:
                 htitle = "#Delta (p_{T})/p_{T}"
-                nbinsx, xmin, xmax = 1000, -6, 6
+                nbinsx, xmin, xmax = 1000, -8, 8
+            elif i == 5:
+                htitle = "#Delta (q/p_{T})*p_{T}"
+                nbinsx, xmin, xmax = 1000, -8, 8
             else:
                 htitle = ""
                 nbinsx, xmin, xmax = 1000, -1., 1.
@@ -785,16 +795,16 @@ def process_step3():
                     hname = "npc%i_vs_par%i" % (i,j)
                     histos[hname].Fill(p[j], x[i])
 
-        for x1, x2, xPt, p1, p2 in izip(data_err1, data_err2, data_errPt, data_par1, data_par2):
+        for x1, x2, xErrPt, p1, p2 in izip(data_err1, data_err2, data_errPt, data_par1, data_par2):
             # Concatenate
             if not use_3D:
-                x = np.concatenate((x1,x2,[xPt]))
+                x = np.concatenate((x1,x2,xErrPt))
                 p = np.concatenate((p1,p2))
             else:
-                x = np.concatenate((x1,[xPt]))
+                x = np.concatenate((x1,xErrPt))
                 p = np.concatenate((p1,))
 
-            for i in xrange(nparameters3D + 1):
+            for i in xrange(nparameters3D + 2):
                 hname = "err%i" % (i)
                 histos[hname].Fill(x[i])
 
@@ -802,8 +812,8 @@ def process_step3():
                     hname = "err%i_vs_par%i" % (i,j)
                     histos[hname].Fill(p[j], x[i])
 
-                pt = abs(1.0/p[0])
-                #pt = abs(1.0/(p[0]/p[2]))
+                pt = 1.0/abs(p[0])
+                #pt = 1.0/abs(p[0])/p[2]
                 theta = atan2(p[2], 1.0)
                 eta = -log(tan(theta/2.0))
                 eta = abs(eta)
