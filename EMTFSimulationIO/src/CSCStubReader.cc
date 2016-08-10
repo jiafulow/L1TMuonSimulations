@@ -46,7 +46,7 @@ CSCStubReader::~CSCStubReader() {
     if (tchain_)  delete tchain_;
 }
 
-void CSCStubReader::init(TString src) {
+void CSCStubReader::init(TString src, TString prefix, TString suffix) {
     if (!src.EndsWith(".root") && !src.EndsWith(".txt")) {
         TString msg = "Input source must be either .root or .txt";
         throw std::invalid_argument(msg.Data());
@@ -150,7 +150,7 @@ CSCStubWriter::~CSCStubWriter() {
     if (tfile_)  delete tfile_;
 }
 
-void CSCStubWriter::init(TTree* tree, TString out) {
+void CSCStubWriter::init(TTree* intree, TString out, TString prefix, TString suffix) {
     gROOT->ProcessLine("#include <vector>");  // how is it not loaded?
 
     if (!out.EndsWith(".root")) {
@@ -169,7 +169,7 @@ void CSCStubWriter::init(TTree* tree, TString out) {
     }
 
     tfile_->mkdir("ntupler")->cd();
-    ttree_ = (TTree*) tree->CloneTree(0); // Do not copy the data yet
+    ttree_ = (TTree*) intree->CloneTree(0); // Do not copy the data yet
     // The clone should not delete any shared i/o buffers.
     resetDeleteBranches(ttree_);
 }

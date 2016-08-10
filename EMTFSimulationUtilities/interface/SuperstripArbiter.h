@@ -29,6 +29,10 @@ public:
 
     unsigned nz() const { return nz_; }
 
+    unsigned nss() const { return nss_; }
+    unsigned nsuperstripsPerLayer() const { return nss(); }
+
+    // Debug
     std::string str() const;
 
 private:
@@ -37,6 +41,7 @@ private:
     SuperstripShapeType shapeType_;
     unsigned            nx_;
     unsigned            nz_;
+    unsigned            nss_;
 
     std::vector<SuperstripLocalParams>  localParams_;
     std::vector<SuperstripGlobalParams> globalParams_;

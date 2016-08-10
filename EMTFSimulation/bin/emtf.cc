@@ -1,6 +1,7 @@
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/MessageLogger.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/StubSelector.h"
 #include "L1TMuonSimulations/EMTFSimulation/interface/PatternGenerator.h"
+#include "L1TMuonSimulations/EMTFSimulation/interface/PatternMatcher.h"
 using namespace phasetwoemtf;
 
 #include "boost/program_options.hpp"
@@ -32,6 +33,7 @@ int main(int argc, char **argv) {
         ("help,h"              , "Produce help message")
         ("selectStubs,S"       , "Select one unique stub per layer")
         ("generateBank,B"      , "Generate associative memory pattern bank")
+        ("patternRecognition,R", "Run associative memory pattern recognition")
         ("no-color"            , "Turn off colored text")
         ;
 
@@ -46,6 +48,8 @@ int main(int argc, char **argv) {
         ("verbosity,v"  , po::value<int>(&option.verbose)->default_value(1), "Verbosity level (-1 = very quiet; 0 = quiet, 1 = verbose, 2+ = debug)")
         ("maxEvents,n"  , po::value<long long>(&option.maxEvents)->default_value(-1), "Specfiy max number of events")
         ("skipEvents,m" , po::value<long long>(&option.skipEvents)->default_value(0), "Specfiy number of events to skip")
+
+        ("nLayers"      , po::value<unsigned>(&option.nLayers)->default_value(5), "Specify # of layers")
 
         // MC truth
         ("minPt"        , po::value<float>(&option.minPt)->default_value(     3.0), "Specify min pt")
@@ -72,8 +76,14 @@ int main(int argc, char **argv) {
         ("fitter,f"     , po::value<std::string>(&option.fitter)->default_value("PCA4"), "Select track fitter -- PCA4: PCA fitter 4 params; PCA5: PCA fitter 5 params (default: PCA4)")
 
         // Only for bank generation
-        ("minPopularity" , po::value<int>(&option.minPopularity)->default_value(1), "Specify min popularity of a pattern to be stored or read")
-        ("maxCoverage"  , po::value<float>(&option.maxCoverage)->default_value(1.0), "Specify max coverage of patterns to be stored or read")
+        ("minPopularity" , po::value<unsigned>(&option.minPopularity)->default_value(1), "Specify min popularity of a pattern to be stored or read")
+        ("maxCoverage"  , po::value<float>(&option.maxCoverage)->default_value(1.), "Specify max coverage of patterns to be stored or read")
+
+        // Only for pattern matching
+        ("maxPatterns"  , po::value<long int>(&option.maxPatterns)->default_value(999999999), "Specfiy max number of patterns")
+        ("maxMisses"    , po::value<int>(&option.maxMisses)->default_value(0), "Specify max number of allowed misses")
+        ("maxStubs"     , po::value<int>(&option.maxStubs)->default_value(4), "Specfiy max number of stubs per superstrip")
+        ("maxRoads"     , po::value<int>(&option.maxRoads)->default_value(999999999), "Specfiy max number of roads per event")
         ;
 
     // Hidden options, will be allowed both on command line and in config file,
@@ -125,10 +135,11 @@ int main(int argc, char **argv) {
 
     // Exactly one of these options must be selected
     int vmcount = vm.count("selectStubs")       +
-                  vm.count("generateBank")      ;
+                  vm.count("generateBank")      +
+                  vm.count("patternRecognition");
     if (vmcount != 1) {
         std::cerr << logTools().Color("red") << "ERROR: " << logTools().EndColor() << "Must select exactly one routine. "
-                  << "Available routines: '-S', '-B'" << std::endl;
+                  << "Available routines: '-S', '-B', '-R'" << std::endl;
         //std::cout << visible << std::endl;
         return EXIT_FAILURE;
     }
@@ -168,6 +179,14 @@ int main(int argc, char **argv) {
         PatternGenerator generator(option);
         generator.init();
         generator.run();
+        std::cout << logTools().Color("lgreenb") << "DONE" << logTools().EndColor() << std::endl;
+
+    } else if (vm.count("patternRecognition")) {
+        std::cout << "Start pattern recognition..." << std::endl;
+
+        PatternMatcher matcher(option);
+        matcher.init();
+        matcher.run();
         std::cout << logTools().Color("lgreenb") << "DONE" << logTools().EndColor() << std::endl;
     }
 

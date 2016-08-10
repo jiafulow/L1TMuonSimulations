@@ -3,8 +3,8 @@
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/Helper.h"
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/HelperString.h"
 #include <cassert>
-#include <stdexcept>
 #include <iostream>
+#include <sstream>
 
 
 namespace {
@@ -33,11 +33,11 @@ void SuperstripArbiter::setDefinition(const std::string& definition) {
 
     if (startswith(definition_, "ss")) {
         SuperstripFixedWidth shape;
-        shape.setDefinition(definition_, coordType_, shapeType_, nx_, nz_, localParams_);
+        shape.setDefinition(definition_, coordType_, shapeType_, nx_, nz_, nss_, localParams_);
 
     } else if (startswith(definition_, "nx")) {
         SuperstripProjective shape;
-        shape.setDefinition(definition_, coordType_, shapeType_, nx_, nz_, globalParams_);
+        shape.setDefinition(definition_, coordType_, shapeType_, nx_, nz_, nss_, globalParams_);
 
     } else {
         throw std::invalid_argument("Incorrect superstrip definition.");

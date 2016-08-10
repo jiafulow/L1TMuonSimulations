@@ -29,13 +29,19 @@ struct ProgramOption {
     float       minVz;
     float       maxVz;
 
+    unsigned    nLayers;
+
     unsigned    tower;
     unsigned    sector;
     std::string superstrip;
     std::string fitter;
 
-    int         minPopularity;
+    unsigned    minPopularity;
     float       maxCoverage;
+    long int    maxPatterns;
+    int         maxMisses;
+    int         maxStubs;
+    int         maxRoads;
 };
 
 // _____________________________________________________________________________

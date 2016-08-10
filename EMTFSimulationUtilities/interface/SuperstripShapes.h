@@ -18,6 +18,7 @@ struct SuperstripLocalParams {
     unsigned right_shift_z;
     unsigned mask_z;
     unsigned shift_z;
+    unsigned mask_m;
     unsigned shift_m;
 };
 
@@ -25,8 +26,10 @@ struct SuperstripGlobalParams {
     float rotate_x;
     float low_x;
     float delta_x;
+    unsigned nbins_x;
     float low_z;
     float delta_z;
+    unsigned nbins_z;
 };
 
 // _____________________________________________________________________________
@@ -39,9 +42,9 @@ public:
     ~SuperstripShapeBase() {}
 
     virtual void setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-            unsigned& nx, unsigned& nz, std::vector<SuperstripLocalParams>& params) const = 0;
+            unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripLocalParams>& params) const = 0;
     virtual void setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-            unsigned& nx, unsigned& nz, std::vector<SuperstripGlobalParams>& params) const = 0;
+            unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripGlobalParams>& params) const = 0;
 
 protected:
     SuperstripCoordType coordType_;
@@ -57,9 +60,9 @@ public:
     }
 
     void setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-            unsigned& nx, unsigned& nz, std::vector<SuperstripLocalParams>& params) const;
+            unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripLocalParams>& params) const;
     void setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-            unsigned& nx, unsigned& nz, std::vector<SuperstripGlobalParams>& params) const;
+            unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripGlobalParams>& params) const;
 };
 
 // _____________________________________________________________________________
@@ -71,9 +74,9 @@ public:
     }
 
     void setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-            unsigned& nx, unsigned& nz, std::vector<SuperstripLocalParams>& params) const;
+            unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripLocalParams>& params) const;
     void setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-            unsigned& nx, unsigned& nz, std::vector<SuperstripGlobalParams>& params) const;
+            unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripGlobalParams>& params) const;
 };
 
 // _____________________________________________________________________________

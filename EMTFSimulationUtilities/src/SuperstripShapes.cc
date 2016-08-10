@@ -25,7 +25,7 @@ namespace phasetwoemtf {
 
 // _____________________________________________________________________________
 void SuperstripFixedWidth::setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-        unsigned& nx, unsigned& nz, std::vector<SuperstripLocalParams>& params) const {
+        unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripLocalParams>& params) const {
     // Parse the definition string
     std::vector<std::string> tokens = split(definition, '_');
     assert(tokens.size() == 2);
@@ -53,15 +53,17 @@ void SuperstripFixedWidth::setDefinition(const std::string& definition, Superstr
     p.right_shift_x = most_sig_bit(nstrips);
     p.mask_x = 0xff; // 0-255 (8 bits)
     p.right_shift_z = most_sig_bit(nsegments);
-    p.mask_z = 0x7f; // 0-127 (7 bits)
+    p.mask_z = 0xf;  // 0-15 (4 bits)
     p.shift_z = 8;
-    p.shift_m = 8 + 7;
+    p.mask_m = 0x3f; // 0-63 (6 bits)
+    p.shift_m = 8+4;
 
     // Return values
     coord = coordType_;
     shape = shapeType_;
     nx = 1u<<8;
-    nz = 1u<<7;
+    nz = 1u<<4;
+    nss = 1u<<(8+4+6);
     params.clear();
     for (unsigned i=0; i<NLAYERS; i++)
         params.push_back(p);
@@ -69,18 +71,18 @@ void SuperstripFixedWidth::setDefinition(const std::string& definition, Superstr
 }
 
 void SuperstripFixedWidth::setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-        unsigned& nx, unsigned& nz, std::vector<SuperstripGlobalParams>& params) const {
+        unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripGlobalParams>& params) const {
     throw std::invalid_argument("Incorrect superstrip definition.");
 }
 
 // _____________________________________________________________________________
 void SuperstripProjective::setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-        unsigned& nx, unsigned& nz, std::vector<SuperstripLocalParams>& params) const {
+        unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripLocalParams>& params) const {
     throw std::invalid_argument("Incorrect superstrip definition.");
 }
 
 void SuperstripProjective::setDefinition(const std::string& definition, SuperstripCoordType& coord, SuperstripShapeType& shape,
-        unsigned& nx, unsigned& nz, std::vector<SuperstripGlobalParams>& params) const {
+        unsigned& nx, unsigned& nz, unsigned& nss, std::vector<SuperstripGlobalParams>& params) const {
     // Parse the definition string
     std::vector<std::string> tokens = split(definition, '_');
     assert(tokens.size() == 2);
@@ -106,12 +108,12 @@ void SuperstripProjective::setDefinition(const std::string& definition, Superstr
 
 // _____________________________________________________________________________
 std::ostream& operator<<(std::ostream& o, const SuperstripLocalParams& p) {
-    o << "rsx: " << p.right_shift_x << " mx: " << p.mask_x << " rsz: " << p.right_shift_z << " mz: " << p.mask_z << " sz: " << p.shift_z << " sm: " << p.shift_m;
+    o << "rsx: " << p.right_shift_x << " mx: " << p.mask_x << " rsz: " << p.right_shift_z << " mz: " << p.mask_z << " sz: " << p.shift_z << " mm: " << p.mask_m << " sm: " << p.shift_m;
     return o;
 }
 
 std::ostream& operator<<(std::ostream& o, const SuperstripGlobalParams& p) {
-    o << "rox: " << p.rotate_x << " lx: " << p.low_x << " dx: " << p.delta_x << " lz: " << p.low_z << " dz: " << p.delta_z;
+    o << "rox: " << p.rotate_x << " lx: " << p.low_x << " dx: " << p.delta_x << " nx: " << p.nbins_x << " lz: " << p.low_z << " dz: " << p.delta_z << " nz: " << p.nbins_z;
     return o;
 }
 

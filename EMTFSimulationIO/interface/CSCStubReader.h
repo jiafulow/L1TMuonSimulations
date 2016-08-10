@@ -20,7 +20,7 @@ public:
     CSCStubReader(int verbose=1);
     ~CSCStubReader();
 
-    void init(TString src);
+    void init(TString src, TString prefix="", TString suffix="");
 
     Long64_t loadTree(Long64_t entry) { return tchain_->LoadTree(entry); }
 
@@ -77,7 +77,7 @@ public:
     CSCStubWriter(int verbose=1);
     ~CSCStubWriter();
 
-    void init(TTree* tree, TString out);
+    void init(TTree* intree, TString out, TString prefix="", TString suffix="");
 
     void resetDeleteBranches (TTree* tree);
 
