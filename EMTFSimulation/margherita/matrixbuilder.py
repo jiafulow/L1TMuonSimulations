@@ -34,14 +34,12 @@ nparameters2D = 2
 nvariables2D = 4
 nparameters3D = nparameters2D*2
 nvariables3D = nvariables2D*2
-cache_size = 20000
+cache_size = 10000
 
 minInvPt = -1.0/3
 maxInvPt = +1.0/3
-minEta = 1.85
-maxEta = 2.2
-#minEta = 1.2
-#maxEta = 2.4
+minEta = 1.2
+maxEta = 2.4
 
 z_center = np.asarray([602.332, 698.693, 828.392, 935.437, 1025.17])
 phi_center = pi*(15+75)/2/180
@@ -102,7 +100,9 @@ def process_step1():
     stat_var2 = IncrementalStats(d=nvariables2D, cache_size=cache_size)
 
     for ievt, evt in enumerate(ttree):
-        if ievt == min(cache_size, nentries):
+        if ievt == nentries:
+            break
+        if stat_var1.count() == cache_size:
             break
 
         # Must have 1 particle
@@ -138,7 +138,7 @@ def process_step1():
             print "Unexpected math error:", evt.genParts_eta[0], simCotTheta, simTanTheta, theta
             raise
 
-        # Must satisfy invPt range
+        # Must satisfy invPt and eta ranges
         if not ((minInvPt <= simInvPt < maxInvPt) and (minEta <= simEta < maxEta)):
             continue
 
@@ -178,24 +178,30 @@ def process_step1():
         print "mean : ", stat_var1.mean()
         print "var  : ", stat_var1.variance()
         print "cov  : ", stat_var1.covariance()
+        print "q01  : ", stat_var1.quantile(p=0.01)
         print "q05  : ", stat_var1.quantile(p=0.05)
         print "q50  : ", stat_var1.quantile(p=0.50)
         print "q95  : ", stat_var1.quantile(p=0.95)
+        print "q99  : ", stat_var1.quantile(p=0.99)
         print
         print "count: ", stat_var2.count()
         print "mean : ", stat_var2.mean()
         print "var  : ", stat_var2.variance()
         print "cov  : ", stat_var2.covariance()
+        print "q01  : ", stat_var2.quantile(p=0.01)
         print "q05  : ", stat_var2.quantile(p=0.05)
         print "q50  : ", stat_var2.quantile(p=0.50)
         print "q95  : ", stat_var2.quantile(p=0.95)
+        print "q99  : ", stat_var2.quantile(p=0.99)
         print
 
     # __________________________________________________________________________
     # Accumulate data
 
-    min_var1, max_var1 = stat_var1.quantile(p=0.05), stat_var1.quantile(p=0.95)
-    min_var2, max_var2 = stat_var2.quantile(p=0.05), stat_var2.quantile(p=0.95)
+    #left_cuts_var1, right_cuts_var1 = stat_var1.quantile(p=0.05), stat_var1.quantile(p=0.95)
+    #left_cuts_var2, right_cuts_var2 = stat_var2.quantile(p=0.05), stat_var2.quantile(p=0.95)
+    left_cuts_var1, right_cuts_var1 = stat_var1.quantile(p=0.01), stat_var1.quantile(p=0.99)
+    left_cuts_var2, right_cuts_var2 = stat_var2.quantile(p=0.01), stat_var2.quantile(p=0.99)
 
     stat_var1 = IncrementalStats(d=nvariables)
     stat_var2 = IncrementalStats(d=nvariables)
@@ -233,7 +239,7 @@ def process_step1():
         #parameters1 = np.array([simInvPt*simTanTheta, simPhi])
         parameters2 = np.array([simTanTheta, simVz])
 
-        # Must satisfy invPt range
+        # Must satisfy invPt and eta ranges
         if not ((minInvPt <= simInvPt < maxInvPt) and (minEta <= simEta < maxEta)):
             continue
 
@@ -265,9 +271,9 @@ def process_step1():
         #variables2 -= r_over_two_rho_term_z
 
         # Must satisfy variable ranges
-        #if not np.all([np.less_equal(min_var1, variables1), np.less(variables1, max_var1), np.less_equal(min_var2, variables2), np.less(variables2, max_var2)]):
+        #if not np.all([np.less_equal(left_cuts_var1, variables1), np.less(variables1, right_cuts_var1), np.less_equal(left_cuts_var2, variables2), np.less(variables2, right_cuts_var2)]):
         #    continue
-        if not np.all([np.less_equal(min_var1, variables1), np.less(variables1, max_var1)]):
+        if not np.all([np.less_equal(left_cuts_var1, variables1), np.less(variables1, right_cuts_var1)]):
             continue
 
         # Concatenate
@@ -371,8 +377,8 @@ def process_step2():
 
     for ievt, variables1, variables2, parameters1, parameters2 in izip(count(), data_var1, data_var2, data_par1, data_par2):
         # Principal components
-        principals1 = np.dot(V_var1, variables1 - stat_var1.mean())
-        principals2 = np.dot(V_var2, variables2 - stat_var2.mean())
+        principals1 = np.dot(V_var1, variables1)
+        principals2 = np.dot(V_var2, variables2)
 
         stat_pc1.add(principals1)
         stat_pc2.add(principals2)
@@ -409,18 +415,16 @@ def process_step2():
         print "cov  : ", stat_pc2.covariance()
         print
         print "count: ", stat_D1.count()
-        print "mean : ", stat_D1.mean()
-        print "var  : ", stat_D1.variance()
+        #print "mean : ", stat_D1.mean()
+        #print "var  : ", stat_D1.variance()
         print "cov  : ", stat_D1.covariance()
-        print "resid: ", soln_pc1[1]
         print "D    : ", D_pc1
         print "DV   : ", D_var1
         print
         print "count: ", stat_D2.count()
-        print "mean : ", stat_D2.mean()
-        print "var  : ", stat_D2.variance()
+        #print "mean : ", stat_D2.mean()
+        #print "var  : ", stat_D2.variance()
         print "cov  : ", stat_D2.covariance()
-        print "resid: ", soln_pc2[1]
         print "D    : ", D_pc2
         print "DV   : ", D_var2
         print
@@ -432,10 +436,6 @@ def process_step2():
 
 # ______________________________________________________________________________
 def process_step2a(ntrials=2, do_trim=True):
-    # Implement Robust Least Squares
-    #   http://www.mathworks.com/help/curvefit/least-squares-fitting.html#bq_5kr9-4
-    #   https://en.wikipedia.org/wiki/Iteratively_reweighted_least_squares
-
     global stat_var1
     global stat_var2
     global stat_par1
@@ -456,9 +456,9 @@ def process_step2a(ntrials=2, do_trim=True):
         nparameters = nparameters2D
 
     def weight_func(u):
-        w = (1. - u*u) * (1. - u*u) if abs(u) < 1 else 0  # bisquare weight
-        return w
-    #weight_func = np.vectorize(weight_func)
+        return None
+
+    good_events = [True for i in xrange(len(data_var1))]
 
     for itrial in xrange(ntrials):
         if verbose > 0:
@@ -469,8 +469,14 @@ def process_step2a(ntrials=2, do_trim=True):
         stat_err2 = IncrementalStats(d=nparameters, cache_size=cache_size)
 
         for ievt, variables1, variables2, parameters1, parameters2 in izip(count(), data_var1, data_var2, data_par1, data_par2):
-            if ievt == min(cache_size, nentries):
+            if ievt == nentries:
                 break
+            if stat_err1.count() == cache_size:
+                break
+
+            # Skip events
+            if not good_events[ievt]:
+                continue
 
             # Fit parameters
             parameters_fit1 = np.dot(D_var1, variables1)
@@ -478,23 +484,38 @@ def process_step2a(ntrials=2, do_trim=True):
             parameters_err1 = parameters_fit1 - parameters1
             parameters_err2 = parameters_fit2 - parameters2
 
-            stat_err1.add(np.fabs(parameters_err1))  # l1-norm
-            stat_err2.add(np.fabs(parameters_err2))  # l1-norm
+            stat_err1.add(parameters_err1)
+            stat_err2.add(parameters_err2)
             continue
 
-        # scale = (Median absolute deviation/0.6745) * tuning * sqrt(1-h)
-        # but ignoring sqrt(1-h) for now
-        scales_resid1 = stat_err1.quantile(p=0.5)/0.6745 * 4.685
-        scales_resid2 = stat_err2.quantile(p=0.5)/0.6745 * 4.685
-        cuts_resid1 = stat_err1.quantile(p=0.90)
-        cuts_resid2 = stat_err2.quantile(p=0.90)
+        q25_err1 = stat_err1.quantile(p=0.25)
+        q25_err2 = stat_err2.quantile(p=0.25)
+        q75_err1 = stat_err1.quantile(p=0.75)
+        q75_err2 = stat_err2.quantile(p=0.75)
+        iqr_err1 = (q75_err1 - q25_err1)
+        iqr_err2 = (q75_err2 - q25_err2)
+        left_cuts_err1 = q25_err1 - iqr_err1 * 4
+        left_cuts_err2 = q25_err2 - iqr_err2 * 4
+        right_cuts_err1 = q75_err1 + iqr_err1 * 4
+        right_cuts_err2 = q75_err2 + iqr_err2 * 4
 
         if verbose > 0:
-            print "scales_resid1: ", scales_resid1
-            print "scales_resid2: ", scales_resid2
-            print "cuts_resid1  : ", cuts_resid1
-            print "cuts_resid2  : ", cuts_resid2
-
+            print "count : ", stat_err1.count()
+            print "mean  : ", stat_err1.mean()
+            print "std   : ", stat_err1.stdev()
+            print "min   : ", stat_err1.minimum()
+            print "max   : ", stat_err1.maximum()
+            print "lcuts : ", left_cuts_err1
+            print "rcuts : ", right_cuts_err1
+            print
+            print "count : ", stat_err2.count()
+            print "mean  : ", stat_err2.mean()
+            print "std   : ", stat_err2.stdev()
+            print "min   : ", stat_err2.minimum()
+            print "max   : ", stat_err2.maximum()
+            print "lcuts : ", left_cuts_err2
+            print "rcuts : ", right_cuts_err2
+            print
 
         stat_var1 = IncrementalStats(d=nvariables)
         stat_var2 = IncrementalStats(d=nvariables)
@@ -512,36 +533,32 @@ def process_step2a(ntrials=2, do_trim=True):
             parameters_fit2 = np.dot(D_var2, variables2)
             parameters_err1 = parameters_fit1 - parameters1
             parameters_err2 = parameters_fit2 - parameters2
+            w_err1 = weight_func(parameters_err1)
+            w_err2 = weight_func(parameters_err2)
 
+            # Simple trimming
             if do_trim:
-                # Simple trimming
-                #if not np.all([np.less(np.fabs(parameters_err1), cuts_resid1), np.less(np.fabs(parameters_err2), cuts_resid2)]):
-                #    continue
-                if not np.all([np.less(np.fabs(parameters_err1[0]), cuts_resid1[0]), np.less(np.fabs(parameters_err2[0]), cuts_resid2[0])]):
-                    continue
-                w_resid1 = None
-                w_resid2 = None
-            else:
-                # Reweighting
-                weights_resid1 = np.fabs(parameters_err1) / scales_resid1
-                weights_resid2 = np.fabs(parameters_err2) / scales_resid2
-                w_resid1 = weight_func(weights_resid1[0])  # use only residual in q/pT
-                w_resid2 = weight_func(weights_resid2[0])  # use only residual in cotTheta
+                if not np.all([np.less_equal(left_cuts_err1, parameters_err1), np.less(parameters_err1, right_cuts_err1), np.less_equal(left_cuts_err2, parameters_err2), np.less(parameters_err2, right_cuts_err2)]):
+                    good_events[ievt] = False
 
-            stat_var1.add(variables1, weight=w_resid1)
-            stat_var2.add(variables2, weight=w_resid2)
-            stat_par1.add(parameters1, weight=w_resid1)
-            stat_par2.add(parameters2, weight=w_resid2)
+            # Skip events
+            if not good_events[ievt]:
+                continue
+
+            stat_var1.add(variables1, weight=w_err1)
+            stat_var2.add(variables2, weight=w_err2)
+            stat_par1.add(parameters1, weight=w_err1)
+            stat_par2.add(parameters2, weight=w_err2)
 
             # Principal components
-            principals1 = np.dot(V_var1, variables1 - stat_var1.mean())
-            principals2 = np.dot(V_var2, variables2 - stat_var2.mean())
-            stat_pc1.add(principals1, weight=w_resid1)
-            stat_pc2.add(principals2, weight=w_resid2)
+            principals1 = np.dot(V_var1, variables1)
+            principals2 = np.dot(V_var2, variables2)
+            stat_pc1.add(principals1, weight=w_err1)
+            stat_pc2.add(principals2, weight=w_err2)
 
             # For D1 & D2
-            stat_D1.add(principals1, covariables=parameters1, weight=w_resid1)
-            stat_D2.add(principals2, covariables=parameters2, weight=w_resid2)
+            stat_D1.add(principals1, covariables=parameters1, weight=w_err1)
+            stat_D2.add(principals2, covariables=parameters2, weight=w_err2)
             continue
 
         # Find eigenvectors
@@ -572,18 +589,16 @@ def process_step2a(ntrials=2, do_trim=True):
             print "cov  : ", stat_pc2.covariance()
             print
             print "count: ", stat_D1.count()
-            print "mean : ", stat_D1.mean()
-            print "var  : ", stat_D1.variance()
+            #print "mean : ", stat_D1.mean()
+            #print "var  : ", stat_D1.variance()
             print "cov  : ", stat_D1.covariance()
-            print "resid: ", soln_pc1[1]
             print "D    : ", D_pc1
             print "DV   : ", D_var1
             print
             print "count: ", stat_D2.count()
-            print "mean : ", stat_D2.mean()
-            print "var  : ", stat_D2.variance()
+            #print "mean : ", stat_D2.mean()
+            #print "var  : ", stat_D2.variance()
             print "cov  : ", stat_D2.covariance()
-            print "resid: ", soln_pc2[1]
             print "D    : ", D_pc2
             print "DV   : ", D_var2
             print
@@ -619,8 +634,8 @@ def process_step3():
 
     for ievt, variables1, variables2, parameters1, parameters2 in izip(count(), data_var1, data_var2, data_par1, data_par2):
         # Principal components
-        principals1 = np.dot(V_var1, variables1 - stat_var1.mean())
-        principals2 = np.dot(V_var2, variables2 - stat_var2.mean())
+        principals1 = np.dot(V_var1, variables1)
+        principals2 = np.dot(V_var2, variables2)
 
         stat_pc1.add(principals1)
         stat_pc2.add(principals2)
@@ -628,8 +643,6 @@ def process_step3():
         data_pc2.append(principals2)
 
         # Fit parameters
-        #parameters_fit1 = np.dot(D_var1, variables1 - stat_var1.mean())
-        #parameters_fit2 = np.dot(D_var2, variables2 - stat_var2.mean())
         parameters_fit1 = np.dot(D_var1, variables1)
         parameters_fit2 = np.dot(D_var2, variables2)
         parameters_err1 = parameters_fit1 - parameters1
@@ -708,10 +721,10 @@ def process_step3():
                     nbinsx, xmin, xmax = 20, 0.1, 0.9
                 elif j == 3:
                     htitle = "z_{0} [cm]"
-                    nbinsx, xmin, xmax = 20, -30, 30
+                    nbinsx, xmin, xmax = 20, -30., 30.
                 else:
                     htitle = ""
-                    nbinsx, xmin, xmax = 20, -1, 1
+                    nbinsx, xmin, xmax = 20, -1., 1.
                 histos[hname] = TH2F(hname, ";"+htitle+";"+htitle2, nbinsx, xmin, xmax, nbinsy, ymin, ymax)
 
         for i in xrange(nparameters3D + 2):
@@ -727,13 +740,13 @@ def process_step3():
                 nbinsx, xmin, xmax = 1000, -0.05, 0.05
             elif i == 3:
                 htitle = "#Delta z_{0} [cm]"
-                nbinsx, xmin, xmax = 1000, -40, 40
+                nbinsx, xmin, xmax = 1000, -40., 40.
             elif i == 4:
                 htitle = "#Delta (p_{T})/p_{T}"
-                nbinsx, xmin, xmax = 1000, -8, 8
+                nbinsx, xmin, xmax = 1000, -8., 8.
             elif i == 5:
                 htitle = "#Delta (q/p_{T})*p_{T}"
-                nbinsx, xmin, xmax = 1000, -8, 8
+                nbinsx, xmin, xmax = 1000, -8., 8.
             else:
                 htitle = ""
                 nbinsx, xmin, xmax = 1000, -1., 1.
@@ -778,12 +791,12 @@ def process_step3():
         for x1, x2, p1, p2 in izip(data_pc1, data_pc2, data_par1, data_par2):
             # Concatenate
             if not use_3D:
-                x1 = [x1[i]/sqrt(w_var1[i]) if abs(w_var1[i]) > 1e-14 else 0. for i in xrange(len(x1))]
-                x2 = [x2[i]/sqrt(w_var2[i]) if abs(w_var2[i]) > 1e-14 else 0. for i in xrange(len(x2))]
+                x1 = [(x1[i] - stat_pc1.mean()[i])/sqrt(w_var1[i]) if abs(w_var1[i]) > 1e-14 else 0. for i in xrange(len(x1))]
+                x2 = [(x2[i] - stat_pc2.mean()[i])/sqrt(w_var2[i]) if abs(w_var2[i]) > 1e-14 else 0. for i in xrange(len(x2))]
                 x = np.concatenate((x1,x2))
                 p = np.concatenate((p1,p2))
             else:
-                x1 = [x1[i]/sqrt(w_var1[i]) if abs(w_var1[i]) > 1e-14 else 0. for i in xrange(len(x1))]
+                x1 = [(x1[i] - stat_pc1.mean()[i])/sqrt(w_var1[i]) if abs(w_var1[i]) > 1e-14 else 0. for i in xrange(len(x1))]
                 x = np.concatenate((x1,))
                 p = np.concatenate((p1,))
 
