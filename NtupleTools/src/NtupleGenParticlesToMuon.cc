@@ -50,18 +50,22 @@ NtupleGenParticlesToMuon::NtupleGenParticlesToMuon(const edm::ParameterSet& iCon
 
     theGeometryTraverser_.reset(new GeometryTraverser());
 
-    produces<std::vector<float> >               (prefix_ + "invPt"    + suffix_);
-    produces<std::vector<float> >               (prefix_ + "cotTheta" + suffix_);
-    produces<std::vector<float> >               (prefix_ + "d0"       + suffix_);
-    produces<std::vector<float> >               (prefix_ + "dz"       + suffix_);
+    produces<std::vector<float> >               (prefix_ + "d0"            + suffix_);
+    produces<std::vector<float> >               (prefix_ + "dz"            + suffix_);
     produces<std::vector<std::vector<float> > > (prefix_ + "globalPhiMB"   + suffix_);
     produces<std::vector<std::vector<float> > > (prefix_ + "globalThetaMB" + suffix_);
     produces<std::vector<std::vector<float> > > (prefix_ + "globalEtaMB"   + suffix_);
     produces<std::vector<std::vector<float> > > (prefix_ + "globalRhoMB"   + suffix_);
+    produces<std::vector<std::vector<float> > > (prefix_ + "globalPxMB"    + suffix_);
+    produces<std::vector<std::vector<float> > > (prefix_ + "globalPyMB"    + suffix_);
+    produces<std::vector<std::vector<float> > > (prefix_ + "globalPzMB"    + suffix_);
     produces<std::vector<std::vector<float> > > (prefix_ + "globalPhiME"   + suffix_);
     produces<std::vector<std::vector<float> > > (prefix_ + "globalThetaME" + suffix_);
     produces<std::vector<std::vector<float> > > (prefix_ + "globalEtaME"   + suffix_);
     produces<std::vector<std::vector<float> > > (prefix_ + "globalRhoME"   + suffix_);
+    produces<std::vector<std::vector<float> > > (prefix_ + "globalPxME"    + suffix_);
+    produces<std::vector<std::vector<float> > > (prefix_ + "globalPyME"    + suffix_);
+    produces<std::vector<std::vector<float> > > (prefix_ + "globalPzME"    + suffix_);
     //produces<unsigned>                          (prefix_ + "size"     + suffix_);
 }
 
@@ -101,18 +105,22 @@ void NtupleGenParticlesToMuon::beginRun(const edm::Run& iRun, const edm::EventSe
 
 void NtupleGenParticlesToMuon::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
-    std::auto_ptr<std::vector<float> >               v_invPt        (new std::vector<float>());
-    std::auto_ptr<std::vector<float> >               v_cotTheta     (new std::vector<float>());
     std::auto_ptr<std::vector<float> >               v_d0           (new std::vector<float>());
     std::auto_ptr<std::vector<float> >               v_dz           (new std::vector<float>());
     std::auto_ptr<std::vector<std::vector<float> > > v_globalPhiMB  (new std::vector<std::vector<float> >());
     std::auto_ptr<std::vector<std::vector<float> > > v_globalThetaMB(new std::vector<std::vector<float> >());
     std::auto_ptr<std::vector<std::vector<float> > > v_globalEtaMB  (new std::vector<std::vector<float> >());
     std::auto_ptr<std::vector<std::vector<float> > > v_globalRhoMB  (new std::vector<std::vector<float> >());
+    std::auto_ptr<std::vector<std::vector<float> > > v_globalPxMB   (new std::vector<std::vector<float> >());
+    std::auto_ptr<std::vector<std::vector<float> > > v_globalPyMB   (new std::vector<std::vector<float> >());
+    std::auto_ptr<std::vector<std::vector<float> > > v_globalPzMB   (new std::vector<std::vector<float> >());
     std::auto_ptr<std::vector<std::vector<float> > > v_globalPhiME  (new std::vector<std::vector<float> >());
     std::auto_ptr<std::vector<std::vector<float> > > v_globalThetaME(new std::vector<std::vector<float> >());
     std::auto_ptr<std::vector<std::vector<float> > > v_globalEtaME  (new std::vector<std::vector<float> >());
     std::auto_ptr<std::vector<std::vector<float> > > v_globalRhoME  (new std::vector<std::vector<float> >());
+    std::auto_ptr<std::vector<std::vector<float> > > v_globalPxME   (new std::vector<std::vector<float> >());
+    std::auto_ptr<std::vector<std::vector<float> > > v_globalPyME   (new std::vector<std::vector<float> >());
+    std::auto_ptr<std::vector<std::vector<float> > > v_globalPzME   (new std::vector<std::vector<float> >());
     //std::auto_ptr<unsigned>            v_size     (new unsigned(0));
 
     //__________________________________________________________________________
@@ -175,46 +183,58 @@ void NtupleGenParticlesToMuon::produce(edm::Event& iEvent, const edm::EventSetup
                 for (unsigned i=0; i<layersBarrel.size(); i++) {
                     vec_r.push_back(layersBarrel.at(i)->radius());
                 }
-                const std::vector<GlobalPoint>& propagatedBarrel = theGeometryTraverser_->propagateBarrels(vec_r);
+                const std::vector<std::pair<GlobalPoint, GlobalVector> >& propagatedBarrel = theGeometryTraverser_->propagateBarrels(vec_r);
 
                 std::vector<double> vec_z;
                 for (unsigned i=0; i<layersEndcap.size(); i++) {
                     vec_z.push_back(layersEndcap.at(i)->position().z());
                 }
-                const std::vector<GlobalPoint>& propagatedEndcap = theGeometryTraverser_->propagateEndcaps(vec_z);
+                const std::vector<std::pair<GlobalPoint, GlobalVector> >& propagatedEndcap = theGeometryTraverser_->propagateEndcaps(vec_z);
 
                 // Fill the intermediate vectors
-                std::vector<float> globalPhiMB, globalThetaMB, globalEtaMB, globalRhoMB;
+                std::vector<float> globalPhiMB, globalThetaMB, globalEtaMB, globalRhoMB, globalPxMB, globalPyMB, globalPzMB;
                 for (unsigned i=0; i<propagatedBarrel.size(); i++) {
-                    const GlobalPoint& gp = propagatedBarrel.at(i);
+                    const GlobalPoint& gp = propagatedBarrel.at(i).first;
+                    const GlobalVector& gv = propagatedBarrel.at(i).second;
                     globalPhiMB.push_back(gp.phi());
                     globalThetaMB.push_back(gp.theta());
                     globalEtaMB.push_back(gp.eta());
                     globalRhoMB.push_back(gp.perp());
+                    globalPxMB.push_back(gv.x());
+                    globalPyMB.push_back(gv.y());
+                    globalPzMB.push_back(gv.z());
                 }
 
-                std::vector<float> globalPhiME, globalThetaME, globalEtaME, globalRhoME;
+                std::vector<float> globalPhiME, globalThetaME, globalEtaME, globalRhoME, globalPxME, globalPyME, globalPzME;
                 for (unsigned i=0; i<propagatedEndcap.size(); i++) {
-                    const GlobalPoint& gp = propagatedEndcap.at(i);
+                    const GlobalPoint& gp = propagatedEndcap.at(i).first;
+                    const GlobalVector& gv = propagatedEndcap.at(i).second;
                     globalPhiME.push_back(gp.phi());
                     globalThetaME.push_back(gp.theta());
                     globalEtaME.push_back(gp.eta());
                     globalRhoME.push_back(gp.perp());
+                    globalPxME.push_back(gv.x());
+                    globalPyME.push_back(gv.y());
+                    globalPzME.push_back(gv.z());
                 }
 
                 // Fill the vectors
-                v_invPt        ->push_back(float(it->charge()) / it->pt());
-                v_cotTheta     ->push_back(it->theta() != 0. ? 1.0 / std::tan(it->theta()) : 1.0 / 1e-16);
                 v_d0           ->push_back(get_d0(poca, poca_mom));
                 v_dz           ->push_back(get_dz(poca, poca_mom));
                 v_globalPhiMB  ->push_back(globalPhiMB);
                 v_globalThetaMB->push_back(globalThetaMB);
                 v_globalEtaMB  ->push_back(globalEtaMB);
                 v_globalRhoMB  ->push_back(globalRhoMB);
+                v_globalPxMB   ->push_back(globalPxMB);
+                v_globalPyMB   ->push_back(globalPyMB);
+                v_globalPzMB   ->push_back(globalPzMB);
                 v_globalPhiME  ->push_back(globalPhiME);
                 v_globalThetaME->push_back(globalThetaME);
                 v_globalEtaME  ->push_back(globalEtaME);
                 v_globalRhoME  ->push_back(globalRhoME);
+                v_globalPxME   ->push_back(globalPxME);
+                v_globalPyME   ->push_back(globalPyME);
+                v_globalPzME   ->push_back(globalPzME);
 
                 n++;
             }
@@ -225,16 +245,20 @@ void NtupleGenParticlesToMuon::produce(edm::Event& iEvent, const edm::EventSetup
     }
 
     //__________________________________________________________________________
-    iEvent.put(v_invPt        , prefix_ + "invPt"         + suffix_);
-    iEvent.put(v_cotTheta     , prefix_ + "cotTheta"      + suffix_);
     iEvent.put(v_d0           , prefix_ + "d0"            + suffix_);
     iEvent.put(v_dz           , prefix_ + "dz"            + suffix_);
     iEvent.put(v_globalPhiMB  , prefix_ + "globalPhiMB"   + suffix_);
     iEvent.put(v_globalThetaMB, prefix_ + "globalThetaMB" + suffix_);
     iEvent.put(v_globalEtaMB  , prefix_ + "globalEtaMB"   + suffix_);
     iEvent.put(v_globalRhoMB  , prefix_ + "globalRhoMB"   + suffix_);
+    iEvent.put(v_globalPxMB   , prefix_ + "globalPxMB"    + suffix_);
+    iEvent.put(v_globalPyMB   , prefix_ + "globalPyMB"    + suffix_);
+    iEvent.put(v_globalPzMB   , prefix_ + "globalPzMB"    + suffix_);
     iEvent.put(v_globalPhiME  , prefix_ + "globalPhiME"   + suffix_);
     iEvent.put(v_globalThetaME, prefix_ + "globalThetaME" + suffix_);
     iEvent.put(v_globalEtaME  , prefix_ + "globalEtaME"   + suffix_);
     iEvent.put(v_globalRhoME  , prefix_ + "globalRhoME"   + suffix_);
+    iEvent.put(v_globalPxME   , prefix_ + "globalPxME"    + suffix_);
+    iEvent.put(v_globalPyME   , prefix_ + "globalPyME"    + suffix_);
+    iEvent.put(v_globalPzME   , prefix_ + "globalPzME"    + suffix_);
 }

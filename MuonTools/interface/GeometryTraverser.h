@@ -30,11 +30,11 @@ class GeometryTraverser {
         _charge = q;
     }
 
-    GlobalPoint propagateBarrel(double r) const;
-    GlobalPoint propagateEndcap(double z) const;
+    std::pair<GlobalPoint, GlobalVector> propagateBarrel(double r) const;
+    std::pair<GlobalPoint, GlobalVector> propagateEndcap(double z) const;
 
-    std::vector<GlobalPoint> propagateBarrels(const std::vector<double>& vec_r) const;
-    std::vector<GlobalPoint> propagateEndcaps(const std::vector<double>& vec_z) const;
+    std::vector<std::pair<GlobalPoint, GlobalVector> > propagateBarrels(const std::vector<double>& vec_r) const;
+    std::vector<std::pair<GlobalPoint, GlobalVector> > propagateEndcaps(const std::vector<double>& vec_z) const;
 
     void checkAndUpdateGeometry(const edm::EventSetup&);
 

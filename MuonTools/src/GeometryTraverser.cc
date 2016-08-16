@@ -35,21 +35,21 @@ void GeometryTraverser::checkAndUpdateGeometry(const edm::EventSetup& es) {
   }
 }
 
-GlobalPoint GeometryTraverser::propagateBarrel(double r) const {
+std::pair<GlobalPoint, GlobalVector> GeometryTraverser::propagateBarrel(double r) const {
     std::vector<double> vec_r;
     vec_r.push_back(r);
-    const std::vector<GlobalPoint>& res = propagateBarrels(vec_r);
+    const std::vector<std::pair<GlobalPoint, GlobalVector> >& res = propagateBarrels(vec_r);
     return res.front();
 }
 
-GlobalPoint GeometryTraverser::propagateEndcap(double z) const {
+std::pair<GlobalPoint, GlobalVector> GeometryTraverser::propagateEndcap(double z) const {
     std::vector<double> vec_z;
     vec_z.push_back(z);
-    const std::vector<GlobalPoint>& res = propagateEndcaps(vec_z);
+    const std::vector<std::pair<GlobalPoint, GlobalVector> >& res = propagateEndcaps(vec_z);
     return res.front();
 }
 
-std::vector<GlobalPoint> GeometryTraverser::propagateBarrels(const std::vector<double>& vec_r) const {
+std::vector<std::pair<GlobalPoint, GlobalVector> > GeometryTraverser::propagateBarrels(const std::vector<double>& vec_r) const {
     FreeTrajectoryState ftsAtProduction(_vertex, _momentum, _charge, magneticField());
     const Propagator * propagatorBarrel = &*(_propagator.product());
 
@@ -70,7 +70,7 @@ std::vector<GlobalPoint> GeometryTraverser::propagateBarrels(const std::vector<d
     // see MuonAnalysis/MuonAssociators/src/PropagateToMuon.cc
     TrajectoryStateOnSurface tsosBarrel;
     bool isValidBarrel = true;
-    std::vector<GlobalPoint> propagatedBarrel;
+    std::vector<std::pair<GlobalPoint, GlobalVector> > propagatedBarrel;
 
     for (unsigned i=0; i<layersBarrel.size(); i++) {
         if (i == 0) {
@@ -82,16 +82,15 @@ std::vector<GlobalPoint> GeometryTraverser::propagateBarrels(const std::vector<d
         isValidBarrel = tsosBarrel.isValid() &&
            fabs(tsosBarrel.globalPosition().z()) <= layersBarrel.at(i)->bounds().length()/2.0;
         if (isValidBarrel) {
-            propagatedBarrel.push_back(tsosBarrel.globalPosition());
+            propagatedBarrel.push_back(std::make_pair(tsosBarrel.globalPosition(), tsosBarrel.globalMomentum()) );
         } else {
-            propagatedBarrel.push_back(GlobalPoint(0., 0., 0.));
+            propagatedBarrel.push_back(std::make_pair(GlobalPoint(0., 0., 0.), GlobalVector(0., 0., 0.)) );
         }
     }
-
     return propagatedBarrel;
 }
 
-std::vector<GlobalPoint> GeometryTraverser::propagateEndcaps(const std::vector<double>& vec_z) const {
+std::vector<std::pair<GlobalPoint, GlobalVector> > GeometryTraverser::propagateEndcaps(const std::vector<double>& vec_z) const {
     FreeTrajectoryState ftsAtProduction(_vertex, _momentum, _charge, _magfield.product());
     const Propagator * propagatorEndcap = &*(_propagator.product());
 
@@ -112,7 +111,7 @@ std::vector<GlobalPoint> GeometryTraverser::propagateEndcaps(const std::vector<d
     // see MuonAnalysis/MuonAssociators/src/PropagateToMuon.cc
     TrajectoryStateOnSurface tsosEndcap;
     bool isValidEndcap = true;
-    std::vector<GlobalPoint> propagatedEndcap;
+    std::vector<std::pair<GlobalPoint, GlobalVector> > propagatedEndcap;
 
     for (unsigned i=0; i<layersEndcap.size(); i++) {
         if (i == 0) {
@@ -125,11 +124,10 @@ std::vector<GlobalPoint> GeometryTraverser::propagateEndcaps(const std::vector<d
            tsosEndcap.globalPosition().perp() >= layersEndcap.at(i)->innerRadius() &&
            tsosEndcap.globalPosition().perp() <= layersEndcap.at(i)->outerRadius();
         if (isValidEndcap) {
-            propagatedEndcap.push_back(tsosEndcap.globalPosition());
+            propagatedEndcap.push_back(std::make_pair(tsosEndcap.globalPosition(), tsosEndcap.globalMomentum()) );
         } else {
-            propagatedEndcap.push_back(GlobalPoint(0., 0., 0.));
+            propagatedEndcap.push_back(std::make_pair(GlobalPoint(0., 0., 0.), GlobalVector(0., 0., 0.)) );
         }
     }
-
     return propagatedEndcap;
 }

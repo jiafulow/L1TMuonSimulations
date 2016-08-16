@@ -148,13 +148,13 @@ void AnalyzerPropagateToMuon::beginRun(const edm::Run& iRun, const edm::EventSet
                 //for (unsigned i=2; i<770; i+=2) {
                 //    vec_r.push_back(double(i));
                 //}
-                //const std::vector<GlobalPoint>& propagatedBarrel = theGeometryTraverser_->propagateBarrels(vec_r);
+                //const std::vector<std::pair<GlobalPoint, GlobalVector> >& propagatedBarrel = theGeometryTraverser_->propagateBarrels(vec_r);
 
                 std::vector<double> vec_z;
                 for (unsigned i=2; i<1100; i+=2) {
                     vec_z.push_back(double(i));
                 }
-                const std::vector<GlobalPoint>& propagatedEndcap = theGeometryTraverser_->propagateEndcaps(vec_z);
+                const std::vector<std::pair<GlobalPoint, GlobalVector> >& propagatedEndcap = theGeometryTraverser_->propagateEndcaps(vec_z);
 
 
                 // Fill the vectors
@@ -170,7 +170,8 @@ void AnalyzerPropagateToMuon::beginRun(const edm::Run& iRun, const edm::EventSet
                 mypropagator_->hits_rho   = std::vector<float>();
 
                 for (unsigned i=0; i<propagatedEndcap.size(); i++) {
-                    const GlobalPoint& gp = propagatedEndcap.at(i);
+                    const GlobalPoint& gp = propagatedEndcap.at(i).first;
+                    //const GlobalVector& gv = propagatedEndcap.at(i).second;
                     mypropagator_->hits_x.push_back(gp.x());
                     mypropagator_->hits_y.push_back(gp.y());
                     mypropagator_->hits_z.push_back(gp.z());
