@@ -24,9 +24,11 @@ from incrementalstats import *
 fname = "/home/jlow/L1MuonTrigger/scratch/work_20160804/stubs.1.root"
 #fname = "/cms/data/store/user/jiafulow/L1TrackTrigger/6_2_0_SLHC25p3/Demo_Emulator/stubs_tt27_300M_emu.root"
 #fname = "root://cmsxrootd-site.fnal.gov//store/user/l1upgrades/SLHC/GEN/Demo_Emulator/stubs_tt27_300M_emu.root"
-nentries = 400000
+nentries = 200000 * 6
 #nentries = 10000000
 use_3D = 1
+fix_beamspot = 1
+fix_charge = 1
 verbose = 1
 make_plots = 1
 
@@ -135,12 +137,22 @@ def process_step1():
             theta = atan2(simTanTheta, 1.0)
             eta = -log(tan(theta/2.0))
         except:
-            print "Unexpected math error:", evt.genParts_eta[0], simCotTheta, simTanTheta, theta
+            print "Unexpected math error:", simEta, simCotTheta, simTanTheta, theta
             raise
 
         # Must satisfy invPt and eta ranges
         if not ((minInvPt <= simInvPt < maxInvPt) and (minEta <= simEta < maxEta)):
             continue
+
+        # Fix beamspot
+        if fix_beamspot:
+            if not (-1 <= simVz <= 1):
+                continue
+
+        # Fix charge
+        if fix_charge:
+            if not (int(evt.genParts_charge[0]) == -1):
+                continue
 
         # Get stub variables
         variables1 = np.array(evt.CSCStubs_globalPhi)
@@ -154,12 +166,12 @@ def process_step1():
         variables3 = variables3[mask]
 
         # Apply deltaZ correction
-        #simC = -0.5 * (0.003 * 3.8 * simInvPt)  # 1/(2 x radius of curvature)
-        #simT = 1.0
-        #simC *= simTanTheta
-        #simT *= simTanTheta
-        #variables1 -= simC * variables3
-        #variables2 -= simT * variables3
+        simC = -0.5 * (0.003 * 3.8 * simInvPt)  # 1/(2 x radius of curvature)
+        simT = 1.0
+        simC *= simTanTheta
+        simT *= simTanTheta
+        variables1 -= simC * variables3
+        variables2 -= simT * variables3
 
         # Apply R^3 correction
         #r_over_two_rho_term = np.power(np.array(evt.CSCStubs_globalRho) * simC,3)
@@ -243,6 +255,16 @@ def process_step1():
         if not ((minInvPt <= simInvPt < maxInvPt) and (minEta <= simEta < maxEta)):
             continue
 
+        # Fix beamspot
+        if fix_beamspot:
+            if not (-1 <= simVz <= 1):
+                continue
+
+        # Fix charge
+        if fix_charge:
+            if not (int(evt.genParts_charge[0]) == -1):
+                continue
+
         # Get stub variables
         variables1 = np.array(evt.CSCStubs_globalPhi)
         variables2 = np.array(evt.CSCStubs_globalRho)
@@ -255,12 +277,12 @@ def process_step1():
         variables3 = variables3[mask]
 
         # Apply deltaZ correction
-        #simC = -0.5 * (0.003 * 3.8 * simInvPt)  # 1/(2 x radius of curvature)
-        #simT = 1.0
-        #simC *= simTanTheta
-        #simT *= simTanTheta
-        #variables1 -= simC * variables3
-        #variables2 -= simT * variables3
+        simC = -0.5 * (0.003 * 3.8 * simInvPt)  # 1/(2 x radius of curvature)
+        simT = 1.0
+        simC *= simTanTheta
+        simT *= simTanTheta
+        variables1 -= simC * variables3
+        variables2 -= simT * variables3
 
         # Apply R^3 correction
         #r_over_two_rho_term = np.power(np.array(evt.CSCStubs_globalRho) * simC,3)
