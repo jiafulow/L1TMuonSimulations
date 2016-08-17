@@ -122,7 +122,7 @@ void StubSelector::selectStubs(TString src, TString out) {
             //float simVy       = reader.vp_vy->at(ipart);
             float simVz       = reader.vp_vz->at(ipart);
             int   simCharge   = reader.vp_charge->at(ipart);
-            float simCotTheta = std::sinh(simEta);
+            //float simCotTheta = std::sinh(simEta);
             float simInvPt    = float(simCharge)/simPt;
 
             // Apply pt, eta, phi requirements
@@ -181,6 +181,8 @@ void StubSelector::selectStubs(TString src, TString out) {
 
         assert(evt_selectedStubRefs.size() == nparts);
 
+
+        // Modify branches to keep only the selected stubs
         bool keepEvent = false;
 
         for (unsigned ipart=0; ipart<nparts; ++ipart) {
@@ -208,6 +210,9 @@ void StubSelector::selectStubs(TString src, TString out) {
             selectVectorElements(*reader.vp_globalThetaME , selectedPartRefs);
             selectVectorElements(*reader.vp_globalEtaME   , selectedPartRefs);
             selectVectorElements(*reader.vp_globalRhoME   , selectedPartRefs);
+            selectVectorElements(*reader.vp_globalPxME    , selectedPartRefs);
+            selectVectorElements(*reader.vp_globalPyME    , selectedPartRefs);
+            selectVectorElements(*reader.vp_globalPzME    , selectedPartRefs);
 
             selectVectorElements(*reader.vb_globalPhi     , selectedStubRefs);
             selectVectorElements(*reader.vb_globalTheta   , selectedStubRefs);

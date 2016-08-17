@@ -46,6 +46,9 @@ public:
     std::vector<std::vector<float> > * vp_globalThetaME;
     std::vector<std::vector<float> > * vp_globalEtaME;
     std::vector<std::vector<float> > * vp_globalRhoME;
+    std::vector<std::vector<float> > * vp_globalPxME;
+    std::vector<std::vector<float> > * vp_globalPyME;
+    std::vector<std::vector<float> > * vp_globalPzME;
 
     // Stub information
     std::vector<float> *          vb_globalPhi;

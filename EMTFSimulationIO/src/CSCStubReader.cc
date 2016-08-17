@@ -23,6 +23,9 @@ CSCStubReader::CSCStubReader(int verbose)
   vp_globalThetaME    (0),
   vp_globalEtaME      (0),
   vp_globalRhoME      (0),
+  vp_globalPxME       (0),
+  vp_globalPyME       (0),
+  vp_globalPzME       (0),
   //
   vb_globalPhi        (0),
   vb_globalTheta      (0),
@@ -90,6 +93,9 @@ void CSCStubReader::init(TString src, TString prefix, TString suffix) {
     tchain_->SetBranchAddress("genParts_globalThetaME", &(vp_globalThetaME));
     tchain_->SetBranchAddress("genParts_globalEtaME"  , &(vp_globalEtaME));
     tchain_->SetBranchAddress("genParts_globalRhoME"  , &(vp_globalRhoME));
+    tchain_->SetBranchAddress("genParts_globalPxME"   , &(vp_globalPxME));
+    tchain_->SetBranchAddress("genParts_globalPyME"   , &(vp_globalPyME));
+    tchain_->SetBranchAddress("genParts_globalPzME"   , &(vp_globalPzME));
     //
     tchain_->SetBranchAddress("CSCStubs_globalPhi"    , &(vb_globalPhi));
     tchain_->SetBranchAddress("CSCStubs_globalTheta"  , &(vb_globalTheta));
@@ -122,6 +128,9 @@ void CSCStubReader::init(TString src, TString prefix, TString suffix) {
     tchain_->SetBranchStatus("genParts_globalThetaME" , 1);
     tchain_->SetBranchStatus("genParts_globalEtaME"   , 1);
     tchain_->SetBranchStatus("genParts_globalRhoME"   , 1);
+    tchain_->SetBranchStatus("genParts_globalPxME"    , 1);
+    tchain_->SetBranchStatus("genParts_globalPyME"    , 1);
+    tchain_->SetBranchStatus("genParts_globalPzME"    , 1);
     //
     tchain_->SetBranchStatus("CSCStubs_globalPhi"     , 1);
     tchain_->SetBranchStatus("CSCStubs_globalTheta"   , 1);
