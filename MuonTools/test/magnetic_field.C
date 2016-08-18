@@ -79,4 +79,6 @@ h2_br->Draw("COLZ");
 mb1->Draw(); mb2->Draw(); mb3->Draw(); mb4->Draw(); me11->Draw(); me12->Draw(); me2->Draw(); me3->Draw(); me4->Draw();
 gPad->Print("magnetic_field_Br.png");
 
+
+tfile->Close();
 }
