@@ -12,7 +12,7 @@ def make_figures(infile='histos.root'):
     if not os.path.exists(imgdir):
         os.makedirs(imgdir)
 
-    tfile = TFile.Open("histos.root")
+    tfile = TFile.Open(infile)
     tfile.cd()
     for h in tfile.GetListOfKeys():
         h = h.ReadObj()
@@ -168,7 +168,7 @@ def make_more_figures():
             for yfit in ["yfit1", "yfit2"]:
                 h1 = getattr(h, yfit)
                 if yfit == "yfit1":
-                    h1.GetYaxis().SetTitle("#mu(%s)" % h1.GetYaxis().GetTitle())
+                    h1.GetYaxis().SetTitle("%s" % h1.GetYaxis().GetTitle())
                     h1.SetMinimum(ymin); h1.SetMaximum(ymax)
                 else:
                     h1.GetYaxis().SetTitle("#sigma(%s)" % h1.GetYaxis().GetTitle())
@@ -182,16 +182,15 @@ def make_more_figures():
 
                 imgname = h1.GetName()
                 gPad.Print(imgdir+imgname+".png")
-
     return
 
 def serve_figures(htmlfile='index.html'):
     html = '''<html><head><link href="bootstrap.min.css" rel="stylesheet"></head><body><div class="container"><div class="row">%s</div></div></body></html>'''
 
     writeme = []
-#    for fig in figures:
-#        s = '''<div class="col-md-3"><img src="%s.png" class="img-responsive"></div>''' % fig
-#        writeme.append(s)
+    #for fig in figures:
+    #    s = '''<div class="col-md-3"><img src="%s.png" class="img-responsive"></div>''' % fig
+    #    writeme.append(s)
     for fig in figures:
         s = '''<div class="col-md-3"><img src="%s.png" class="img-responsive"></div>''' % fig.replace("_yfit2", "_yfit1")
         writeme.append(s)
