@@ -105,24 +105,24 @@ def drawer_book(histos, options):
     for ptbin in l1t_pt_vec:
         for modebin in l1t_mode_vec:
             hname = "resolution_pt_in_mode%i_pt%i" % (modebin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #Delta (1/p_{T})*p_{T} {mode %s}; entries" % (get_l1t_mode_label(modebin)), 200, -8, 8
+            htitle, nbinsx, xmin, xmax = "; #Delta (1/p_{T})*p_{T} {mode %s}; entries" % (get_l1t_mode_label(modebin)), 200, -5, 5
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (modebin, ptbin)
         for qualbin in l1t_quality_vec:
             hname = "resolution_pt_in_qual%i_pt%i" % (qualbin, ptbin)
-            htitle, nbinsx, xmin, xmax = "; #Delta (1/p_{T})*p_{T} {modes %s}; entries" % (get_l1t_quality_label(qualbin)), 200, -8, 8
+            htitle, nbinsx, xmin, xmax = "; #Delta (1/p_{T})*p_{T} {modes %s}; entries" % (get_l1t_quality_label(qualbin)), 200, -5, 5
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (qualbin, ptbin)
 
     for etabin in l1t_eta_vec:
         for modebin in l1t_mode_vec:
             hname = "resolution_pt_in_mode%i_eta%i" % (modebin, etabin)
-            htitle, nbinsx, xmin, xmax = "; #Delta (1/p_{T})*p_{T} {mode %s}; entries" % (get_l1t_mode_label(modebin)), 200, -8, 8
+            htitle, nbinsx, xmin, xmax = "; #Delta (1/p_{T})*p_{T} {mode %s}; entries" % (get_l1t_mode_label(modebin)), 200, -5, 5
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (modebin, etabin)
         for qualbin in l1t_quality_vec:
             hname = "resolution_pt_in_qual%i_eta%i" % (qualbin, etabin)
-            htitle, nbinsx, xmin, xmax = "; #Delta (1/p_{T})*p_{T} {modes %s}; entries" % (get_l1t_quality_label(qualbin)), 200, -8, 8
+            htitle, nbinsx, xmin, xmax = "; #Delta (1/p_{T})*p_{T} {modes %s}; entries" % (get_l1t_quality_label(qualbin)), 200, -5, 5
             histos[hname] = TH1F(hname, htitle, nbinsx, xmin, xmax)
             histos[hname].indices = (qualbin, ptbin)
 
@@ -130,24 +130,24 @@ def drawer_book(histos, options):
     for ptbin in l1t_pt_vec:
         for modebin in l1t_mode_vec:
             hname = "resolution_pt_vs_eta_in_mode%i_pt%i" % (modebin, ptbin)
-            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta; #Delta (1/p_{T})*p_{T} {mode %s}" % (get_l1t_mode_label(modebin)), 200, -8, 8, 26, 1.2, 2.5
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta; #Delta (1/p_{T})*p_{T} {mode %s}" % (get_l1t_mode_label(modebin)), 200, -5, 5, 26, 1.2, 2.5
             histos[hname] = TH2F(hname, htitle, nbinsy, ymin, ymax, nbinsx, xmin, xmax)
             histos[hname].indices = (modebin, ptbin)
         for qualbin in l1t_quality_vec:
             hname = "resolution_pt_vs_eta_in_qual%i_pt%i" % (qualbin, ptbin)
-            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta; #Delta (1/p_{T})*p_{T} {modes %s}" % (get_l1t_quality_label(qualbin)), 200, -8, 8, 26, 1.2, 2.5
+            htitle, nbinsx, xmin, xmax, nbinsy, ymin, ymax = "; #eta; #Delta (1/p_{T})*p_{T} {modes %s}" % (get_l1t_quality_label(qualbin)), 200, -5, 5, 26, 1.2, 2.5
             histos[hname] = TH2F(hname, htitle, nbinsy, ymin, ymax, nbinsx, xmin, xmax)
             histos[hname].indices = (qualbin, ptbin)
 
     for etabin in l1t_eta_vec:
         for modebin in l1t_mode_vec:
             hname = "resolution_pt_vs_pt_in_mode%i_eta%i" % (modebin, etabin)
-            htitle, nbinsx, xmin, xmax = "; p_{T} [GeV]; #Delta (1/p_{T})*p_{T} {mode %s}" % (get_l1t_mode_label(modebin)), 200, -8, 8
+            htitle, nbinsx, xmin, xmax = "; p_{T} [GeV]; #Delta (1/p_{T})*p_{T} {mode %s}" % (get_l1t_mode_label(modebin)), 200, -5, 5
             histos[hname] = TH2F(hname, htitle, len(myptbins)-1, np.array(myptbins), nbinsx, xmin, xmax)
             histos[hname].indices = (modebin, etabin)
         for qualbin in l1t_quality_vec:
             hname = "resolution_pt_vs_pt_in_qual%i_eta%i" % (qualbin, etabin)
-            htitle, nbinsx, xmin, xmax = "; p_{T} [GeV]; #Delta (1/p_{T})*p_{T} {modes %s}" % (get_l1t_quality_label(qualbin)), 200, -8, 8
+            htitle, nbinsx, xmin, xmax = "; p_{T} [GeV]; #Delta (1/p_{T})*p_{T} {modes %s}" % (get_l1t_quality_label(qualbin)), 200, -5, 5
             histos[hname] = TH2F(hname, htitle, len(myptbins)-1, np.array(myptbins), nbinsx, xmin, xmax)
             histos[hname].indices = (qualbin, etabin)
 

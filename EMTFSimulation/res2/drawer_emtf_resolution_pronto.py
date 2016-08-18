@@ -6,6 +6,7 @@ histos = None
 options = None
 figures = []
 
+l1t_pt_vec = [3,5,10,20,50,200,1000]
 ptpalette = map(lambda x: TColor.GetColor(x), ("#66DD66", "#3333FF", "#990099", "#FFBB44", "#EE4477", "#56D3DB", "#454545"))
 tlegend2 = tlegend.Clone()
 
@@ -35,10 +36,10 @@ def display_yfit(h, xxmin, xxmax, fun="gaus"):
             display_fit(py, xxmin, xxmax)
             p1, p2 = py.fit.GetParameter(1), py.fit.GetParameter(2)
             e1, e2 = py.fit.GetParError(1), py.fit.GetParError(2)
-            is_fit_ok = (abs(p1 - py.GetMean())/py.GetRMS() < 1) and (1e-2 < p2/py.GetRMS() < 1e2)
-            if not is_fit_ok:
-                p1, p2 = py.GetMean(), py.GetRMS()
-                e1, e2 = py.GetMeanError(), py.GetRMSError()
+            #is_fit_ok = (abs(p1 - py.GetMean())/py.GetRMS() < 1) and (1e-2 < p2/py.GetRMS() < 1e2)
+            #if not is_fit_ok:
+            #    p1, p2 = py.GetMean(), py.GetRMS()
+            #    e1, e2 = py.GetMeanError(), py.GetRMSError()
             h.yfit1.SetBinContent(b, p1)
             h.yfit1.SetBinError(b, p2)
             h.yfit2.SetBinContent(b, p2)
@@ -98,7 +99,8 @@ def do_resolution_pt_vs_pt_overlays(special_hname = "resolution_pt_vs_pt_in_mode
 
 # ______________________________________________________________________________
 def do_resolution_pt_vs_eta_overlays(special_hname = "resolution_pt_vs_eta_in_mode%i_pt%i"):
-    l1t_pt_vec = [5,10,50,200,1000]
+    l1t_pt_vec = [3,5,10,50,200]
+    ptpalette = map(lambda x: TColor.GetColor(x), ("#66DD66", "#3333FF", "#990099", "#EE4477", "#56D3DB"))
 
     def doit():
         for i, ptbin in enumerate(l1t_pt_vec):
@@ -118,7 +120,7 @@ def do_resolution_pt_vs_eta_overlays(special_hname = "resolution_pt_vs_eta_in_mo
                 h1.SetMinimum(ymin); h1.SetMaximum(ymax)
             else:
                 h1.GetYaxis().SetTitle(re.sub(r"(.*)({.*})", r"#sigma(\1)", htitle2))
-                h1.SetMinimum(0.); h1.SetMaximum(3.)
+                h1.SetMinimum(0.); h1.SetMaximum(2.5)
             h1.SetStats(0); h1.Draw()
             tlatex.DrawLatex(0.68, 0.68, re.sub(r"(.*){(.*)}", r"\2", htitle2))
 
@@ -139,6 +141,56 @@ def do_resolution_pt_vs_eta_overlays(special_hname = "resolution_pt_vs_eta_in_mo
 
     for mode in d.l1t_mode_vec:
         doit()
+
+    special_hname = special_hname.replace("mode", "qual")
+    for mode in d.l1t_quality_vec:
+        doit()
+    return
+
+# ______________________________________________________________________________
+def do_resolution_pt_in_1D(special_hname = "resolution_pt_vs_pt_in_mode%i_eta%i"):
+    l1t_eta_vec = d.l1t_eta_vec[:-1]  # no inclusive bin
+    l1t_pt_vec = [3,5,10,20,50]
+    ptpalette = map(lambda x: TColor.GetColor(x), ("#66DD66", "#3333FF", "#990099", "#FFBB44", "#EE4477"))
+
+    def doit():
+        for i, etabin in enumerate(l1t_eta_vec):
+            hname = special_hname % (mode, etabin)
+            h = histos[hname]
+            ymin, ymax = h.GetYaxis().GetXmin(), h.GetYaxis().GetXmax()
+            yymin, yymax = h.GetMean(2)-4.0*h.GetRMS(2), h.GetMean(2)+4.0*h.GetRMS(2)
+
+            py_histos = []
+            for j, ptbin in enumerate(l1t_pt_vec):
+                b = h.GetXaxis().FindFixBin(ptbin)
+                py = h.ProjectionY(h.GetName()+"_pt%i" % ptbin, b, b)
+                py_histos.append(py)
+
+            htitle, htitle2 = h.GetXaxis().GetTitle(), h.GetYaxis().GetTitle()
+            h1 = py_histos[-1].Clone(hname+"_frame"); h1.Reset()
+            h1.GetXaxis().SetTitle(re.sub(r"(.*)({.*})", r"\1", htitle2))
+            h1.SetMaximum(h.GetMaximum()*42); h1.SetMinimum(0.5)
+            h1.SetStats(0); h1.Draw()
+            tlatex.DrawLatex(0.64, 0.64, re.sub(r"(.*){(.*)}", r"\2", htitle2))
+            gPad.SetLogy(True)
+
+            moveLegend(tlegend,0.06,0.68,0.52,0.94); tlegend.Clear()
+            moveLegend(tlegend2,0.46,0.68,0.92,0.94); tlegend2.Clear()
+            for j, ptbin in enumerate(l1t_pt_vec):
+                h = py_histos[j]
+                h.SetLineWidth(2); h.SetMarkerStyle(20); h.SetFillStyle(0)
+                h.SetLineColor(ptpalette[j]); h.SetMarkerColor(ptpalette[j])
+                h.SetStats(0); h.Draw("same e")
+                display_fit(h, yymin, yymax)
+                tlegend.AddEntry(h, "#color[%i]{#mu(p_{T} = %i GeV) = %.2f}" % (h.fit.GetLineColor(), ptbin, h.fit.GetParameter(1)), "")
+                tlegend2.AddEntry(h, "#color[%i]{#sigma(p_{T} = %i GeV) = %.2f}" % (h.fit.GetLineColor(), ptbin, h.fit.GetParameter(2)), "")
+            tlegend.Draw()
+            tlegend2.Draw()
+
+            CMS_label()
+            imgname = (special_hname % (mode, etabin)) + ("_pt99")
+            save(options.outdir, imgname); figures.append(imgname)
+            gPad.SetLogy(False)
 
     special_hname = special_hname.replace("mode", "qual")
     for mode in d.l1t_quality_vec:
@@ -192,6 +244,8 @@ def main():
     # Process
     do_resolution_pt_vs_pt_overlays()
     do_resolution_pt_vs_eta_overlays()
+
+    do_resolution_pt_in_1D()
 
     # Serve
     serve_figures()
