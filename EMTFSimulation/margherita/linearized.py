@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from ROOT import TFile, TTree, TH1F, TH2F, TProfile, TGraph, gROOT, gStyle, gPad
-from math import sqrt, pi, sinh, atan2, tan, exp, log
+from math import sqrt, pi, sinh, atan2, tan, exp, log, degrees, radians
 from itertools import izip, count
 import numpy as np
 from numpy import linalg as LA
@@ -15,19 +15,22 @@ from linregression import *
 
 # ______________________________________________________________________________
 # Configurations
-fname = "stubs_flatPt100to200.2.root"
-#fname = "stubs_flatPt100to200.1.root"
-#fname = "/home/jlow/L1MuonTrigger/scratch/work_20160804/stubs_flatPt100to200.0.root"
+#fname = "stubs_flatOneOverPt100to200.1.root"
+fname = "/home/jlow/L1MuonTrigger/scratch/work_20160804/stubs_fixBeamSpot_pt10.2.root"
+#fname = "/home/jlow/L1MuonTrigger/scratch/work_20160804/stubs.2.root"
 imgdir = "figures_linearized/"
-nentries = 100000
+nentries = 50000
+use_invPt = 1
 fix_beamspot = 0
 fix_charge = 1
-fix_phi = 1
+fix_phi = 0
 verbose = 1
 make_plots = 1
 
-minInvPt = -1.0/190
-maxInvPt = +1.0/190
+#minInvPt = -1.0/20
+#maxInvPt = +1.0/20
+minInvPt = -1.0/200
+maxInvPt = +1.0/200
 minEta = 1.2
 maxEta = 2.4
 #minEta = 1.9
@@ -35,6 +38,47 @@ maxEta = 2.4
 
 z_center = np.asarray([602.332, 698.693, 828.392, 935.437, 1025.17])
 
+magfield = np.asarray([[
+    +3.007, +3.045, +3.063, +3.071, +3.072, +3.069, +3.063, +3.054, +3.041, +3.026,
+    +3.006, +2.982, +2.950, +2.909, +2.855, +2.778, +2.682, +2.601, +2.574, +2.592,
+    +2.655, +2.627, +1.622, +0.422, -0.311, -0.215, -0.153, -0.114, -0.089, -0.072,
+    -0.059, -0.050, -0.041, -0.031, -0.021, -0.010, -1.010, -1.270, -1.317, -0.106,
+    -0.006, -0.007, -0.004, -0.344, -0.787, -0.806, -0.804, -0.805, -0.802, -0.518,
+    -0.003, -0.005, -0.004, -0.179, -0.795, -0.833, -0.833, -0.836, -0.842, -0.731
+    ],[
+    +2.888, +2.882, +2.871, +2.859, +2.848, +2.837, +2.827, +2.819, +2.812, +2.806,
+    +2.802, +2.801, +2.804, +2.813, +2.829, +2.857, +1.580, +0.974, +0.986, +0.965,
+    +0.919, +0.859, +0.787, +0.707, +0.626, +0.545, +0.468, +0.394, +0.325, +0.259,
+    +0.195, +0.133, +0.069, +0.004, -0.065, -0.133, -0.189, -0.214, -0.224, -0.234,
+    -0.250, -0.276, -0.310, -0.344, -0.365, -0.373, -0.377, -0.377, -0.376, -0.372,
+    -0.365, -0.365, -0.375, -0.393, -0.407, -0.414, -0.416, -0.417, -0.414, -0.384
+    ],[
+    +3.201, +1.991, +1.278, +1.293, +1.286, +1.273, +1.254, +1.231, +1.201, +1.165,
+    +1.125, +1.077, +1.024, +0.967, +0.906, +0.843, +0.779, +0.715, +0.653, +0.593,
+    +0.535, +0.480, +0.428, +0.378, +0.331, +0.286, +0.243, +0.204, +0.166, +0.132,
+    +0.100, +0.071, +0.046, +0.023, +0.004, -0.012, -0.024, -0.034, -0.041, -0.047,
+    -0.052, -0.055, -0.058, -0.060, -0.062, -0.063, -0.064, -0.065, -0.065, -0.066,
+    -0.066, -0.066, -0.067, -0.068, -0.069, -0.071, -0.074, -0.079, -0.086, -0.087
+    ],[
+    +1.437, +2.198, +2.210, +1.405, +0.120, +0.125, +0.127, +0.128, +0.129, +0.129,
+    +0.129, +0.128, +0.127, +0.126, +0.125, +0.123, +0.121, +0.118, +0.115, +0.112,
+    +0.109, +0.105, +0.102, +0.099, +0.096, +0.093, +0.091, +0.089, +0.087, +0.085,
+    +0.084, +0.083, +0.082, +0.081, +0.081, +0.080, +0.080, +0.080, +0.079, +0.079,
+    +0.079, +0.079, +0.079, +0.078, +0.078, +0.078, +0.078, +0.078, +0.078, +0.078,
+    +0.078, +0.078, +0.079, +0.079, +0.080, +0.082, +0.084, +0.088, +0.095, +0.092
+    ],[
+    +0.182, +1.013, +1.331, +1.310, +1.293, +0.404, +0.025, +0.037, +0.044, +0.048,
+    +0.051, +0.053, +0.055, +0.056, +0.057, +0.057, +0.057, +0.058, +0.058, +0.058,
+    +0.058, +0.058, +0.058, +0.058, +0.058, +0.058, +0.058, +0.058, +0.058, +0.058,
+    +0.058, +0.058, +0.059, +0.059, +0.059, +0.059, +0.059, +0.059, +0.059, +0.059,
+    +0.059, +0.059, +0.059, +0.059, +0.060, +0.060, +0.060, +0.060, +0.060, +0.060,
+    +0.060, +0.061, +0.061, +0.062, +0.063, +0.064, +0.067, +0.070, +0.076, +0.077
+]])
+
+def get_magnetic_field(i, r):
+    assert(r > 0)
+    rbin = min((r - 100)//10, 699.9)
+    return magfield[(i,rbin)]
 
 # ______________________________________________________________________________
 def process_step1():
@@ -82,8 +126,12 @@ def process_step1():
         parameters2 = np.array([simTanTheta, simVz])
 
         # Must satisfy invPt and eta ranges
-        if not ((minInvPt <= simInvPt < maxInvPt) and (minEta <= simEta < maxEta)):
-            continue
+        if use_invPt:
+            if not ((minInvPt <= simInvPt < maxInvPt) and (minEta <= simEta < maxEta)):
+                continue
+        else:
+            if not ((minInvPt <= simInvPt*simTanTheta < maxInvPt) and (minEta <= simEta < maxEta)):
+                continue
 
         # Fix beamspot
         if fix_beamspot:
@@ -97,7 +145,7 @@ def process_step1():
 
         # Fix phi
         if fix_phi:
-            if not ((pi/4)-0.087266 <= simPhi <= (pi/4)+0.087266):
+            if not ((pi/4)-radians(10) <= simPhi <= (pi/4)+radians(10)):
                 continue
 
         # Get stub variables
@@ -139,46 +187,64 @@ def process_step1():
                 s = "pol1"
             return s
 
-        # phi
         phimin, phimax = -40e-3, 40e-3
-        hname = "h_phi_of_z"
-        histos[hname] = TH2F(hname, "; z [cm]; #phi [rad]", 110, 0, 1100, 200, phimin, phimax)
-        histos[hname].g = TGraph(n*4)
+        rmin, rmax = 0, 800
+        zmin, zmax = 0, 1200
 
+        # phi
         for j in xrange(6):
             hname = "h_phi%i_vs_p0" % j
-            histos[hname] = TH2F(hname, "; q/p_{T} [1/GeV]; #phi_{%s} - #phi_{0} [rad]" % label_st(j), 100, -0.02, 0.02, 200, phimin, phimax)
+            histos[hname] = TH2F(hname, "; q/p_{T} [1/GeV]; #phi_{%s} [rad]" % label_st(j), 100, -0.02, 0.02, 200, phimin, phimax)
+            #histos[hname] = TH2F(hname, "; q/p_{T} [1/GeV]; #phi_{%s} [rad]" % label_st(j), 100, minInvPt, maxInvPt, 200, phimin, phimax)
             histos[hname].g = TGraph(n)
             hname = "h_phi%i_vs_p1" % j
-            histos[hname] = TH2F(hname, "; #phi_{0} [rad]; #phi_{%s} - #phi_{0} [rad]" % label_st(j), 100, pi*15/180, pi*75/180, 200, phimin, phimax)
+            histos[hname] = TH2F(hname, "; #phi_{0} [rad]; #phi_{%s} [rad]" % label_st(j), 100, radians(15), radians(75), 200, phimin, phimax)
             histos[hname].g = TGraph(n)
             hname = "h_phi%i_vs_p2" % j
-            histos[hname] = TH2F(hname, "; tan #theta; #phi_{%s} - #phi_{0} [rad]" % label_st(j), 100, 0.1, 0.9, 200, phimin, phimax)
+            histos[hname] = TH2F(hname, "; tan #theta; #phi_{%s} [rad]" % label_st(j), 100, 0.1, 0.9, 200, phimin, phimax)
             histos[hname].g = TGraph(n)
             hname = "h_phi%i_vs_p3" % j
-            histos[hname] = TH2F(hname, "; z_{0} [cm]; #phi_{%s} - #phi_{0} [rad]" % label_st(j), 100, -30., 30., 200, phimin, phimax)
+            histos[hname] = TH2F(hname, "; z_{0} [cm]; #phi_{%s} [rad]" % label_st(j), 100, -30., 30., 200, phimin, phimax)
             histos[hname].g = TGraph(n)
             hname = "h_phi%i_vs_p4" % j
-            histos[hname] = TH2F(hname, "; q/p_{z} [1/GeV]; #phi_{%s} - #phi_{0} [rad]" % label_st(j), 100, -0.02, 0.02, 200, phimin, phimax)
+            histos[hname] = TH2F(hname, "; q/p_{z} [1/GeV]; #phi_{%s} [rad]" % label_st(j), 100, -0.02, 0.02, 200, phimin, phimax)
+            #histos[hname] = TH2F(hname, "; q/p_{z} [1/GeV]; #phi_{%s} [rad]" % label_st(j), 100, minInvPt, maxInvPt, 200, phimin, phimax)
             histos[hname].g = TGraph(n)
 
             hname = "h_phi%i_corr0" % j
-            histos[hname] = TH1F(hname, "; #phi_{%s} - #phi_{0} [rad]; Entries" % label_st(j), 200, phimin, phimax)
+            histos[hname] = TH1F(hname, "; #phi_{%s} [rad]; Entries" % label_st(j), 200, phimin, phimax)
             hname = "h_phi%i_corr1" % j
-            histos[hname] = TH1F(hname, "; #phi_{%s} - #phi_{0} [rad]; Entries" % label_st(j), 200, phimin, phimax)
+            histos[hname] = TH1F(hname, "; #phi_{%s} [rad]; Entries" % label_st(j), 200, phimin, phimax)
+            hname = "h_phi%i_f_corr0" % j
+            histos[hname] = TH1F(hname, "; #phi_{%s} [rad]; Entries" % label_st(j), 200, phimin, phimax)
+            hname = "h_phi%i_f_corr1" % j
+            histos[hname] = TH1F(hname, "; #phi_{%s} [rad]; Entries" % label_st(j), 200, phimin, phimax)
+            hname = "h_phi%i_r_corr0" % j
+            histos[hname] = TH1F(hname, "; #phi_{%s} [rad]; Entries" % label_st(j), 200, phimin, phimax)
+            hname = "h_phi%i_r_corr1" % j
+            histos[hname] = TH1F(hname, "; #phi_{%s} [rad]; Entries" % label_st(j), 200, phimin, phimax)
 
-        # rho
-        rmin, rmax = 0, 500
-        hname = "h_rho_of_z"
-        histos[hname] = TH2F(hname, "; z [cm]; r [cm]", 110, 0, 1100, 200, rmin, rmax)
+        hname = "h_phi_of_z_corr0"
+        histos[hname] = TH2F(hname, "; z [cm]; #phi [rad]", 200, zmin, zmax, 200, phimin, phimax)
+        histos[hname].g = TGraph(n*4)
+        hname = "h_phi_of_z_corr1"
+        histos[hname] = TH2F(hname, "; z [cm]; #phi [rad]", 200, zmin, zmax, 200, phimin, phimax)
+        histos[hname].g = TGraph(n*4)
+        hname = "h_phi_of_zt_corr0"
+        histos[hname] = TH2F(hname, "; z*tan #theta [cm]; #phi [rad]", 200, rmin, rmax, 200, phimin, phimax)
+        histos[hname].g = TGraph(n*4)
+        hname = "h_phi_of_zt_corr1"
+        histos[hname] = TH2F(hname, "; z*tan #theta [cm]; #phi [rad]", 200, rmin, rmax, 200, phimin, phimax)
         histos[hname].g = TGraph(n*4)
 
+        # rho
         for j in xrange(6):
             hname = "h_rho%i_vs_p0" % j
             histos[hname] = TH2F(hname, "; q/p_{T} [1/GeV]; r_{%s} [cm]" % label_st(j), 100, -0.02, 0.02, 200, rmin, rmax)
+            #histos[hname] = TH2F(hname, "; q/p_{T} [1/GeV]; r_{%s} [cm]" % label_st(j), 100, minInvPt, maxInvPt, 200, rmin, rmax)
             histos[hname].g = TGraph(n)
             hname = "h_rho%i_vs_p1" % j
-            histos[hname] = TH2F(hname, "; #phi_{0} [rad]; r_{%s} [cm]" % label_st(j), 100, pi*15/180, pi*75/180, 200, rmin, rmax)
+            histos[hname] = TH2F(hname, "; #phi_{0} [rad]; r_{%s} [cm]" % label_st(j), 100, radians(15), radians(75), 200, rmin, rmax)
             histos[hname].g = TGraph(n)
             hname = "h_rho%i_vs_p2" % j
             histos[hname] = TH2F(hname, "; tan #theta; r_{%s} [cm]" % label_st(j), 100, 0.1, 0.9, 200, rmin, rmax)
@@ -188,15 +254,37 @@ def process_step1():
             histos[hname].g = TGraph(n)
             hname = "h_rho%i_vs_p4" % j
             histos[hname] = TH2F(hname, "; q/p_{z} [1/GeV]; r_{%s} [cm]" % label_st(j), 100, -0.02, 0.02, 200, rmin, rmax)
+            #histos[hname] = TH2F(hname, "; q/p_{z} [1/GeV]; r_{%s} [cm]" % label_st(j), 100, minInvPt, maxInvPt, 200, rmin, rmax)
             histos[hname].g = TGraph(n)
 
             hname = "h_rho%i_corr0" % j
             histos[hname] = TH1F(hname, "; r_{%s} [cm]; Entries" % label_st(j), 200, rmin, rmax)
             hname = "h_rho%i_corr1" % j
             histos[hname] = TH1F(hname, "; r_{%s} [cm]; Entries" % label_st(j), 200, rmin, rmax)
+            hname = "h_rho%i_f_corr0" % j
+            histos[hname] = TH1F(hname, "; r_{%s} [cm]; Entries" % label_st(j), 200, rmin, rmax)
+            hname = "h_rho%i_f_corr1" % j
+            histos[hname] = TH1F(hname, "; r_{%s} [cm]; Entries" % label_st(j), 200, rmin, rmax)
+            hname = "h_rho%i_r_corr0" % j
+            histos[hname] = TH1F(hname, "; r_{%s} [cm]; Entries" % label_st(j), 200, rmin, rmax)
+            hname = "h_rho%i_r_corr1" % j
+            histos[hname] = TH1F(hname, "; r_{%s} [cm]; Entries" % label_st(j), 200, rmin, rmax)
+
+        hname = "h_rho_of_z_corr0"
+        histos[hname] = TH2F(hname, "; z [cm]; r [cm]", 200, zmin, zmax, 200, rmin, rmax)
+        histos[hname].g = TGraph(n*4)
+        hname = "h_rho_of_z_corr1"
+        histos[hname] = TH2F(hname, "; z [cm]; r [cm]", 200, zmin, zmax, 200, rmin, rmax)
+        histos[hname].g = TGraph(n*4)
+        hname = "h_rho_of_zt_corr0"
+        histos[hname] = TH2F(hname, "; z*tan #theta [cm]; r [cm]", 200, rmin, rmax, 200, rmin, rmax)
+        histos[hname].g = TGraph(n*4)
+        hname = "h_rho_of_zt_corr1"
+        histos[hname] = TH2F(hname, "; z*tan #theta [cm]; r [cm]", 200, rmin, rmax, 200, rmin, rmax)
+        histos[hname].g = TGraph(n*4)
+
 
         # Fill histograms
-        i = 0
         for ievt, variables1, variables2, variables3, parameters1, parameters2 in izip(count(), data_var1, data_var2, data_var3, data_par1, data_par2):
 
             simInvPt, simPhi = parameters1
@@ -204,6 +292,8 @@ def process_step1():
             simInvPz = simInvPt * simTanTheta
 
             variables1 -= simPhi # force phi0 to be zero
+
+            tmp_variables3 = variables3 - tmp_z_center
 
             #print ievt, variables1, variables2
 
@@ -231,15 +321,7 @@ def process_step1():
                 histos["h_rho%i_vs_p3" % j].g.SetPoint(ievt, simVz      , variables2[j])
                 histos["h_rho%i_vs_p4" % j].g.SetPoint(ievt, simInvPz   , variables2[j])
 
-            for j in xrange(4):
-                histos["h_phi_of_z"].Fill(variables3[j], variables1[j])
-                histos["h_rho_of_z"].Fill(variables3[j], variables2[j])
-                histos["h_phi_of_z"].g.SetPoint(i, variables3[j], variables1[j])
-                histos["h_rho_of_z"].g.SetPoint(i, variables3[j], variables2[j])
-                i += 1
-
-            # ______________________________________________________________________
-            # Regression
+            # With regression
             reg_phi = LinearRegression()
             reg_rho = LinearRegression()
             reg_phi.add_n(variables3, variables1)
@@ -272,33 +354,65 @@ def process_step1():
             # ______________________________________________________________________
             # Before corrections
             for j in xrange(4):
-                if variables3[j] < tmp_z_center[j]:  # FIXME
-                    histos["h_phi%i_corr0" % j].Fill(variables1[j])
-                    histos["h_rho%i_corr0" % j].Fill(variables2[j])
+                histos["h_phi_of_z_corr0"].Fill(variables3[j], variables1[j])
+                histos["h_rho_of_z_corr0"].Fill(variables3[j], variables2[j])
+                histos["h_phi_of_z_corr0"].g.SetPoint(ievt*4 + j, variables3[j], variables1[j])
+                histos["h_rho_of_z_corr0"].g.SetPoint(ievt*4 + j, variables3[j], variables2[j])
+
+                histos["h_phi_of_zt_corr0"].Fill(variables3[j]*simTanTheta, variables1[j])
+                histos["h_rho_of_zt_corr0"].Fill(variables3[j]*simTanTheta, variables2[j])
+                histos["h_phi_of_zt_corr0"].g.SetPoint(ievt*4 + j, variables3[j]*simTanTheta, variables1[j])
+                histos["h_rho_of_zt_corr0"].g.SetPoint(ievt*4 + j, variables3[j]*simTanTheta, variables2[j])
+
+                histos["h_phi%i_corr0" % j].Fill(variables1[j])
+                histos["h_rho%i_corr0" % j].Fill(variables2[j])
+                if tmp_variables3[j] < 0.:
+                    histos["h_phi%i_f_corr0" % j].Fill(variables1[j])
+                    histos["h_rho%i_f_corr0" % j].Fill(variables2[j])
+                else:
+                    histos["h_phi%i_r_corr0" % j].Fill(variables1[j])
+                    histos["h_rho%i_r_corr0" % j].Fill(variables2[j])
 
             # ______________________________________________________________________
             # Apply deltaZ correction
-            #simC = -0.5 * (0.003 * 3.8 * simInvPt)  # 1/(2 x radius of curvature)
-            #simT = 1.0
-            #simC *= simTanTheta
-            #simT *= simTanTheta
-            #variables1 -= simC * variables3
-            #variables2 -= simT * variables3
+            bz = np.array([get_magnetic_field(i,r) for i, r in enumerate(variables2)])
+            simC = (-0.5 * (0.003 * 1.0 * simInvPt)) * bz
+            simT = 1.0
+            simC *= simTanTheta
+            simT *= simTanTheta
+            variables1 -= simC * tmp_variables3
+            variables2 -= simT * tmp_variables3
+            variables3 -= 1.0 * tmp_variables3
 
             # ______________________________________________________________________
             # Apply non-pointing strip correction
-            ext_variables2 = variables3 * simTanTheta
-            variables1 += np.divide(ext_variables2 - variables2, variables2) * -1 * np.tan(variables1)
-            variables2 = ext_variables2
+            #ext_variables2 = variables3 * simTanTheta
+            #variables1 += np.divide(ext_variables2 - variables2, variables2) * -1 * np.tan(variables1)
+            #variables2 = ext_variables2
 
             # ______________________________________________________________________
             # After corrections
             for j in xrange(4):
-                if variables3[j] > tmp_z_center[j]:  # FIXME
-                    histos["h_phi%i_corr1" % j].Fill(variables1[j])
-                    histos["h_rho%i_corr1" % j].Fill(variables2[j])
+                histos["h_phi_of_z_corr1"].Fill(variables3[j], variables1[j])
+                histos["h_rho_of_z_corr1"].Fill(variables3[j], variables2[j])
+                histos["h_phi_of_z_corr1"].g.SetPoint(ievt*4 + j, variables3[j], variables1[j])
+                histos["h_rho_of_z_corr1"].g.SetPoint(ievt*4 + j, variables3[j], variables2[j])
 
-        print n, i
+                histos["h_phi_of_zt_corr1"].Fill(variables3[j]*simTanTheta, variables1[j])
+                histos["h_rho_of_zt_corr1"].Fill(variables3[j]*simTanTheta, variables2[j])
+                histos["h_phi_of_zt_corr1"].g.SetPoint(ievt*4 + j, variables3[j]*simTanTheta, variables1[j])
+                histos["h_rho_of_zt_corr1"].g.SetPoint(ievt*4 + j, variables3[j]*simTanTheta, variables2[j])
+
+                histos["h_phi%i_corr1" % j].Fill(variables1[j])
+                histos["h_rho%i_corr1" % j].Fill(variables2[j])
+                if tmp_variables3[j] < 0.:
+                    histos["h_phi%i_f_corr1" % j].Fill(variables1[j])
+                    histos["h_rho%i_f_corr1" % j].Fill(variables2[j])
+                else:
+                    histos["h_phi%i_r_corr1" % j].Fill(variables1[j])
+                    histos["h_rho%i_r_corr1" % j].Fill(variables2[j])
+
+        print "Number of events: ", n
 
         # Write histograms
         outfile = TFile.Open("histos_linearized.root", "RECREATE")

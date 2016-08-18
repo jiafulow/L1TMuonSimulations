@@ -4,7 +4,7 @@ from ROOT import TFile, TH1F, TH2F, TProfile, TF1, TText, gPad, gROOT, gStyle
 import numpy as np
 import os
 
-imgdir = "figures/"
+imgdir = "figures_linearized/"
 histos = {}
 figures = []
 
@@ -67,107 +67,99 @@ def make_figures(infile='histos_linearized.root'):
 
     #print figures
     figures[:] = [
-        'h_phi_of_z',
-        'empty',
-        'empty',
-        'empty',
         'h_phi0_vs_p0',
-        'h_phi1_vs_p0',
-        'h_phi2_vs_p0',
-        'h_phi3_vs_p0',
         'h_phi0_vs_p1',
-        'h_phi1_vs_p1',
-        'h_phi2_vs_p1',
-        'h_phi3_vs_p1',
         'h_phi0_vs_p2',
-        'h_phi1_vs_p2',
-        'h_phi2_vs_p2',
-        'h_phi3_vs_p2',
-        'h_phi0_vs_p3',
-        'h_phi1_vs_p3',
-        'h_phi2_vs_p3',
-        'h_phi3_vs_p3',
         'h_phi0_vs_p4',
+        'h_phi1_vs_p0',
+        'h_phi1_vs_p1',
+        'h_phi1_vs_p2',
         'h_phi1_vs_p4',
+        'h_phi2_vs_p0',
+        'h_phi2_vs_p1',
+        'h_phi2_vs_p2',
         'h_phi2_vs_p4',
+        'h_phi3_vs_p0',
+        'h_phi3_vs_p1',
+        'h_phi3_vs_p2',
         'h_phi3_vs_p4',
 
         'h_phi4_vs_p0',
-        'h_phi5_vs_p0',
-        'empty',
-        'empty',
         'h_phi4_vs_p1',
-        'h_phi5_vs_p1',
-        'empty',
-        'empty',
         'h_phi4_vs_p2',
-        'h_phi5_vs_p2',
-        'empty',
-        'empty',
-        'h_phi4_vs_p3',
-        'h_phi5_vs_p3',
-        'empty',
-        'empty',
         'h_phi4_vs_p4',
+        'h_phi5_vs_p0',
+        'h_phi5_vs_p1',
+        'h_phi5_vs_p2',
         'h_phi5_vs_p4',
-        'empty',
-        'empty',
 
+        'h_phi_of_z_corr0',
+        'h_phi_of_z_corr1',
+        'h_phi_of_zt_corr0',
+        'h_phi_of_zt_corr1',
         'h_phi0_corr0',
+        'empty',
+        'h_phi0_f_corr0',
+        'h_phi0_r_corr0',
         'h_phi1_corr0',
+        'empty',
+        'h_phi1_f_corr0',
+        'h_phi1_r_corr0',
         'h_phi2_corr0',
+        'empty',
+        'h_phi2_f_corr0',
+        'h_phi2_r_corr0',
         'h_phi3_corr0',
+        'empty',
+        'h_phi3_f_corr0',
+        'h_phi3_r_corr0',
 
-        'h_rho_of_z',
-        'empty',
-        'empty',
-        'empty',
         'h_rho0_vs_p0',
-        'h_rho1_vs_p0',
-        'h_rho2_vs_p0',
-        'h_rho3_vs_p0',
         'h_rho0_vs_p1',
-        'h_rho1_vs_p1',
-        'h_rho2_vs_p1',
-        'h_rho3_vs_p1',
         'h_rho0_vs_p2',
-        'h_rho1_vs_p2',
-        'h_rho2_vs_p2',
-        'h_rho3_vs_p2',
-        'h_rho0_vs_p3',
-        'h_rho1_vs_p3',
-        'h_rho2_vs_p3',
-        'h_rho3_vs_p3',
         'h_rho0_vs_p4',
+        'h_rho1_vs_p0',
+        'h_rho1_vs_p1',
+        'h_rho1_vs_p2',
         'h_rho1_vs_p4',
+        'h_rho2_vs_p0',
+        'h_rho2_vs_p1',
+        'h_rho2_vs_p2',
         'h_rho2_vs_p4',
+        'h_rho3_vs_p0',
+        'h_rho3_vs_p1',
+        'h_rho3_vs_p2',
         'h_rho3_vs_p4',
 
         'h_rho4_vs_p0',
-        'h_rho5_vs_p0',
-        'empty',
-        'empty',
         'h_rho4_vs_p1',
-        'h_rho5_vs_p1',
-        'empty',
-        'empty',
         'h_rho4_vs_p2',
-        'h_rho5_vs_p2',
-        'empty',
-        'empty',
-        'h_rho4_vs_p3',
-        'h_rho5_vs_p3',
-        'empty',
-        'empty',
         'h_rho4_vs_p4',
+        'h_rho5_vs_p0',
+        'h_rho5_vs_p1',
+        'h_rho5_vs_p2',
         'h_rho5_vs_p4',
-        'empty',
-        'empty',
 
+        'h_rho_of_z_corr0',
+        'h_rho_of_z_corr1',
+        'h_rho_of_zt_corr0',
+        'h_rho_of_zt_corr1',
         'h_rho0_corr0',
+        'empty',
+        'h_rho0_f_corr0',
+        'h_rho0_r_corr0',
         'h_rho1_corr0',
+        'empty',
+        'h_rho1_f_corr0',
+        'h_rho1_r_corr0',
         'h_rho2_corr0',
+        'empty',
+        'h_rho2_f_corr0',
+        'h_rho2_r_corr0',
         'h_rho3_corr0',
+        'empty',
+        'h_rho3_f_corr0',
+        'h_rho3_r_corr0',
     ]
     return
 
@@ -187,9 +179,21 @@ def make_more_figures():
         gPad.Print(imgdir+"%s.png" % h.GetName())
         return
 
-    h = histos["h_phi_of_z"]
+    h = histos["h_phi_of_z_corr0"]
     doit()
-    h = histos["h_rho_of_z"]
+    h = histos["h_phi_of_z_corr1"]
+    doit()
+    h = histos["h_phi_of_zt_corr0"]
+    doit()
+    h = histos["h_phi_of_zt_corr1"]
+    doit()
+    h = histos["h_rho_of_z_corr0"]
+    doit()
+    h = histos["h_rho_of_z_corr1"]
+    doit()
+    h = histos["h_rho_of_zt_corr0"]
+    doit()
+    h = histos["h_rho_of_zt_corr1"]
     doit()
 
     for j in xrange(4):
@@ -259,16 +263,29 @@ def make_more_figures():
         gPad.Modified(); gPad.Update()
         moveStats(ha, 0.73, 0.80, 0.98, 0.995)
         moveStats(hb, 0.73, 0.60, 0.98, 0.795, color=4)
-        print "std: %f %f" % (ha.GetRMS(), hb.GetRMS())
         gPad.Print(imgdir+"%s.png" % ha.GetName())
         return
 
     for j in xrange(4):
         ha = histos["h_phi%i_corr0" % j]
         hb = histos["h_phi%i_corr1" % j]
+        print "std: %f %f" % (ha.GetRMS(), hb.GetRMS())
+        doit()
+        ha = histos["h_phi%i_f_corr0" % j]
+        hb = histos["h_phi%i_f_corr1" % j]
+        doit()
+        ha = histos["h_phi%i_r_corr0" % j]
+        hb = histos["h_phi%i_r_corr1" % j]
         doit()
         ha = histos["h_rho%i_corr0" % j]
         hb = histos["h_rho%i_corr1" % j]
+        print "std: %f %f" % (ha.GetRMS(), hb.GetRMS())
+        doit()
+        ha = histos["h_rho%i_f_corr0" % j]
+        hb = histos["h_rho%i_f_corr1" % j]
+        doit()
+        ha = histos["h_rho%i_r_corr0" % j]
+        hb = histos["h_rho%i_r_corr1" % j]
         doit()
     return
 
@@ -310,3 +327,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
