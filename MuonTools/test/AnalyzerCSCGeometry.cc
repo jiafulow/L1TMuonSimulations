@@ -115,6 +115,8 @@ void AnalyzerCSCGeometry::beginRun(const edm::Run& iRun, const edm::EventSetup& 
                 int nstrips = cscLayerGeom->numberOfStrips();
                 int nwires = cscLayerGeom->numberOfWires();
                 int nwiregroups = cscLayerGeom->numberOfWireGroups();
+                //float length = cscLayerGeom->length();
+                //float thickness = cscLayerGeom->thickness();
 
                 float stripPhiPitch = cscLayerGeom->stripPhiPitch();  // angular pitch
                 //float stripPitch = cscLayerGeom->stripPitch();  // local pitch
@@ -125,14 +127,22 @@ void AnalyzerCSCGeometry::beginRun(const edm::Run& iRun, const edm::EventSetup& 
                 float stripAngle0 = cscLayerGeom->stripAngle(1);
                 float stripAngleN = cscLayerGeom->stripAngle(nstrips);
                 float stripLength = cscStripTopo->stripLength();
-                float originToIntersect = cscStripTopo->originToIntersection();
+                float centreToIntersection = cscStripTopo->centreToIntersection();
+                float yCentreOfStripPlane = cscStripTopo->yCentreOfStripPlane();
+                float angularWidth = cscStripTopo->angularWidth();
+                float detHeight = cscStripTopo->detHeight();
 
                 float wirePitch = cscLayerGeom->wirePitch();
+                //float wireSpacing = cscWireTopo->wireSpacing();  // same as wirePitch
                 float wireAngle = cscLayerGeom->wireAngle();
-                float wireSpacing = cscWireTopo->wireSpacing();
+                float yOfWire0 = cscLayerGeom->yOfWire(1);
+                float yOfWireN = cscLayerGeom->yOfWire(nwires);
+                float yOfWireGroup0 = cscLayerGeom->yOfWireGroup(1);
+                float yOfWireGroupN = cscLayerGeom->yOfWireGroup(nwiregroups);
                 float wideWidthOfPlane = cscWireTopo->wideWidthOfPlane();
                 float narrowWidthOfPlane = cscWireTopo->narrowWidthOfPlane();
                 float lengthOfPlane = cscWireTopo->lengthOfPlane();
+                float extentOfWirePlane = cscWireTopo->extentOfWirePlane();
 
                 float boundWidth = cscLayer->surface().bounds().width();
                 float boundWidthAtHalfLength = cscLayer->surface().bounds().widthAtHalfLength();
@@ -149,7 +159,9 @@ void AnalyzerCSCGeometry::beginRun(const edm::Run& iRun, const edm::EventSetup& 
 
                 const GlobalPoint& centerOfStrip0 = cscLayer->centerOfStrip(1);
                 const GlobalPoint& centerOfStripN = cscLayer->centerOfStrip(nstrips);
-                const GlobalPoint& centerOfWireGroup = cscLayer->centerOfWireGroup(1);
+                const GlobalPoint& centerOfStripC = cscLayer->centerOfStrip(nstrips/2);
+                const GlobalPoint& centerOfWireGroup0 = cscLayer->centerOfWireGroup(1);
+                const GlobalPoint& centerOfWireGroupN = cscLayer->centerOfWireGroup(nwiregroups);
                 bool isCounterClockwise = reco::deltaPhi(centerOfStrip0.barePhi(), centerOfStripN.barePhi()) < 0.;
                 bool isFront = false;
                 if (cscDet.station() == 1 && (cscDet.ring() == 1 || cscDet.ring() == 4)) {
@@ -165,13 +177,53 @@ void AnalyzerCSCGeometry::beginRun(const edm::Run& iRun, const edm::EventSetup& 
                 }
                 bool isEven = (cscDet.chamber() % 2 == 0);
 
+                // Examine global phi
+                // copied from Geometry/CSCGeometry/test/stubs/CSCGeometryOfWires.cc
+                std::array<const float, 4> const & parameters = cscLayerGeom->parameters();  // these parameters are half-lengths, due to GEANT
+                //float hBottomEdge = parameters[0];
+                //float hTopEdge    = parameters[1];
+                //float hThickness  = parameters[2];
+                float hApothem    = parameters[3];
+                float x_1_t = cscLayerGeom->xOfStrip(1, hApothem); // x of strip 1 at top edge
+                float x_1_b = cscLayerGeom->xOfStrip(1, -hApothem); // x of strip 1 at bottom edge
+                float x_n_t = cscLayerGeom->xOfStrip(nstrips, hApothem); // x of strip n at top edge
+                float x_n_b = cscLayerGeom->xOfStrip(nstrips, -hApothem); // x of strip n at bottom edge
+                float x_c_t = cscLayerGeom->xOfStrip(nstrips/2, hApothem); // x of strip n/2 at top edge
+                float x_c_b = cscLayerGeom->xOfStrip(nstrips/2, -hApothem); // x of strip n/2 at bottom edge
+                const GlobalPoint& g_1_t = cscLayer->toGlobal( LocalPoint(x_1_t, hApothem, 0.) );
+                const GlobalPoint& g_1_b = cscLayer->toGlobal( LocalPoint(x_1_b, -hApothem, 0.) );
+                const GlobalPoint& g_n_t = cscLayer->toGlobal( LocalPoint(x_n_t, hApothem, 0.) );
+                const GlobalPoint& g_n_b = cscLayer->toGlobal( LocalPoint(x_n_b, -hApothem, 0.) );
+                const GlobalPoint& g_c_t = cscLayer->toGlobal( LocalPoint(x_c_t, hApothem, 0.) );
+                const GlobalPoint& g_c_b = cscLayer->toGlobal( LocalPoint(x_c_b, -hApothem, 0.) );
+                float phi_1_c = centerOfStrip0.phi();
+                float phi_n_c = centerOfStripN.phi();
+                float phi_c_c = centerOfStripC.phi();
+                float phi_1_t = g_1_t.phi();
+                float phi_1_b = g_1_b.phi();
+                float phi_n_t = g_n_t.phi();
+                float phi_n_b = g_n_b.phi();
+                float phi_c_t = g_c_t.phi();
+                float phi_c_b = g_c_b.phi();
+                float rho_1_c = centerOfStrip0.perp();
+                float rho_n_c = centerOfStripN.perp();
+                float rho_c_c = centerOfStripC.perp();
+                float rho_1_t = g_1_t.perp();
+                float rho_1_b = g_1_b.perp();
+                float rho_n_t = g_n_t.perp();
+                float rho_n_b = g_n_b.perp();
+                float rho_c_t = g_c_t.perp();
+                float rho_c_b = g_c_b.perp();
+
                 if (verbose_) {
                     std::cout << ".. " << n << " endcap: " << iendcap << " station: " << istation << " ring: " << iring << " chamber: " << ichamber << " layer: " << ilayer << std::endl;
                     std::cout << ".. " << n << " sector: " << isector << " subsector: " << isubsector << " cscID: " << cscID << " -- moduleId: " << moduleId << " frBit: " << frBit << " ccwBit: " << ccwBit << std::endl;
                     std::cout << ".. " << n << " nstrips: " << nstrips << " nwires: " << nwires << " nwiregroups: " << nwiregroups << " chamberType: " << chamberType << " stripRes: " << stripRes << " wireRes: " << wireRes << " boundWidthAtHalfLength: " << boundWidthAtHalfLength << " boundWidth: " << boundWidth << " boundLength: " << boundLength << " boundThickness: " << boundThickness << std::endl;
-                    std::cout << ".. " << n << std::setprecision(10) << " stripPhiPitch*1000: " << stripPhiPitch*1000 << std::setprecision(6) << " stripOffset: " << stripOffset << " stagger: " << stagger << " xOfStrip0: " << xOfStrip0 << " xOfStripN: " << xOfStripN << " stripAngle0: " << stripAngle0 << " stripAngleN: " << stripAngleN << " stripLength: " << stripLength << " originToIntersect: " << originToIntersect << std::endl;
-                    std::cout << ".. " << n << " wirePitch: " << wirePitch << " wireAngle: " << wireAngle << " wireSpacing: " << wireSpacing << " wideWidthOfPlane: " << wideWidthOfPlane << " narrowWidthOfPlane: " << narrowWidthOfPlane << " lengthOfPlane: " << lengthOfPlane << std::endl;
-                    std::cout << ".. " << n << " centerOfStrip: " << centerOfStrip0.x() << "," << centerOfStrip0.y() << "," << centerOfStrip0.z() << " centerOfWireGroup: " << centerOfWireGroup.x() << "," << centerOfWireGroup.y() << "," << centerOfWireGroup.z() << std::endl;
+                    std::cout << ".. " << n << std::setprecision(10) << " stripPhiPitch*1000: " << stripPhiPitch*1000 << std::setprecision(6) << " stripOffset: " << stripOffset << " stagger: " << stagger << " xOfStrip0: " << xOfStrip0 << " xOfStripN: " << xOfStripN << " stripAngle0: " << stripAngle0 << " stripAngleN: " << stripAngleN << " stripLength: " << stripLength << " centreToIntersection: " << centreToIntersection << " yCentreOfStripPlane: " << yCentreOfStripPlane << " angularWidth: " << angularWidth << " detHeight: " << detHeight << std::endl;
+                    std::cout << ".. " << n << " wirePitch: " << wirePitch << " wireAngle: " << wireAngle << " yOfWire0: " << yOfWire0 << " yOfWireN: " << yOfWireN << " yOfWireGroup0: " << yOfWireGroup0 << " yOfWireGroupN: " << yOfWireGroupN << " wideWidthOfPlane: " << wideWidthOfPlane << " narrowWidthOfPlane: " << narrowWidthOfPlane << " lengthOfPlane: " << lengthOfPlane << " extentOfWirePlane: " << extentOfWirePlane << std::endl;
+                    std::cout << ".. " << n << " centerOfStrip0: " << centerOfStrip0.x() << "," << centerOfStrip0.y() << "," << centerOfStrip0.z() << " centerOfStripN: " << centerOfStripN.x() << "," << centerOfStripN.y() << "," << centerOfStripN.z() << " centerOfWireGroup0: " << centerOfWireGroup0.x() << "," << centerOfWireGroup0.y() << "," << centerOfWireGroup0.z() << " centerOfWireGroupN: " << centerOfWireGroupN.x() << "," << centerOfWireGroupN.y() << "," << centerOfWireGroupN.z() << std::endl;
+                    std::cout << ".. " << n << " global phi0 top: " << phi_1_t << " centre: " << phi_1_c << " bottom: " << phi_1_b << " top-bottom: " << phi_1_t-phi_1_b << " global phiC top: " << phi_c_t << " centre: " << phi_c_c << " bottom: " << phi_c_b << " top-bottom: " << phi_c_t-phi_c_b << " global phiN top: " << phi_n_t << " centre: " << phi_n_c << " bottom: " << phi_n_b << " top-bottom: " << phi_n_t-phi_n_b << std::endl;
+                    std::cout << ".. " << n << " global rho0 top: " << rho_1_t << " centre: " << rho_1_c << " bottom: " << rho_1_b << " top-bottom: " << rho_1_t-rho_1_b << " global rhoC top: " << rho_c_t << " centre: " << rho_c_c << " bottom: " << rho_c_b << " top-bottom: " << rho_c_t-rho_c_b << " global rhoN top: " << rho_n_t << " centre: " << rho_n_c << " bottom: " << rho_n_b << " top-bottom: " << rho_n_t-rho_n_b << std::endl;
 
                     int nwires1 = 0;
                     for (int wg=0; wg!=nwiregroups; ++wg) {
