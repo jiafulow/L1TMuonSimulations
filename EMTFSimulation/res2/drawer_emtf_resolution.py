@@ -19,6 +19,8 @@ l1t_mode_vec += (27,29,30,31)  # for ME1/2
 l1t_mode_vec += (32,)  # inclusive
 l1t_quality_vec = (4,8,12,16)
 
+bdt_factor = 1.4
+
 
 # ______________________________________________________________________________
 # Helper
@@ -221,6 +223,8 @@ def drawer_project(tree, histos, options):
                     elif (best_quality == quality) and (best_dR > dR):
                         best_quality, best_dR = quality, dR
                         best_itrack, best_mode, best_trig_pt, best_trig_phi, best_trig_eta = itrack, mode, trig_pt, trig_phi, trig_eta
+
+            best_trig_pt /= bdt_factor
 
             if options.verbose:
                 print ".. %i best l1t itrack: %i mode: %i pt: %f phi: %f eta: %f" % (ievt, best_itrack, best_mode, best_trig_pt, best_trig_phi, best_trig_eta)
