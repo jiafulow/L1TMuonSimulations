@@ -52,11 +52,11 @@ std::vector<unsigned> AssociativeMemory::lookup(const HitBuffer& hitBuffer, cons
             unsigned layer = (rend - 1) - itlayer;
             superstrip_t ssId = *itlayer;
 
-            if (ssId == 0xffffffff)
-                continue;
-
-            if (!hitBuffer.hasHits(layer, ssId))
+            if (ssId == 0xffffffff) {
                 ++nMisses;
+            } else if (!hitBuffer.hasHits(layer, ssId)) {
+                ++nMisses;
+            }
 
             // Skip if more misses than allowed
             if (nMisses > maxMisses)

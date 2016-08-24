@@ -23,13 +23,13 @@ struct SuperstripLocalParams {
 };
 
 struct SuperstripGlobalParams {
-    float rotate_x;
     float low_x;
     float delta_x;
-    unsigned nbins_x;
+    unsigned mask_x;
     float low_z;
     float delta_z;
-    unsigned nbins_z;
+    unsigned mask_z;
+    unsigned shift_z;
 };
 
 // _____________________________________________________________________________

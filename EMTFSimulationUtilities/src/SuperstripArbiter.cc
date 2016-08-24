@@ -7,12 +7,6 @@
 #include <iostream>
 
 
-namespace {
-unsigned round_to_uint(float x) {
-    return std::floor(x + 0.5);
-}
-}  // namespace
-
 namespace phasetwoemtf {
 
 // _____________________________________________________________________________
@@ -22,6 +16,8 @@ SuperstripArbiter::SuperstripArbiter()
   shapeType_(SuperstripShapeType::UNKNOWN),
   nx_(1),
   nz_(1),
+  nss_(1),
+  rotatePhi_(0.),
   localParams_(),
   globalParams_() {}
 
@@ -42,6 +38,8 @@ void SuperstripArbiter::setDefinition(const std::string& definition) {
     } else {
         throw std::invalid_argument("Incorrect superstrip definition.");
     }
+
+    rotatePhi_ = -M_PI/4;  // CUIDADO: this is 45 degree used for sector 0 (15-75 degrees)
 }
 
 // _____________________________________________________________________________
@@ -94,13 +92,24 @@ unsigned SuperstripArbiter::superstripLocal(unsigned moduleId, float strip, floa
 }
 
 // _____________________________________________________________________________
-unsigned SuperstripArbiter::superstripGlobal(unsigned moduleId, float rho, float phi, float theta, float bend) const {
+unsigned SuperstripArbiter::superstripGlobal(unsigned moduleId, float r, float phi, float theta, float bend) const {
     unsigned ss = 0;
+    unsigned ss_x = 0;
+    unsigned ss_z = 0;
 
-    //
-    // FIXME
-    //
+    unsigned layME = decodeLayerME(moduleId);
 
+    // Rotate phi
+    phi += rotatePhi_;
+
+    const SuperstripGlobalParams& p = globalParams_.at(layME);
+    ss_x = std::round((phi - p.low_x) / p.delta_x);
+    ss_z = std::round((theta - p.low_z) / p.delta_z);
+    ss_x = std::min(ss_x, nx_-1);
+    ss_z = std::min(ss_z, nz_-1);
+
+    ss |= (ss_x & p.mask_x);
+    ss |= ((ss_z & p.mask_z) << p.shift_z);
     return ss;
 }
 
@@ -112,6 +121,8 @@ std::string SuperstripArbiter::str() const {
       << "  shape: " << getShapeType()
       << "  nx: " << nx()
       << "  nz: " << nz()
+      << "  nss: " << nss()
+      << "  rotatePhi: " << rotatePhi()
       << "  localParams[0]: " << (localParams_.empty() ? SuperstripLocalParams() : localParams_.front())
       << "  globalParams[0]: " << (globalParams_.empty() ? SuperstripGlobalParams() : globalParams_.front());
     return o.str();

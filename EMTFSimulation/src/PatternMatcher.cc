@@ -27,6 +27,7 @@ void PatternMatcher::init() {}
 void PatternMatcher::run() {
     loadPatterns(po_.bankfile);
     matchPatterns(po_.input, po_.output);
+    analyzeRoads(po_.output);
 }
 
 
@@ -130,7 +131,7 @@ void PatternMatcher::matchPatterns(TString src, TString out) {
         for (unsigned istub=0; istub<nstubs; ++istub) {
 
             uint32_t moduleId    = reader.vb_moduleId   ->at(istub);
-            int16_t  isector     = reader.vb_isector    ->at(istub);
+            //int16_t  isector     = reader.vb_isector    ->at(istub);
             //int16_t  isubsector  = reader.vb_isubsector ->at(istub);
             uint16_t keywire     = reader.vb_keywire    ->at(istub);
             uint16_t strip       = reader.vb_strip      ->at(istub);
@@ -138,31 +139,54 @@ void PatternMatcher::matchPatterns(TString src, TString out) {
 
             float    globalPhi   = reader.vb_globalPhi  ->at(istub);
             float    globalTheta = reader.vb_globalTheta->at(istub);
-            //float    globalEta   = reader.vb_globalEta  ->at(istub);
+            float    globalEta   = reader.vb_globalEta  ->at(istub);
             float    globalRho   = reader.vb_globalRho  ->at(istub);
+
+            // _________________________________________________________________
+            // Find all subtowers
+            std::vector<unsigned> subtowers;
+
+            if (moduleId != 999999) {
+                float absGlobalEta = std::abs(globalEta);
+                if (1.0 <= absGlobalEta && absGlobalEta <= 1.6) {
+                    subtowers.push_back(0);
+                }
+                if (1.5 <= absGlobalEta && absGlobalEta <= 1.9) {
+                    subtowers.push_back(1);
+                }
+                if (1.8 <= absGlobalEta && absGlobalEta <= 2.2) {
+                    subtowers.push_back(2);
+                }
+                if (2.1 <= absGlobalEta && absGlobalEta <= 2.6) {
+                    subtowers.push_back(3);
+                }
+            }
+
+            LogDebug("PatternMatcher", verbose_) << "... ... stub: " << istub << " moduleId: " << moduleId << " globalEta: " << globalEta << " subtowers: " << subtowers << std::endl;
 
             // _________________________________________________________________
             // Find superstrip ID
             unsigned ssId = 0;
 
-            if (moduleId == 999999) {
-                ssId = 0xffffffff;
+            for (const auto& subtower: subtowers) {
+                if (moduleId == 999999) {
+                    ssId = 0xffffffff;
 
-            } else if (arbiter_ -> getCoordType() == SuperstripCoordType::LOCAL) {
-                ssId = arbiter_ -> superstripLocal(moduleId, strip, keywire, pattern);
+                } else if (arbiter_ -> getCoordType() == SuperstripCoordType::LOCAL) {
+                    //ssId = arbiter_ -> superstripLocal(moduleId, strip, keywire, pattern);
+                    ssId = arbiter_ -> superstripLocal(moduleId, strip, subtower, pattern);
 
-            } else if (arbiter_ -> getCoordType() == SuperstripCoordType::GLOBAL) {
-                ssId = arbiter_ -> superstripGlobal(moduleId, globalRho, globalPhi, globalTheta, pattern);
-            }
+                } else if (arbiter_ -> getCoordType() == SuperstripCoordType::GLOBAL) {
+                    ssId = arbiter_ -> superstripGlobal(moduleId, globalRho, globalPhi, globalTheta, pattern);
+                }
 
-            unsigned layME = decodeLayerME(moduleId);
+                unsigned layME = decodeLayerME(moduleId);
 
-            // Push into hit buffer
-            hitBuffer_ -> insert(layME, ssId, istub);
+                // Push into hit buffer
+                hitBuffer_ -> insert(layME, ssId, istub);
 
-            if (verbose_>2) {
-                LogDebug("PatternMatcher", verbose_) << "... ... stub: " << istub << " moduleId: " << moduleId << " strip: " << strip << " segment: " << keywire << " rho: " << globalRho << " phi: " << globalPhi << " theta: " << globalTheta << " ds: " << pattern << std::endl;
-                LogDebug("PatternMatcher", verbose_) << "... ... stub: " << istub << " ssId: " << ssId << " layME: " << layME << std::endl;
+                LogDebug("PatternMatcher", verbose_) << "... ... ... subtower: " << subtower << " moduleId: " << moduleId << " strip: " << strip << " segment: " << keywire << " rho: " << globalRho << " phi: " << globalPhi << " theta: " << globalTheta << " ds: " << pattern << std::endl;
+                LogDebug("PatternMatcher", verbose_) << "... ... ... subtower: " << subtower << " layME: " << layME << " ssId: " << ssId << std::endl;
             }
         }
 
@@ -177,7 +201,7 @@ void PatternMatcher::matchPatterns(TString src, TString out) {
         // Create roads
         roads.clear();
 
-        // Collect stubs
+        // Loop over fired patterns
         for (std::vector<unsigned>::const_iterator it = firedPatterns.begin(); it != firedPatterns.end(); ++it) {
             // Create and set EMTFRoad
             EMTFRoad aroad;
@@ -198,7 +222,7 @@ void PatternMatcher::matchPatterns(TString src, TString out) {
             for (unsigned layer=0; layer<po_.nLayers; ++layer) {
                 const unsigned ssId = patt.at(layer);
 
-                if (hitBuffer_ -> hasHits(layer, ssId)) {
+                if (ssId != 0xffffffff && hitBuffer_ -> hasHits(layer, ssId)) {
                     const std::vector<unsigned>& stubRefs = hitBuffer_ -> getHits(layer, ssId);
                     aroad.superstripIds.at(layer) = ssId;
                     aroad.stubRefs     .at(layer) = stubRefs;
@@ -228,4 +252,20 @@ void PatternMatcher::matchPatterns(TString src, TString out) {
 
     long long nentries = writer.writeTree();
     assert(nentries == nRead);
+}
+
+// _____________________________________________________________________________
+// Analyze roads
+void PatternMatcher::analyzeRoads(TString out) {
+
+    // _________________________________________________________________________
+    // For reading
+    EMTFRoadReader reader(verbose_);
+    reader.init(out);
+
+    //for (long long ievt=0; ievt<nEvents_; ++ievt) {
+    //    if (reader.loadTree(ievt) < 0)  break;
+    //    reader.getEntry(ievt);
+    //}
+
 }

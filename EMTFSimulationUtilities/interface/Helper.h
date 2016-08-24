@@ -2,7 +2,7 @@
 #define EMTFSimulationUtilities_Helper_h_
 
 #include <algorithm>
-//#include <functional>
+#include <functional>
 #include <cassert>
 #include <stdexcept>
 #include <iostream>

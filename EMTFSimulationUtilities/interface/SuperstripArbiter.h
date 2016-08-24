@@ -15,7 +15,7 @@ public:
     unsigned superstripLocal(unsigned moduleId, float strip, float segment, float ds) const;
 
     // Superstrip using global coordinates
-    unsigned superstripGlobal(unsigned moduleId, float rho, float phi, float theta, float bend) const;
+    unsigned superstripGlobal(unsigned moduleId, float r, float phi, float theta, float bend) const;
 
     void setDefinition(const std::string& definition);
 
@@ -32,6 +32,8 @@ public:
     unsigned nss() const { return nss_; }
     unsigned nsuperstripsPerLayer() const { return nss(); }
 
+    float rotatePhi() const { return rotatePhi_; }
+
     // Debug
     std::string str() const;
 
@@ -42,6 +44,7 @@ private:
     unsigned            nx_;
     unsigned            nz_;
     unsigned            nss_;
+    float               rotatePhi_;
 
     std::vector<SuperstripLocalParams>  localParams_;
     std::vector<SuperstripGlobalParams> globalParams_;

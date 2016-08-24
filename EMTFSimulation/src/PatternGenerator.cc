@@ -5,6 +5,19 @@
 #include "L1TMuonSimulations/EMTFSimulationIO/interface/PatternBankReader.h"
 using namespace phasetwoemtf;
 
+namespace {
+unsigned count_bit_in_vector(std::vector<unsigned>::const_iterator first,
+        std::vector<unsigned>::const_iterator last,
+        unsigned init, unsigned b)
+{
+    for (; first != last; ++ first) {
+        init += (((*first) & (1<<b)) > 0);
+    }
+    return init;
+}
+}  // namespace
+
+
 
 // _____________________________________________________________________________
 PatternGenerator::PatternGenerator(const ProgramOption& po)
@@ -98,45 +111,72 @@ void PatternGenerator::makePatterns(TString src) {
         assert(nstubs == 5);
         unsigned ngoodstubs = 0;
         unsigned ngoodstubs_ME11 = 0, ngoodstubs_ME12 = 0, ngoodstubs_ME2to4 = 0;
+        std::vector<unsigned> subtowers(nstubs, 0);
 
+        // Loop over reconstructed stubs
         for (unsigned istub=0; istub<nstubs; ++istub) {
             int16_t  isector     = reader.vb_isector    ->at(istub);
+
             if (unsigned(isector) != po_.sector)  //FIXME: include neighbors
                 reader.vb_moduleId->at(istub) = 999999;  // mask out-of-sector stub
 
             uint32_t moduleId    = reader.vb_moduleId   ->at(istub);
-            if (moduleId == 999999)
-                continue;
+            float    globalEta   = reader.vb_globalEta  ->at(istub);
 
-            ++ngoodstubs;
-            if (istub == 0) {
-                ++ngoodstubs_ME11;
-                reader.vb_moduleId->at(1) = 999999;  // mask ME1/2 stub
-            } else if (istub == 1) {
-                ++ngoodstubs_ME12;
-            } else {
-                ++ngoodstubs_ME2to4;
+            float absGlobalEta = std::abs(globalEta);
+            if ((1.0 <= absGlobalEta && absGlobalEta <= 1.6) || moduleId == 999999) {
+                subtowers.at(istub) |= (1<<0);
+            }
+            if ((1.5 <= absGlobalEta && absGlobalEta <= 1.9) || moduleId == 999999) {
+                subtowers.at(istub) |= (1<<1);
+            }
+            if ((1.8 <= absGlobalEta && absGlobalEta <= 2.2) || moduleId == 999999) {
+                subtowers.at(istub) |= (1<<2);
+            }
+            if ((2.1 <= absGlobalEta && absGlobalEta <= 2.6) || moduleId == 999999) {
+                subtowers.at(istub) |= (1<<3);
+            }
+
+            if (moduleId != 999999) {
+                ++ngoodstubs;
+                if (istub == 0) {
+                    ++ngoodstubs_ME11;
+                    reader.vb_moduleId->at(1) = 999999;  // mask ME1/2 stub
+                } else if (istub == 1) {
+                    ++ngoodstubs_ME12;
+                } else {
+                    ++ngoodstubs_ME2to4;
+                }
             }
         }
 
-        unsigned category = 0;
-        if (ngoodstubs_ME11 && ngoodstubs_ME2to4 == 3) {
-            category = 0;
-        } else if (ngoodstubs_ME11 && ngoodstubs_ME2to4 == 2) {
-            category = 1;
-        } else if (ngoodstubs_ME12 && ngoodstubs_ME2to4 == 3) {
-            category = 2;
-        } else if (ngoodstubs_ME12 && ngoodstubs_ME2to4 == 2) {
-            category = 3;
-        } else if (ngoodstubs_ME2to4 == 3) {
-            category = 4;
-        } else {
-            category = 5;
+        unsigned mysubtower = 4;
+        for (unsigned isubtower=0; isubtower<4; isubtower++) {
+            unsigned cnt = count_bit_in_vector(subtowers.begin(), subtowers.end(), 0, isubtower);
+            if (cnt == nstubs) {
+                mysubtower = isubtower;
+            }
         }
 
-        LogDebug("PatternGenerator", verbose_) << "... evt: " << ievt << " ngoodstubs: " << ngoodstubs << " ME1/1: " << ngoodstubs_ME11 << " ME1/2: " << ngoodstubs_ME12 << " ME2to4: " << ngoodstubs_ME2to4 << " category: " << category << std::endl;
+        unsigned mycategory = 0;
+        if (ngoodstubs_ME11 && ngoodstubs_ME2to4 == 3) {
+            mycategory = 0;
+        } else if (ngoodstubs_ME11 && ngoodstubs_ME2to4 == 2) {
+            mycategory = 1;
+        } else if (ngoodstubs_ME12 && ngoodstubs_ME2to4 == 3) {
+            mycategory = 2;
+        } else if (ngoodstubs_ME12 && ngoodstubs_ME2to4 == 2) {
+            mycategory = 3;
+        } else if (ngoodstubs_ME2to4 == 3) {
+            mycategory = 4;
+        } else {
+            mycategory = 5;
+        }
 
-        if (category > 0) {
+        bool reco = (mysubtower < 4 && mycategory < 4);
+        LogDebug("PatternGenerator", verbose_) << "... evt: " << ievt << " subtowers: " << subtowers << " mysubtower: " << mysubtower << " ngoodstubs: " << ngoodstubs << " ME11: " << ngoodstubs_ME11 << " ME12: " << ngoodstubs_ME12 << " ME2to4: " << ngoodstubs_ME2to4 << " mycategory: " << mycategory << " keep? " << reco << std::endl;
+
+        if (!reco) {
             ++nRead;
             continue;
         }
@@ -152,7 +192,7 @@ void PatternGenerator::makePatterns(TString src) {
         for (unsigned istub=0; istub<nstubs; ++istub) {
 
             uint32_t moduleId    = reader.vb_moduleId   ->at(istub);
-            int16_t  isector     = reader.vb_isector    ->at(istub);
+            //int16_t  isector     = reader.vb_isector    ->at(istub);
             //int16_t  isubsector  = reader.vb_isubsector ->at(istub);
             uint16_t keywire     = reader.vb_keywire    ->at(istub);
             uint16_t strip       = reader.vb_strip      ->at(istub);
@@ -171,7 +211,8 @@ void PatternGenerator::makePatterns(TString src) {
                 ssId = 0xffffffff;
 
             } else if (arbiter_ -> getCoordType() == SuperstripCoordType::LOCAL) {
-                ssId = arbiter_ -> superstripLocal(moduleId, strip, keywire, pattern);
+                //ssId = arbiter_ -> superstripLocal(moduleId, strip, keywire, pattern);
+                ssId = arbiter_ -> superstripLocal(moduleId, strip, mysubtower, pattern);
 
             } else if (arbiter_ -> getCoordType() == SuperstripCoordType::GLOBAL) {
                 ssId = arbiter_ -> superstripGlobal(moduleId, globalRho, globalPhi, globalTheta, pattern);

@@ -99,10 +99,25 @@ void SuperstripProjective::setDefinition(const std::string& definition, Superstr
     token2 = replace_all(token2, "p", ".");
     float token2f = std::stof(token2);
 
-    //
-    // FIXME
-    //
+    // Calculate the parameters
+    SuperstripGlobalParams p;
+    p.low_x = -M_PI/3;     // CUIDADO: this is to cover -60 to +60 degrees after rotation
+    p.delta_x = 2.327105045e-3;  // single-strip pitch in the 10-degree chamber
+    p.mask_x = 0x1fff;  // 0-8191 (12 bits)
+    p.low_z = 0.0;
+    p.delta_z = 1.0;
+    p.mask_z = 0xf;  // 0-15 (4 bits)
+    p.shift_z = 12;
 
+    // Return values
+    coord = coordType_;
+    shape = shapeType_;
+    nx = 1u<<12;
+    nz = 1u<<4;
+    nss = 1u<<(12+4);
+    params.clear();
+    for (unsigned i=0; i<NLAYERS; i++)
+        params.push_back(p);
     return;
 }
 
@@ -113,7 +128,7 @@ std::ostream& operator<<(std::ostream& o, const SuperstripLocalParams& p) {
 }
 
 std::ostream& operator<<(std::ostream& o, const SuperstripGlobalParams& p) {
-    o << "rox: " << p.rotate_x << " lx: " << p.low_x << " dx: " << p.delta_x << " nx: " << p.nbins_x << " lz: " << p.low_z << " dz: " << p.delta_z << " nz: " << p.nbins_z;
+    o << " lx: " << p.low_x << " dx: " << p.delta_x << " mx: " << p.mask_x << " lz: " << p.low_z << " dz: " << p.delta_z << " mz: " << p.mask_z << " sz: " << p.shift_z;
     return o;
 }
 

@@ -23,8 +23,11 @@ class PatternMatcher {
     // Load pattern bank
     void loadPatterns(TString bank);
 
-    // Do pattern recognition
+    // Do pattern recognition, find roads
     void matchPatterns(TString src, TString out);
+
+    // Analyze roads
+    void analyzeRoads(TString out);
 
     // Program options
     const ProgramOption po_;
