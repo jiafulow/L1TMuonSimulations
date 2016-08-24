@@ -12,6 +12,7 @@ namespace DataFormats_WrappedStdDictionaries {
   //edm::Wrapper<std::vector<std::vector<int> > >          pippo1;
   edm::Wrapper<std::vector<std::vector<unsigned int> > > pippo2;
   edm::Wrapper<std::vector<std::vector<float> > >        pippo3;
+  edm::Wrapper<std::vector<std::vector<bool> > >         pippo4;
   };
 }
 

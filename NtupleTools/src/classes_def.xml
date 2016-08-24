@@ -2,4 +2,5 @@
  <!--class name="edm::Wrapper<std::vector<std::vector<int> > >"/-->
  <class name="edm::Wrapper<std::vector<std::vector<unsigned int> > >"/>
  <class name="edm::Wrapper<std::vector<std::vector<float> > >"/>
+ <class name="edm::Wrapper<std::vector<std::vector<bool> > >"/>
 </lcgdict>
