@@ -39,7 +39,7 @@ inline unsigned decodeStation(unsigned moduleId) {
 inline unsigned decodeRing(unsigned moduleId) {
     unsigned lad = decodeLadder(moduleId);
     unsigned mod = decodeModule(moduleId);
-    return lad < 2 ? ((mod/3) + 1) : ((mod/3) == 0 ? 1 : 2);
+    return lad < 2 ? ((mod/3) + 1) : ((mod/3 > 0) + 1);
 }
 inline unsigned decodeCscID(unsigned moduleId) {
     unsigned lad = decodeLadder(moduleId);
@@ -54,12 +54,24 @@ inline unsigned decodeSubSector(unsigned moduleId) {
     unsigned lad = decodeLadder(moduleId);
     return lad < 2 ? lad + 1 : 0;
 }
+inline unsigned decodeChamberType(unsigned moduleId) {
+    unsigned lad = decodeLadder(moduleId);
+    unsigned mod = decodeModule(moduleId);
+    return lad < 2 ? ((mod/3 == 3) ? 1 : 1 + ((mod/3) + 1)) : (2 * lad + ((mod/3 > 0) + 1));
+}
 
 // Retrieve 'layerME' used for making patterns
 inline unsigned decodeLayerME(unsigned moduleId) {
     unsigned lad = decodeLadder(moduleId);
     unsigned mod = decodeModule(moduleId);
     return lad < 2 ? ((mod%9) > 2) : lad;
+}
+
+// Retrieve 'moduleME' used for making patterns
+inline unsigned decodeModuleME(unsigned moduleId) {
+    unsigned lad = decodeLadder(moduleId);
+    unsigned mod = decodeModule(moduleId);
+    return lad < 2 ? (lad * 9) + (mod%9) : mod;
 }
 
 // Get min, max moduleId

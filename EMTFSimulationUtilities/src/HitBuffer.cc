@@ -1,6 +1,7 @@
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/HitBuffer.h"
 #include <cassert>
 #include <sstream>
+#include <iostream>
 
 namespace {
 // Join 'layer' and 'superstrip' into one number
@@ -37,8 +38,7 @@ void HitBuffer::reset() {
 void HitBuffer::insert(unsigned layer, superstrip_t ssId, unsigned stubRef) {
     const unsigned hash = simpleHash(nss_, layer, ssId);
     superstripHits_[hash].push_back(stubRef);
-
-    superstripBools_[hash] = true;
+    superstripBools_.at(hash) = true;
 }
 
 // _____________________________________________________________________________

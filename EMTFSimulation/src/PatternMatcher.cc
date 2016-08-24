@@ -65,7 +65,7 @@ void PatternMatcher::loadPatterns(TString bank) {
         assert(pbreader.pb_superstripIds->size() == po_.nLayers);
 
         if (verbose_>3) {
-            LogDebug("PatternMatcher", verbose_) << "... patt: " << ipatt << "  " << pbreader.pb_superstripIds << std::endl;
+            LogDebug("PatternMatcher", verbose_) << "... patt: " << ipatt << "  " << *(pbreader.pb_superstripIds) << std::endl;
         }
 
         // Fill the associative memory
@@ -171,7 +171,7 @@ void PatternMatcher::matchPatterns(TString src, TString out) {
         // _____________________________________________________________________
         // Perform associative memory lookup
         const std::vector<unsigned>& firedPatterns = associativeMemory_ -> lookup(*hitBuffer_, po_.nLayers, po_.maxMisses);
-
+        LogDebug("PatternMatcher", verbose_) << "... evt: " << ievt << " # roads: " << firedPatterns.size() << std::endl;
 
         // _____________________________________________________________________
         // Create roads

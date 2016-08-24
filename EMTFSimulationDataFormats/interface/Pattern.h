@@ -9,7 +9,8 @@
 namespace phasetwoemtf {
 
 typedef std::uint32_t superstrip_t;
-typedef std::array<superstrip_t,8> pattern_t;
+//typedef std::array<superstrip_t,8> pattern_t;
+typedef std::array<superstrip_t,5> pattern_t;
 
 struct PatternAttribute {
     unsigned long n;  // popularity

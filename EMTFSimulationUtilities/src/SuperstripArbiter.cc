@@ -3,8 +3,8 @@
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/Helper.h"
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/HelperString.h"
 #include <cassert>
-#include <iostream>
 #include <sstream>
+#include <iostream>
 
 
 namespace {
@@ -52,6 +52,7 @@ unsigned SuperstripArbiter::superstripLocal(unsigned moduleId, float strip, floa
     unsigned isegment = segment;
 
     unsigned layME = decodeLayerME(moduleId);
+    unsigned modME = decodeModuleME(moduleId);
     unsigned istation = decodeStation(moduleId);
     unsigned iring = decodeRing(moduleId);
 
@@ -88,7 +89,7 @@ unsigned SuperstripArbiter::superstripLocal(unsigned moduleId, float strip, floa
     const SuperstripLocalParams& p = localParams_.at(layME);
     ss |= ((istrip >> p.right_shift_x) & p.mask_x);
     ss |= (((isegment >> p.right_shift_z) & p.mask_z) << p.shift_z);
-    ss |= (moduleId << p.shift_m);
+    ss |= (modME << p.shift_m);
     return ss;
 }
 

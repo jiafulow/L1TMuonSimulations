@@ -1,6 +1,7 @@
 #include "L1TMuonSimulations/EMTFSimulationUtilities/interface/AssociativeMemory.h"
 #include <cassert>
 #include <sstream>
+#include <iostream>
 
 namespace phasetwoemtf {
 
@@ -48,9 +49,13 @@ std::vector<unsigned> AssociativeMemory::lookup(const HitBuffer& hitBuffer, cons
         pattern_t::const_reverse_iterator rbegin = itpatt->rend() - nLayers;
         pattern_t::const_reverse_iterator rend = itpatt->rend();
         for (pattern_t::const_reverse_iterator itlayer = rbegin; itlayer != rend; ++itlayer) {
-            unsigned layer = itlayer - rbegin;
-            superstrip_t ss = *itlayer;
-            if (!hitBuffer.hasHits(layer, ss))
+            unsigned layer = (rend - 1) - itlayer;
+            superstrip_t ssId = *itlayer;
+
+            if (ssId == 0xffffffff)
+                continue;
+
+            if (!hitBuffer.hasHits(layer, ssId))
                 ++nMisses;
 
             // Skip if more misses than allowed
