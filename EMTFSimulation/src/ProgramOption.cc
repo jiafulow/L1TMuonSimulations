@@ -35,6 +35,7 @@ std::ostream& operator<<(std::ostream& o, const ProgramOption& po) {
 
       << "  minPopularity: " << po.minPopularity
       << "  maxCoverage: "   << po.maxCoverage
+      << "  maxPattInvPt: "  << po.maxPattInvPt
       << "  maxPatterns: "   << po.maxPatterns
       << "  maxMisses: "     << po.maxMisses
       << "  maxStubs: "      << po.maxStubs

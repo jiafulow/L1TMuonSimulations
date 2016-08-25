@@ -241,7 +241,7 @@ void PatternGenerator::makePatterns(TString src) {
     // _________________________________________________________________________
     // Freeze the pattern bank
 
-    bank_->freeze();
+    bank_->freeze(po_.minPopularity, po_.maxPattInvPt);
 
     bank_->getBankInfo().coverage      = coverage;
     bank_->getBankInfo().count         = nKept;

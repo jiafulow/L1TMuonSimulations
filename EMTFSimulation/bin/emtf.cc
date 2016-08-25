@@ -76,8 +76,9 @@ int main(int argc, char **argv) {
         ("fitter,f"     , po::value<std::string>(&option.fitter)->default_value("PCA4"), "Select track fitter -- PCA4: PCA fitter 4 params; PCA5: PCA fitter 5 params (default: PCA4)")
 
         // Only for bank generation
-        ("minPopularity" , po::value<unsigned>(&option.minPopularity)->default_value(1), "Specify min popularity of a pattern to be stored or read")
+        ("minPopularity", po::value<unsigned>(&option.minPopularity)->default_value(1), "Specify min popularity of a pattern to be stored or read")
         ("maxCoverage"  , po::value<float>(&option.maxCoverage)->default_value(1.), "Specify max coverage of patterns to be stored or read")
+        ("maxPattInvPt" , po::value<float>(&option.maxPattInvPt)->default_value(10.), "Specify max pattern signed 1/pt")
 
         // Only for pattern matching
         ("maxPatterns"  , po::value<long int>(&option.maxPatterns)->default_value(999999999), "Specfiy max number of patterns")

@@ -42,16 +42,20 @@ void PatternBankContainer::fill(const pattern_pair& pair, float invPt, float cot
     fill_attribute(invPt, cotTheta, phi, z0, ins.first->second);
 }
 
-void PatternBankContainer::freeze() {
+void PatternBankContainer::freeze(unsigned minPopularity, float maxPattInvPt) {
     // Convert map to vector of pairs
-    const size_t origSize = patternBankMap_.size();
+    //const size_t origSize = patternBankMap_.size();
 
     for (PatternBankMap::const_iterator it = patternBankMap_.begin();
-         it != patternBankMap_.end(); ) {  // should not cause bad_alloc
-        patternBank_.push_back(*it);
+            it != patternBankMap_.end(); ) {  // should not cause bad_alloc
+
+        // Keep only patterns above certain popularity and below certain q/pT
+        if (it->second.n >= minPopularity && std::abs(it->second.invPt_mean) < maxPattInvPt)
+            patternBank_.push_back(*it);
+
         it = patternBankMap_.erase(it);
     }
-    assert(patternBank_.size() == origSize);
+    //assert(patternBank_.size() == origSize);
 
     // Clear map and release memory
     patternBankMap_.clear();

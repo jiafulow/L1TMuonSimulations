@@ -16,7 +16,7 @@ public:
 
     void fill(const pattern_pair& pair, float invPt, float cotTheta, float phi, float z0);
 
-    void freeze();
+    void freeze(unsigned minPopularity=1, float maxPattInvPt=10.);
 
     void clear();
 

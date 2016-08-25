@@ -38,6 +38,7 @@ struct ProgramOption {
 
     unsigned    minPopularity;
     float       maxCoverage;
+    float       maxPattInvPt;
     long int    maxPatterns;
     int         maxMisses;
     int         maxStubs;

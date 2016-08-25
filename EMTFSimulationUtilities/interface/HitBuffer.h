@@ -23,7 +23,7 @@ public:
 
     void insert(unsigned layer, superstrip_t ssId, unsigned stubRef);
 
-    void freeze(unsigned maxStubs);
+    void freeze(unsigned maxStubs=999999999);
 
     bool hasHits(unsigned layer, superstrip_t ssId) const;
 
