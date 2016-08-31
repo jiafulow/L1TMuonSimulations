@@ -67,7 +67,7 @@ def do_resolution_pt_vs_pt_overlays(special_hname = "resolution_pt_vs_pt_in_mode
                 h1.SetMinimum(ymin); h1.SetMaximum(ymax)
             else:
                 h1.GetYaxis().SetTitle(re.sub(r"(.*)({.*})", r"#sigma(\1)", htitle2))
-                h1.SetMinimum(0.); h1.SetMaximum(3.)
+                h1.SetMinimum(0.); h1.SetMaximum(1.0)
             h1.SetStats(0); h1.Draw()
             tlatex.DrawLatex(0.68, 0.76, re.sub(r"(.*){(.*)}", r"\2", htitle2))
             gPad.SetLogx(True)
@@ -120,7 +120,7 @@ def do_resolution_pt_vs_eta_overlays(special_hname = "resolution_pt_vs_eta_in_mo
                 h1.SetMinimum(ymin); h1.SetMaximum(ymax)
             else:
                 h1.GetYaxis().SetTitle(re.sub(r"(.*)({.*})", r"#sigma(\1)", htitle2))
-                h1.SetMinimum(0.); h1.SetMaximum(2.5)
+                h1.SetMinimum(0.); h1.SetMaximum(1.0)
             h1.SetStats(0); h1.Draw()
             tlatex.DrawLatex(0.68, 0.68, re.sub(r"(.*){(.*)}", r"\2", htitle2))
 
