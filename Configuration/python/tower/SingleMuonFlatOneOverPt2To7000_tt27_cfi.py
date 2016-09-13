@@ -14,7 +14,7 @@ generator = cms.EDProducer("FlatRandomPtGunProducer2",
         YFlatSpread = cms.double(5./1.41421356),  ## in mm
         ZFlatSpread = cms.double(70.), ## in mm
         RStarForPhi = cms.double(58.8889),  ## in cm
-        #RStarForTheta = cms.double(110.),  ## in cm
+        #RStarForEta = cms.double(110.),  ## in cm
         RandomCharge = cms.bool(True),
         PtSpectrum = cms.string('flatOneOverPt'),
     ),

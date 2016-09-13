@@ -33,7 +33,7 @@ namespace edm
     double            fYFlatSpread    ;
     double            fZFlatSpread    ;
     double            fRStarForPhi    ;
-    double            fRStarForTheta  ;
+    double            fRStarForEta    ;
     bool              fRandomCharge   ;
     std::string       fPtSpectrum     ;
 

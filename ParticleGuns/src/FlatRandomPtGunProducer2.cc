@@ -25,10 +25,11 @@ namespace {
         double dphi = - asin(mPtFactor * rStar * qOverPt);
         return phiStar - dphi;
     }
-    double get_theta0_from_thetaStar(double thetaStar, double z0, double rStar) {
-        double cotStar = 1.0/tan(thetaStar);
-        double dcot = rStar > 0. ? z0/rStar : 0.;
-        return atan(1.0/(cotStar - dcot));
+    double get_eta0_from_etaStar(double etaStar, double z0, double qOverPt, double rStar) {
+        double mPtFactor = 0.3*3.8*1e-2/2.0;
+        double cotStar = sinh(etaStar);
+        double cot0 = (rStar * cotStar - z0) / (asin(mPtFactor * rStar * qOverPt)/(mPtFactor * qOverPt));
+        return asinh(cot0);
     }
 }
 
@@ -49,7 +50,7 @@ FlatRandomPtGunProducer2::FlatRandomPtGunProducer2(const ParameterSet& pset) :
   fYFlatSpread   = pgun_params.exists("YFlatSpread")   ? pgun_params.getParameter<double>("YFlatSpread")     : 0.;
   fZFlatSpread   = pgun_params.exists("ZFlatSpread")   ? pgun_params.getParameter<double>("ZFlatSpread")     : 0.;
   fRStarForPhi   = pgun_params.exists("RStarForPhi")   ? pgun_params.getParameter<double>("RStarForPhi")     : 0.;
-  fRStarForTheta = pgun_params.exists("RStarForTheta") ? pgun_params.getParameter<double>("RStarForTheta")   : 0.;
+  fRStarForEta   = pgun_params.exists("RStarForEta")   ? pgun_params.getParameter<double>("RStarForEta")     : 0.;
   fRandomCharge  = pgun_params.exists("RandomCharge")  ? pgun_params.getParameter<bool>("RandomCharge")      : false;
   fPtSpectrum    = pgun_params.exists("PtSpectrum")    ? pgun_params.getParameter<std::string>("PtSpectrum") : "flatPt";
 
@@ -122,8 +123,8 @@ void FlatRandomPtGunProducer2::produce(Event &e, const EventSetup& es)
     double phi    = CLHEP::RandFlat::shoot(engine, fMinPhi, fMaxPhi) ;
            phi    = get_phi0_from_phiStar(phi, PData->charge()/pt, fRStarForPhi);
     double eta    = CLHEP::RandFlat::shoot(engine, fMinEta, fMaxEta) ;
+           eta    = get_eta0_from_etaStar(eta, vz, PData->charge()/pt, fRStarForEta);
     double theta  = 2.*atan(exp(-eta)) ;
-           theta  = get_theta0_from_thetaStar(theta, vz, fRStarForTheta);
     double mom    = pt/sin(theta) ;
     double px     = pt*cos(phi) ;
     double py     = pt*sin(phi) ;
