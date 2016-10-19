@@ -167,9 +167,9 @@ void NtupleEMTFTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSe
             v_isRPCHit        ->push_back(it->Is_RPC_hit());
             v_bx0             ->push_back(it->BX0());
             v_layer           ->push_back(it->Layer());
-            v_zoneHit         ->push_back(it->Zone_hit());
+            v_zoneHit         ->push_back(0);  //FIXME: v_zoneHit         ->push_back(it->Zone_hit());
             v_phiHit          ->push_back(it->Phi_hit());
-            v_phiZVal         ->push_back(it->Phi_Z_val());
+            v_phiZVal         ->push_back(0);  //FIXME: v_phiZVal         ->push_back(it->Phi_Z_val());
             v_phiLocInt       ->push_back(it->Phi_loc_int());
             v_phiLocDeg       ->push_back(it->Phi_loc_deg());
             v_phiLocRad       ->push_back(it->Phi_loc_rad());

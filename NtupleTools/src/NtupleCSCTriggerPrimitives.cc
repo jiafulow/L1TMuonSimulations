@@ -295,7 +295,7 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 v_convPhit        ->push_back(convHit.Ph_hit());
                 v_convPhzvl       ->push_back(convHit.Phzvl());
                 v_convZhit        ->push_back(convHit.Zhit());
-                v_convZoneCont    ->push_back(convHit.ZoneContribution());
+                v_convZoneCont    ->push_back(std::vector<int>());  //FIXME: v_convZoneCont    ->push_back(convHit.ZoneContribution());
                 v_convGlobalPhi   ->push_back(getConvGlobalPhi(isector, convHit.Phi()));
                 v_convGlobalTheta ->push_back(getConvGlobalTheta(isector, convHit.Theta()));
                 v_convGlobalEta   ->push_back(getConvGlobalEta(isector, convHit.Theta()));
