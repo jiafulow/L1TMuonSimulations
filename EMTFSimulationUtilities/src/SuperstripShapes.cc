@@ -6,6 +6,9 @@
 #include <iostream>
 
 
+// TODO: pass NLAYERS as argument
+// TODO: reformat SuperstripShapeBase, add SuperstripCommonParams
+
 namespace {
 static const unsigned NLAYERS = 5;
 

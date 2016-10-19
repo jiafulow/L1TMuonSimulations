@@ -7,6 +7,8 @@
 
 #include "L1TMuonSimulations/MuonTools/interface/ModuleIdHelper.h"
 
+// TODO: add chamber type, phi pitch, y pitch
+
 
 NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& iConfig) :
   //wireTag_(iConfig.getParameter<edm::InputTag>("wireTag")),

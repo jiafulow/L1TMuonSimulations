@@ -6,6 +6,7 @@
 
 #include <cassert>
 
+// TODO: fix ME1/A coordinates
 
 uint32_t ModuleIdHelper::getModuleId(const DetId& id) {
     uint32_t result = 0;
