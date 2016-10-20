@@ -1,6 +1,6 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleLegacyCSCTFTriggerTracks.h"
 
-#include "L1TMuonSimulations/NtupleTools/interface/MapCSCTriggerPrimitives.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleCollectionMap.h"
 
 #include "L1Trigger/CSCTrackFinder/interface/CSCTFPtLUT.h"
 
@@ -147,7 +147,7 @@ void NtupleLegacyCSCTFTriggerTracks::produce(edm::Event& iEvent, const edm::Even
     if (!stubToken_.isUninitialized())
         iEvent.getByToken(stubToken_, stubs);
 
-    MapCSCTriggerPrimitives stubMap;
+    CSCDigiCollectionMap stubMap;
     stubMap.setup(stubs);
 
 
@@ -197,11 +197,9 @@ void NtupleLegacyCSCTFTriggerTracks::produce(edm::Event& iEvent, const edm::Even
             std::vector<unsigned> myStubRefs;
             for (CSCCorrelatedLCTDigiCollection::DigiRangeIterator itr = it2.begin(); itr != it2.end(); ++itr) {
                 for (CSCCorrelatedLCTDigiCollection::const_iterator it = (*itr).second.first; it != (*itr).second.second; ++it) {
-                    MapCSCTriggerPrimitives::StubRef stubRef = std::make_tuple((*itr).first.rawId(), it->getKeyWG(), it->getStrip(),
-                        it->getPattern(), it->getBend(), it->getBX(), it->getCSCID());
-                    unsigned myStubRef = stubMap.get(stubRef);
-
-                    myStubRefs.push_back(myStubRef);
+                    const std::vector<int> data = {it->getKeyWG(), it->getStrip(), it->getPattern(), it->getBend(), it->getBX(), it->getCSCID()};
+                    CSCDigiCollectionMap::identifier_type myStubId((*itr).first.rawId(), data);
+                    myStubRefs.push_back(stubMap.get_index(myStubId));
                 }
             }
 

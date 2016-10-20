@@ -1,7 +1,7 @@
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleMixedSimHits.h"
 
 #include "L1TMuonSimulations/MuonTools/interface/ModuleIdHelper.h"
-#include "L1TMuonSimulations/NtupleTools/interface/MapTrackingParticles.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleCollectionMap.h"
 
 
 NtupleMixedSimHits::NtupleMixedSimHits(const edm::ParameterSet& iConfig) :
@@ -102,7 +102,7 @@ void NtupleMixedSimHits::produce(edm::Event& iEvent, const edm::EventSetup& iSet
         //iEvent.getByLabel(trkPartTag_, trackingParticleHandle);
         if (!trkPartToken_.isUninitialized())
             iEvent.getByToken(trkPartToken_, trackingParticleHandle);
-        MapTrackingParticles trkToTPMap;
+        TrackingParticleCollectionMap trkToTPMap;
         trkToTPMap.setup(trackingParticleHandle);
 
         unsigned n = 0;
@@ -144,7 +144,8 @@ void NtupleMixedSimHits::produce(edm::Event& iEvent, const edm::EventSetup& iSet
                     const GlobalPoint& globalPosition = cscLayer->surface().toGlobal(localPosition);
 
                     // Get the matching tracking particle
-                    int tpId = trkToTPMap.get(it->trackId(), it->eventId());
+                    const TrackingParticleCollectionMap::identifier_type myTpId(it->eventId(), it->trackId());
+                    int tpId = trkToTPMap.get_index(myTpId);
                     int pdgId = (tpId != -1) ? trackingParticleHandle->at(tpId).pdgId() : -99;
 
 
