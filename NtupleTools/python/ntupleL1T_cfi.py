@@ -35,42 +35,34 @@ ntupleLegacyCSCTFTriggerTracks = cms.EDProducer('NtupleLegacyCSCTFTriggerTracks'
 )
 
 ntupleEMTFTriggerPrimitives = cms.EDProducer('NtupleEMTFTriggerPrimitives',
-    stubTag = cms.InputTag('simEmtfDigis','EMTF'),
-    prefix = cms.string('EMTFStubs@'),
-    suffix = cms.string(''),
-    cut = cms.string(''),
+    unpStubTag = cms.InputTag('emtfStage2Digis'),
+    unpPrefix = cms.string('EMTFStubs@'),
+    unpSuffix = cms.string(''),
+    unpCut = cms.string(''),
+    emuStubTag = cms.InputTag('simEmtfDigis','EMTF'),
+    emuPrefix = cms.string('EMTFStubExtras@'),
+    emuSuffix = cms.string(''),
+    emuCut = cms.string(''),
     maxN = cms.uint32(999999)
 )
 
 ntupleEMTFTriggerTracks = cms.EDProducer('NtupleEMTFTriggerTracks',
-    stubTag = cms.InputTag('simEmtfDigis','EMTF'),
-    trackTag = cms.InputTag('simEmtfDigis','EMTF'),
-    prefix = cms.string('EMTFTracks@'),
-    suffix = cms.string(''),
-    cut = cms.string(''),
+    unpStubTag = cms.InputTag('emtfStage2Digis'),
+    unpTrackTag = cms.InputTag('emtfStage2Digis'),
+    unpPrefix = cms.string('EMTFTracks@'),
+    unpSuffix = cms.string(''),
+    unpCut = cms.string(''),
+    emuStubTag = cms.InputTag('simEmtfDigis','EMTF'),
+    emuTrackTag = cms.InputTag('simEmtfDigis','EMTF'),
+    emuPrefix = cms.string('EMTFTrackExtras@'),
+    emuSuffix = cms.string(''),
+    emuCut = cms.string(''),
     maxN = cms.uint32(999999)
 )
 
 ntupleEMTFRegionalCandidates = cms.EDProducer('NtupleEMTFRegionalCandidates',
     trackTag = cms.InputTag("simEmtfDigis","EMTF"),
     prefix = cms.string('EMTFCands@'),
-    suffix = cms.string(''),
-    cut = cms.string(''),
-    maxN = cms.uint32(999999)
-)
-
-ntupleUnpackedEMTFTriggerPrimitives = cms.EDProducer('NtupleUnpackedEMTFTriggerPrimitives',
-    stubTag = cms.InputTag('emtfStage2Digis'),
-    prefix = cms.string('UnpEMTFStubs@'),
-    suffix = cms.string(''),
-    cut = cms.string(''),
-    maxN = cms.uint32(999999)
-)
-
-ntupleUnpackedEMTFTriggerTracks = cms.EDProducer('NtupleUnpackedEMTFTriggerTracks',
-    stubTag = cms.InputTag('emtfStage2Digis'),
-    trackTag = cms.InputTag('emtfStage2Digis'),
-    prefix = cms.string('UnpEMTFTracks@'),
     suffix = cms.string(''),
     cut = cms.string(''),
     maxN = cms.uint32(999999)
@@ -86,5 +78,4 @@ ntupleL1TMuons = cms.EDProducer('NtupleL1TMuons',
 
 
 ntupleL1T = cms.Sequence(ntupleCSCTriggerPrimitives * ntupleRPCTriggerPrimitives * ntupleDTTriggerPrimitives * ntupleLegacyCSCTFTriggerTracks * ntupleEMTFTriggerPrimitives * ntupleEMTFTriggerTracks * ntupleEMTFRegionalCandidates * ntupleL1TMuons)
-ntupleL1TUnpacker = cms.Sequence(ntupleUnpackedEMTFTriggerPrimitives * ntupleUnpackedEMTFTriggerTracks)
 

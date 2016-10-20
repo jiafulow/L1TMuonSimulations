@@ -7,8 +7,6 @@
 
 #include "L1TMuonSimulations/MuonTools/interface/ModuleIdHelper.h"
 
-// TODO: add chamber type, phi pitch, y pitch
-
 
 NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& iConfig) :
   //wireTag_(iConfig.getParameter<edm::InputTag>("wireTag")),
@@ -64,16 +62,8 @@ NtupleCSCTriggerPrimitives::NtupleCSCTriggerPrimitives(const edm::ParameterSet& 
     produces<std::vector<float> >             (prefix_ + "globalX"         + suffix_);
     produces<std::vector<float> >             (prefix_ + "globalY"         + suffix_);
     produces<std::vector<float> >             (prefix_ + "globalZ"         + suffix_);
-    produces<std::vector<int> >               (prefix_ + "convPhi"         + suffix_);
-    produces<std::vector<int> >               (prefix_ + "convTheta"       + suffix_);
-    produces<std::vector<int> >               (prefix_ + "convPhit"        + suffix_);
-    produces<std::vector<int> >               (prefix_ + "convPhzvl"       + suffix_);
-    produces<std::vector<int> >               (prefix_ + "convZhit"        + suffix_);
-    produces<std::vector<std::vector<int> > > (prefix_ + "convZoneCont"    + suffix_);
-    produces<std::vector<float> >             (prefix_ + "convGlobalPhi"   + suffix_);
-    produces<std::vector<float> >             (prefix_ + "convGlobalTheta" + suffix_);
-    produces<std::vector<float> >             (prefix_ + "convGlobalEta"   + suffix_);
-    produces<std::vector<float> >             (prefix_ + "convGlobalRho"   + suffix_);
+    produces<std::vector<float> >             (prefix_ + "stripPhiPitch"   + suffix_);
+    produces<std::vector<float> >             (prefix_ + "wirePitch"       + suffix_);
     produces<unsigned>                        (prefix_ + "size"            + suffix_);
 }
 
@@ -81,13 +71,13 @@ NtupleCSCTriggerPrimitives::~NtupleCSCTriggerPrimitives() {}
 
 void NtupleCSCTriggerPrimitives::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
     /// Geometry setup
-    //edm::ESHandle<CSCGeometry> cscGeometryHandle;
-    //iSetup.get<MuonGeometryRecord>().get(cscGeometryHandle);
-    //if (!cscGeometryHandle.isValid()) {
-    //    edm::LogWarning("NtupleCSCTriggerPrimitives") << "Unable to get MuonGeometryRecord!";
-    //} else {
-    //    theCSCGeometry_ = cscGeometryHandle.product();
-    //}
+    edm::ESHandle<CSCGeometry> cscGeometryHandle;
+    iSetup.get<MuonGeometryRecord>().get(cscGeometryHandle);
+    if (!cscGeometryHandle.isValid()) {
+        edm::LogWarning("NtupleCSCTriggerPrimitives") << "Unable to get MuonGeometryRecord!";
+    } else {
+        theCSCGeometry_ = cscGeometryHandle.product();
+    }
 
     /// Magnetic field setup
     //edm::ESHandle<MagneticField> magneticFieldHandle;
@@ -118,36 +108,6 @@ void NtupleCSCTriggerPrimitives::extractPrimitives(edm::Handle<CSCCorrelatedLCTD
     }
   }
 }
-
-
-// _____________________________________________________________________________
-namespace {
-// FIXME: check these
-float getConvGlobalPhi(int isector, int iphi) {
-    if (iphi == -999)  return -999.;
-    float fphi = (iphi*0.0166666) + (isector%6)*60.0 + 13.0;
-    fphi *= M_PI / 180.0;
-    if (fphi > M_PI) fphi -= 2*M_PI;  // convert from [0,2pi] to [-pi,pi]
-    return fphi;
-}
-float getConvGlobalTheta(int isector, int itheta) {
-    if (itheta == -999)  return -999.;
-    float ftheta = (itheta*0.2851562) + 8.5;
-    ftheta *= M_PI / 180.0;
-    if (isector/6 == 1) ftheta = -ftheta;
-    return ftheta;
-}
-float getConvGlobalEta(int isector, int itheta) {
-    if (itheta == -999)  return -999.;
-    float ftheta = getConvGlobalTheta(isector, itheta);
-    float feta = - std::log(std::tan(ftheta/2.0));
-    return feta;
-}
-//double getThetaFromEta(double eta) {
-//    double cottheta = std::sinh(eta);
-//    return 1.0/std::atan(cottheta);
-//}
-}  // end anonymous namespace
 
 // _____________________________________________________________________________
 void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -185,16 +145,8 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     std::auto_ptr<std::vector<float> >             v_globalX         (new std::vector<float>());
     std::auto_ptr<std::vector<float> >             v_globalY         (new std::vector<float>());
     std::auto_ptr<std::vector<float> >             v_globalZ         (new std::vector<float>());
-    std::auto_ptr<std::vector<int> >               v_convPhi         (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_convTheta       (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_convPhit        (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_convPhzvl       (new std::vector<int>());
-    std::auto_ptr<std::vector<int> >               v_convZhit        (new std::vector<int>());
-    std::auto_ptr<std::vector<std::vector<int> > > v_convZoneCont    (new std::vector<std::vector<int> >());
-    std::auto_ptr<std::vector<float> >             v_convGlobalPhi   (new std::vector<float>());
-    std::auto_ptr<std::vector<float> >             v_convGlobalTheta (new std::vector<float>());
-    std::auto_ptr<std::vector<float> >             v_convGlobalEta   (new std::vector<float>());
-    std::auto_ptr<std::vector<float> >             v_convGlobalRho   (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_stripPhiPitch   (new std::vector<float>());
+    std::auto_ptr<std::vector<float> >             v_wirePitch       (new std::vector<float>());
     std::auto_ptr<unsigned>                        v_size            (new unsigned(0));
 
 
@@ -244,17 +196,14 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 assert(CSCTriggerNumbering::triggerSubSectorFromLabels(cscDet) == (int) isubsector);
                 assert(cscData.cscID == cscDet.triggerCscId());
 
-                // Get ConvertedHit
-                L1TMuon::TriggerPrimitiveCollection tester;
-                tester.push_back(*it);
-                const std::vector<ConvertedHit>& convHits = primConv_.convert(tester, isector);
+                const CSCLayer * cscLayer = theCSCGeometry_->layer(cscDet);     // CSCLayer is inherited from GeomDetUnit
+                const CSCLayerGeometry * cscLayerGeom = cscLayer->geometry();   // CSCLayerGeometry is inherited from TrapezoidalPlaneBounds
+                //const CSCChamber * cscChamber = cscLayer->chamber();            // CSCChamber is inherited from GeomDet
 
-                ConvertedHit convHit;
-                if (convHits.size()) {
-                    convHit = convHits.front();
-                } else {
-                    convHit.SetNull();  // why fail?
-                }
+                // Geom
+                float stripPhiPitch = cscLayerGeom->stripPhiPitch();  // angular pitch
+                float wirePitch = cscLayerGeom->wirePitch();
+
 
                 // Fill the vectors
                 v_geoId           ->push_back(it->rawId().rawId());
@@ -290,16 +239,8 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 v_globalX         ->push_back(gp.x());
                 v_globalY         ->push_back(gp.y());
                 v_globalZ         ->push_back(gp.z());
-                v_convPhi         ->push_back(convHit.Phi());
-                v_convTheta       ->push_back(convHit.Theta());
-                v_convPhit        ->push_back(convHit.Ph_hit());
-                v_convPhzvl       ->push_back(convHit.Phzvl());
-                v_convZhit        ->push_back(convHit.Zhit());
-                v_convZoneCont    ->push_back(std::vector<int>());  //FIXME: v_convZoneCont    ->push_back(convHit.ZoneContribution());
-                v_convGlobalPhi   ->push_back(getConvGlobalPhi(isector, convHit.Phi()));
-                v_convGlobalTheta ->push_back(getConvGlobalTheta(isector, convHit.Theta()));
-                v_convGlobalEta   ->push_back(getConvGlobalEta(isector, convHit.Theta()));
-                v_convGlobalRho   ->push_back(0.);
+                v_stripPhiPitch   ->push_back(stripPhiPitch);
+                v_wirePitch       ->push_back(wirePitch);
 
                 n++;
             }
@@ -346,15 +287,7 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
     iEvent.put(v_globalX         , prefix_ + "globalX"         + suffix_);
     iEvent.put(v_globalY         , prefix_ + "globalY"         + suffix_);
     iEvent.put(v_globalZ         , prefix_ + "globalZ"         + suffix_);
-    iEvent.put(v_convPhi         , prefix_ + "convPhi"         + suffix_);
-    iEvent.put(v_convTheta       , prefix_ + "convTheta"       + suffix_);
-    iEvent.put(v_convPhit        , prefix_ + "convPhit"        + suffix_);
-    iEvent.put(v_convPhzvl       , prefix_ + "convPhzvl"       + suffix_);
-    iEvent.put(v_convZhit        , prefix_ + "convZhit"        + suffix_);
-    iEvent.put(v_convZoneCont    , prefix_ + "convZoneCont"    + suffix_);
-    iEvent.put(v_convGlobalPhi   , prefix_ + "convGlobalPhi"   + suffix_);
-    iEvent.put(v_convGlobalTheta , prefix_ + "convGlobalTheta" + suffix_);
-    iEvent.put(v_convGlobalEta   , prefix_ + "convGlobalEta"   + suffix_);
-    iEvent.put(v_convGlobalRho   , prefix_ + "convGlobalRho"   + suffix_);
+    iEvent.put(v_stripPhiPitch   , prefix_ + "stripPhiPitch"   + suffix_);
+    iEvent.put(v_wirePitch       , prefix_ + "wirePitch"       + suffix_);
     iEvent.put(v_size            , prefix_ + "size"            + suffix_);
 }

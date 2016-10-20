@@ -22,14 +22,20 @@ class NtupleEMTFTriggerTracks : public edm::EDProducer {
     //virtual void beginRun(const edm::Run&, const edm::EventSetup&);
     //virtual void endRun(const edm::Run&, const edm::EventSetup&);
 
-    const edm::InputTag stubTag_, trackTag_;
-    const std::string   prefix_, suffix_;
+    const edm::InputTag unpStubTag_, unpTrackTag_;
+    const std::string   unpPrefix_, unpSuffix_;
+    StringCutObjectSelector<l1t::EMTFTrack> unpSelector_;
 
-    StringCutObjectSelector<l1t::EMTFTrackExtra> selector_;
+    const edm::InputTag emuStubTag_, emuTrackTag_;
+    const std::string   emuPrefix_, emuSuffix_;
+    StringCutObjectSelector<l1t::EMTFTrackExtra> emuSelector_;
+
     const unsigned maxN_;
 
-    edm::EDGetTokenT<l1t::EMTFHitExtraCollection> stubToken_;
-    edm::EDGetTokenT<l1t::EMTFTrackExtraCollection> trackToken_;
+    edm::EDGetTokenT<l1t::EMTFHitCollection> unpStubToken_;
+    edm::EDGetTokenT<l1t::EMTFTrackCollection> unpTrackToken_;
+    edm::EDGetTokenT<l1t::EMTFHitExtraCollection> emuStubToken_;
+    edm::EDGetTokenT<l1t::EMTFTrackExtraCollection> emuTrackToken_;
 };
 
 #endif

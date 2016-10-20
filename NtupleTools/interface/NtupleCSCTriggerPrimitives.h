@@ -16,9 +16,9 @@
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigi.h"
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 
-//#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
-//#include "Geometry/CSCGeometry/interface/CSCLayerGeometry.h"
-//#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
+#include "Geometry/CSCGeometry/interface/CSCLayerGeometry.h"
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
 //#include "MagneticField/Engine/interface/MagneticField.h"
 //#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
@@ -26,8 +26,6 @@
 #include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitiveFwd.h" // why deprecate?
 //#include "L1Trigger/L1TMuon/interface/deprecate/GeometryTranslator.h"      // why deprecate?
 #include "L1TMuonSimulations/MuonTools/interface/GeometryTranslator2.h"
-
-#include "L1Trigger/L1TMuonEndCap/interface/PrimitiveConverter.h"
 
 
 class NtupleCSCTriggerPrimitives : public edm::EDProducer {
@@ -48,12 +46,10 @@ class NtupleCSCTriggerPrimitives : public edm::EDProducer {
                                    L1TMuon::TriggerPrimitiveCollection& out) const;
 
     // Event setup
-    //const CSCGeometry * theCSCGeometry_;
+    const CSCGeometry * theCSCGeometry_;
     //const MagneticField * theMagneticField_;
-    std::unique_ptr<L1TMuon::GeometryTranslator2> theGeometryTranslator_;
 
-    // EMTF
-    PrimitiveConverter primConv_;
+    std::unique_ptr<L1TMuon::GeometryTranslator2> theGeometryTranslator_;
 
     //const edm::InputTag wireTag_;
     //const edm::InputTag stripTag_;

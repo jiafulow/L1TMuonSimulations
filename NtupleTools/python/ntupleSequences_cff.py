@@ -12,6 +12,5 @@ from L1TMuonSimulations.NtupleTools.ntupleMaker_cfi import *
 ntupleGen += ntupleGenExtra
 
 ntupleSequence = cms.Sequence(ntupleEventInfo * ntupleGen * ntupleSim * ntupleDigi * ntupleHLT * ntupleReco * ntupleL1T * ntupler)
-#ntupleSequence = cms.Sequence(ntupleEventInfo * ntupleGen * ntupleSim * ntupleDigi * ntupleHLT * ntupleReco * ntupleL1T * ntupleL1TUnpacker * ntupler)
 
 ntupleSequence_GENSIM = cms.Sequence(ntupleEventInfo * ntupleGen * ntupleSim * ntupler)
