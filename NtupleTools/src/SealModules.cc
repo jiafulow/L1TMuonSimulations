@@ -71,6 +71,12 @@ DEFINE_FWK_MODULE(NtupleEMTFTriggerTracks);
 DEFINE_FWK_MODULE(NtupleEMTFRegionalCandidates);
 DEFINE_FWK_MODULE(NtupleL1TMuons);
 
+// L1TExtra
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleEMUTFTriggerPrimitives.h"
+#include "L1TMuonSimulations/NtupleTools/interface/NtupleEMUTFTriggerTracks.h"
+DEFINE_FWK_MODULE(NtupleEMUTFTriggerPrimitives);
+DEFINE_FWK_MODULE(NtupleEMUTFTriggerTracks);
+
 // NtupleMaker
 #include "L1TMuonSimulations/NtupleTools/interface/NtupleMaker.h"
 DEFINE_FWK_MODULE(NtupleMaker);
