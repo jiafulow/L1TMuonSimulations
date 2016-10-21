@@ -11,6 +11,7 @@ public:
     static bool isEven(const DetId& id);
     static bool isFront(const DetId& id);
     static bool isCounterClockwise(const DetId& id);
+    static bool isNeighbor(const DetId& id);
 };
 
 #endif

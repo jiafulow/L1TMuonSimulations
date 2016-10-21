@@ -4,9 +4,6 @@
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 
-#include <cassert>
-
-// TODO: fix ME1/A coordinates
 
 uint32_t ModuleIdHelper::getModuleId(const DetId& id) {
     uint32_t result = 0;
@@ -14,13 +11,13 @@ uint32_t ModuleIdHelper::getModuleId(const DetId& id) {
         if (id.subdetId() == (int) MuonSubdetId::CSC) {
             const CSCDetId cscDet(id);
 
-            if (cscDet.station() == 1) {  // station 1
+            if (cscDet.station() == 1) {  // station 1: each subsector has 12 chambers
                 int subsector = (cscDet.chamber()%6 > 2) ? 1 : 2;
                 int mystation = subsector - 1;
                 int mychamber = (cscDet.ring() == 4) ? cscDet.triggerCscId()-1+9 : cscDet.triggerCscId()-1;
                 result = (mystation * 12) + mychamber;
 
-            } else {                      // stations 2,3,4
+            } else {                      // stations 2,3,4: each station has 9 chambers
                 int mystation = cscDet.station()-2;
                 int mychamber = cscDet.triggerCscId()-1;
                 int offset    = (2*12);
@@ -75,3 +72,20 @@ bool ModuleIdHelper::isCounterClockwise(const DetId& id) {
     return result;
 }
 
+bool ModuleIdHelper::isNeighbor(const DetId& id) {
+    bool result = false;
+    if (id.det() == DetId::Muon) {
+        if (id.subdetId() == (int) MuonSubdetId::CSC) {
+            const CSCDetId cscDet(id);
+            if (cscDet.station() == 1) {
+                int subsector = (cscDet.chamber()%6 > 2) ? 1 : 2;
+                if ((subsector == 2) && (cscDet.triggerCscId() == 3 || cscDet.triggerCscId() == 6 || cscDet.triggerCscId() == 9))
+                  result = true;
+            } else {
+              if (cscDet.triggerCscId() == 3 || cscDet.triggerCscId() == 9)
+                result = true;
+            }
+        }
+    }
+    return result;
+}
