@@ -196,13 +196,13 @@ void NtupleCSCTriggerPrimitives::produce(edm::Event& iEvent, const edm::EventSet
                 assert(CSCTriggerNumbering::triggerSubSectorFromLabels(cscDet) == (int) isubsector);
                 assert(cscData.cscID == cscDet.triggerCscId());
 
-                const CSCLayer * cscLayer = theCSCGeometry_->layer(cscDet);     // CSCLayer is inherited from GeomDetUnit
-                const CSCLayerGeometry * cscLayerGeom = cscLayer->geometry();   // CSCLayerGeometry is inherited from TrapezoidalPlaneBounds
+                //const CSCLayer * cscLayer = theCSCGeometry_->layer(cscDet);     // CSCLayer is inherited from GeomDetUnit
+                //const CSCLayerGeometry * cscLayerGeom = cscLayer->geometry();   // CSCLayerGeometry is inherited from TrapezoidalPlaneBounds
                 //const CSCChamber * cscChamber = cscLayer->chamber();            // CSCChamber is inherited from GeomDet
 
                 // Geom
-                float stripPhiPitch = cscLayerGeom->stripPhiPitch();  // angular pitch
-                float wirePitch = cscLayerGeom->wirePitch();
+                float stripPhiPitch = 0.; //FIXME: cscLayerGeom->stripPhiPitch();  // angular pitch
+                float wirePitch = 0.; //FIXME: cscLayerGeom->wirePitch();
 
 
                 // Fill the vectors

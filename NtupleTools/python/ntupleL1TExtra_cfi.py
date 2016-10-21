@@ -5,7 +5,7 @@ ntupleEMUTFTriggerPrimitives = cms.EDProducer('NtupleEMUTFTriggerPrimitives',
     unpPrefix = cms.string('EMUTFStubs@'),
     unpSuffix = cms.string(''),
     unpCut = cms.string(''),
-    emuStubTag = cms.InputTag('simEmtfDigisMC',''),
+    emuStubTag = cms.InputTag('simEmtfDigisMC'),
     emuPrefix = cms.string('EMUTFStubExtras@'),
     emuSuffix = cms.string(''),
     emuCut = cms.string(''),
@@ -18,13 +18,16 @@ ntupleEMUTFTriggerTracks = cms.EDProducer('NtupleEMUTFTriggerTracks',
     unpPrefix = cms.string('EMUTFTracks@'),
     unpSuffix = cms.string(''),
     unpCut = cms.string(''),
-    emuStubTag = cms.InputTag('simEmtfDigisMC',''),
-    emuTrackTag = cms.InputTag('simEmtfDigisMC',''),
+    emuStubTag = cms.InputTag('simEmtfDigisMC'),
+    emuTrackTag = cms.InputTag('simEmtfDigisMC'),
     emuPrefix = cms.string('EMUTFTrackExtras@'),
     emuSuffix = cms.string(''),
     emuCut = cms.string(''),
     maxN = cms.uint32(999999)
 )
 
-ntupleL1TExtra = cms.Sequence(ntupleEMUTFTriggerPrimitives * ntupleEMUTFTriggerTracks)
+from L1TriggerSep2016.L1TMuonEndCap.simEmtfDigis_cfi import simEmtfDigisMC
+
+#ntupleL1TExtra = cms.Sequence(ntupleEMUTFTriggerPrimitives * ntupleEMUTFTriggerTracks)
+ntupleL1TExtra = cms.Sequence(simEmtfDigisMC * ntupleEMUTFTriggerPrimitives * ntupleEMUTFTriggerTracks)
 

@@ -8,9 +8,10 @@ cmsDriver.py ntuple \
   --step L1REPACK:FullMC,RAW2DIGI \
   --mc --no_output \
   --era Run2_2016 \
-  --conditions 80X_mcRun2_asymptotic_v14 \
+  --conditions 80X_mcRun2_asymptotic_v17 \
   --geometry Extended2016,Extended2016Reco \
   --customise L1TMuonSimulations/NtupleTools/customise.cust_ntuple \
+  --customise_commands "process.load('EventFilter.L1TRawToDigi.emtfStage2Digis_cfi')  \nprocess.L1TRawToDigi_Stage2 += process.emtfStage2Digis" \
   --filein file:SingleMuon_PositiveEndCap.root \
   --no_exec -n 100
 
