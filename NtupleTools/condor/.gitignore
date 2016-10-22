@@ -6,5 +6,6 @@
 !pack.py
 !retrieve.py
 !pset.py
+!*.sh
 !sourceFiles/
 !sourceFiles/*

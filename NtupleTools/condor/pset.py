@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: ntuple --step L1REPACK:FullMC,RAW2DIGI --mc --no_output --era Run2_2016 --conditions 80X_mcRun2_asymptotic_v14 --geometry Extended2016,Extended2016Reco --customise L1TMuonSimulations/NtupleTools/customise.cust_ntuple --filein file:SingleMuon_PositiveEndCap.root --no_exec -n 100
+# with command line options: ntuple --step L1REPACK:FullMC,RAW2DIGI --mc --no_output --era Run2_2016 --conditions 80X_mcRun2_asymptotic_v17 --geometry Extended2016,Extended2016Reco --customise L1TMuonSimulations/NtupleTools/customise.cust_ntuple --customise_commands process.load('EventFilter.L1TRawToDigi.emtfStage2Digis_cfi')  \nprocess.L1TRawToDigi_Stage2 += process.emtfStage2Digis --filein file:SingleMuon_PositiveEndCap.root --no_exec -n 100
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -49,7 +49,7 @@ process.configurationMetadata = cms.untracked.PSet(
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_v14', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_v17', '')
 
 # Path and EndPath definitions
 process.L1RePack_step = cms.Path(process.SimL1Emulator)
@@ -68,6 +68,11 @@ from L1TMuonSimulations.NtupleTools.customise import cust_ntuple
 process = cust_ntuple(process)
 
 # End of customisation functions
+
+# Customisation from command line
+process.load('EventFilter.L1TRawToDigi.emtfStage2Digis_cfi')  
+process.L1TRawToDigi_Stage2 += process.emtfStage2Digis
+
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
