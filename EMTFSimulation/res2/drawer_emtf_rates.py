@@ -12,8 +12,8 @@ l1t_l1pt_vec = (0, 1, 2)  # 3 l1pt bins
 l1t_l1pt_thresholds = (0, 12, 18)
 l1t_mode_vec = (0, 1, 2, 3)  # MuOpen, DoubleMu, SingleMu, Mode15
 l1t_mode_integers = ((3,5,6,7,9,10,11,12,13,14,15), (7,10,11,12,13,14,15), (11,13,14,15), (15,))
-l1t_bx_vec = (0, 1, 2)  # BX=any, seBX=0, BX=0
-l1t_bx_integers = (range(-12,3), range(-12,3), (0,))
+l1t_bx_vec = (0, 1)  # BX=any, BX=0
+l1t_bx_integers = (range(-3,4+1), (0,))
 l1t_eta_vec = (0, 1, 2, 3)  # 3 eta bins + inclusive
 l1t_eta_floats = ((1.2,1.6), (1.6,2.0), (2.0,2.4), (-99999999.,99999999.))
 l1t_genpt_vec = (0, 1, 2)  # 2 genpt bins + inclusive
@@ -59,8 +59,6 @@ def get_l1t_bx_label(b):
         label = ""
     elif b == 0:
         label = "any BX"
-    elif b == 1:
-        label = "seBX = 0"
     else:
         label = "ERROR"
     return label
@@ -129,9 +127,6 @@ def drawer_book(histos, options):
             hname = "rate_of_bx_in_mode%i_l1pt%i" % (modebin, l1ptbin)
             histos[hname] = TH1F(hname, "; BX; entries", 5, -2.5, 2.5)
             histos[hname].indices = (bxbin, modebin, l1ptbin)
-            hname = "rate_of_sebx_in_mode%i_l1pt%i" % (modebin, l1ptbin)
-            histos[hname] = TH1F(hname, "; seBX; entries", 5, -2.5, 2.5)
-            histos[hname].indices = (bxbin, modebin, l1ptbin)
 
     hname = "trueNPV"
     histos[hname] = TH1F(hname, "; gen # PU; entries", 56, 0, 56)
@@ -159,7 +154,7 @@ def drawer_project(tree, histos, options):
     tree.SetBranchStatus("*", 0)
     tree.SetBranchStatus("gen_trueNPV", 1)
     #tree.SetBranchStatus("genParts_*", 1)
-    tree.SetBranchStatus("EMTFTracks_*", 1)
+    tree.SetBranchStatus("EMTFTrackExtras_*", 1)
 
     def modify_ptcut(h):
         nbinsx = h.GetNbinsX()
@@ -179,13 +174,13 @@ def drawer_project(tree, histos, options):
         trueNPV = evt.gen_trueNPV
 
         if options.verbose:
-            print ".. %i # PU: %i ntracks: %i" % (ievt, trueNPV, len(evt.EMTFTracks_pt))
+            print ".. %i # PU: %i ntracks: %i" % (ievt, trueNPV, len(evt.EMTFTrackExtras_pt))
 
         # Loop over tracks
-        for (itrack, mode, bx, sebx, trig_pt, trig_phi, trig_eta) in izip(count(), evt.EMTFTracks_mode, evt.EMTFTracks_firstBX, evt.EMTFTracks_secondBX, evt.EMTFTracks_pt, evt.EMTFTracks_phiGlbRad, evt.EMTFTracks_eta):
+        for (itrack, mode, bx, trig_pt, trig_phi, trig_eta) in izip(count(), evt.EMTFTrackExtras_mode, evt.EMTFTrackExtras_bx, evt.EMTFTrackExtras_pt, evt.EMTFTrackExtras_phiGlbRad, evt.EMTFTrackExtras_eta):
 
             if options.verbose:
-                print ".... %i l1t pt: %f phi: %f eta: %f mode: %i bx: %i sebx: %i" % (itrack, trig_pt, trig_phi, trig_eta, mode, int(bx), int(sebx))
+                print ".... %i l1t pt: %f phi: %f eta: %f mode: %i bx: %i" % (itrack, trig_pt, trig_phi, trig_eta, mode, int(bx))
 
             # Select only endcap
             is_endcap = 1.25 < abs(trig_eta) < 2.4
@@ -195,9 +190,7 @@ def drawer_project(tree, histos, options):
                     for modebin in l1t_mode_vec:
                         for bxbin in l1t_bx_vec:
                             for etabin in l1t_eta_vec:
-                                select = (in_l1t_pu_bin(pubin, trueNPV)) and (in_l1t_mode_bin(modebin, mode)) and (in_l1t_bx_bin(bxbin, bx)) and (in_l1t_eta_bin(etabin, trig_eta))
-                                if bxbin == 1:  # Special rule regarding sebx
-                                    select = select and (sebx == 0)
+                                select = (in_l1t_pu_bin(pubin, trueNPV)) and (in_l1t_mode_bin(modebin, mode)) and (in_l1t_bx_bin(bxbin, int(bx))) and (in_l1t_eta_bin(etabin, trig_eta))
                                 if select:
                                     hname = "rate_of_pt_in_eta%i_bx%i_mode%i_pu%i" % (etabin, bxbin, modebin, pubin)
                                     histos[hname].Fill(trig_pt)
@@ -208,9 +201,7 @@ def drawer_project(tree, histos, options):
                     for modebin in l1t_mode_vec:
                         for bxbin in l1t_bx_vec:
                             for etabin in l1t_eta_vec:
-                                select = (in_l1t_l1pt_bin(l1ptbin, trig_pt)) and (in_l1t_mode_bin(modebin, mode)) and (in_l1t_bx_bin(bxbin, bx)) and (in_l1t_eta_bin(etabin, trig_eta))
-                                if bxbin == 1:  # Special rule regarding sebx
-                                    select = select and (sebx == 0)
+                                select = (in_l1t_l1pt_bin(l1ptbin, trig_pt)) and (in_l1t_mode_bin(modebin, mode)) and (in_l1t_bx_bin(bxbin, int(bx))) and (in_l1t_eta_bin(etabin, trig_eta))
                                 if select:
                                     hname = "rate_of_pu_in_eta%i_bx%i_mode%i_l1pt%i" % (etabin, bxbin, modebin, l1ptbin)
                                     histos[hname].Fill(trueNPV)
@@ -224,9 +215,7 @@ def drawer_project(tree, histos, options):
 
                                         if bxbin == 0:  # inclusive
                                             hname = "rate_of_bx_in_mode%i_l1pt%i" % (modebin, l1ptbin)
-                                            histos[hname].Fill(bx)
-                                            hname = "rate_of_sebx_in_mode%i_l1pt%i" % (modebin, l1ptbin)
-                                            histos[hname].Fill(sebx)
+                                            histos[hname].Fill(int(bx))
                 continue
 
         hname = "trueNPV"
