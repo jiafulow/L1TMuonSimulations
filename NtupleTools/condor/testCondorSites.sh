@@ -1,0 +1,22 @@
+#!/bin/bash
+
+OLD_CONDOR_DEFAULT_DESIRED_SITES=$CONDOR_DEFAULT_DESIRED_SITES
+OLD_PWD=$PWD
+
+export X509_USER_PROXY="/tmp/x509up_u`id -u`"
+export CONDOR_DEFAULT_DESIRED_SITES="T3_US_ANL,T3_US_Baylor,T3_US_Brown,T2_US_Caltech,T3_US_Colorado,T3_US_Cornell,T3_US_FIT,T1_US_FNAL,T1_US_FNAL_Disk,T3_US_FNALLPC,T3_US_Omaha,T2_US_Florida,T3_US_JHU,T3_US_Kansas,T2_US_MIT,T3_US_Minnesota,T3_US_NotreDame,T2_US_Nebraska,T3_US_NEU,T3_US_NU,T3_US_OSU,T3_US_Princeton_ARM,T3_US_Princeton_ICSE,T2_US_Purdue,T3_US_Rice,T3_US_Rutgers,T3_US_UB,T3_US_MIT,T3_US_NERSC,T3_US_SDSC,T3_US_Wisconsin,T3_US_BU,T3_US_FIU,T3_US_FSU,T3_US_HEPCloud,T3_US_OSG,T3_US_TACC,T3_US_TAMU,T3_US_TTU,T3_US_UCR,T3_US_UCD,T3_US_UCSB,T2_US_UCSD,T3_US_UIowa,T3_US_UMD,T3_US_UMiss,T3_US_PuertoRico,T3_US_UTENN,T3_US_UVA,T2_US_Vanderbilt,T3_US_Vanderbilt_EC2,T2_US_Wisconsin"
+
+JOBPATH="blt_projects/NoAnalyzer/SingleMuon_PositiveEndCap_foo"
+JOBNAME="job"
+JOBAD="blt.jdl"
+
+for i in ${CONDOR_DEFAULT_DESIRED_SITES//,/ }
+do
+    export CONDOR_DEFAULT_DESIRED_SITES=$i
+    echo "Submitting job(s) to $i"
+    cd ${JOBPATH}/ && ~/condor_submit ${JOBNAME}/${JOBAD}
+    cd ${OLD_PWD}
+done
+
+export CONDOR_DEFAULT_DESIRED_SITES=$OLD_CONDOR_DEFAULT_DESIRED_SITES
+
