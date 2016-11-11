@@ -24,7 +24,7 @@ class UserTarball(object):
         """
         Add the necessary files to the tarball
         """
-        directories = ['lib', 'biglib', 'module']
+        directories = ['lib', 'biglib', 'module', 'bin']
         if self.sendPythonFolder:
             directories.append('python')
             directories.append('cfipython')
@@ -124,6 +124,7 @@ def main():
 
     print('[INFO   ] Packing tarball ...')
     print('[INFO   ] Using CMSSW_BASE: %s' % (os.environ['CMSSW_BASE']))
+    print('[INFO   ] Using CMSSW_VERSION: %s' % (os.environ['CMSSW_VERSION']))
     tb = UserTarball()
     tb.add_files(userFiles=[pkl.pklFileName, pkl.auxFileName], excludeFiles=['LUT_AndrewFix_25July16.dat'])
     print('[INFO   ] %s%s is created (%iM).%s' % ('\033[92m', tb.name, os.stat(tb.name).st_size >> 20, '\033[0m'))
