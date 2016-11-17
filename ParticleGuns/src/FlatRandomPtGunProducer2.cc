@@ -20,15 +20,18 @@ using namespace edm;
 using namespace std;
 
 namespace {
-    double get_phi0_from_phiStar(double phiStar, double qOverPt, double rStar) {
-        double mPtFactor = 0.3*3.8*1e-2/2.0;
-        double dphi = - asin(mPtFactor * rStar * qOverPt);
+    double get_phi0_from_phiStar(double phiStar, double invPt, double rStar) {
+        constexpr double mPtFactor = 0.3*3.8*1e-2/2.0;
+        double dphi = - asin(mPtFactor * rStar * invPt);
         return phiStar - dphi;
     }
-    double get_eta0_from_etaStar(double etaStar, double z0, double qOverPt, double rStar) {
-        double mPtFactor = 0.3*3.8*1e-2/2.0;
+    double get_eta0_from_etaStar(double etaStar, double z0, double invPt, double rStar) {
+        constexpr double mPtFactor = 0.3*3.8*1e-2/2.0;
+        if (std::abs(rStar) < 1e-10)  return etaStar;
+        if (std::abs(invPt) < 1e-10 && invPt <  0.) invPt = -1e-10;
+        if (std::abs(invPt) < 1e-10 && invPt >= 0.) invPt = +1e-10;
         double cotStar = sinh(etaStar);
-        double cot0 = (rStar * cotStar - z0) / (asin(mPtFactor * rStar * qOverPt)/(mPtFactor * qOverPt));
+        double cot0 = (rStar * cotStar - z0) / (asin(mPtFactor * rStar * invPt)/(mPtFactor * invPt));
         return asinh(cot0);
     }
 }
